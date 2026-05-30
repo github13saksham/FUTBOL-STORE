@@ -70,17 +70,17 @@ export default function Homepage() {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.6, ease: "easeOut" }}
-              className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto pt-6 sm:pt-4 justify-center px-2 sm:px-0"
+              className="flex flex-row gap-3 sm:gap-4 w-full sm:w-auto pt-6 sm:pt-4 justify-center px-4 sm:px-0"
             >
               <button 
                 onClick={() => {
                   const el = document.getElementById("bestsellers");
                   el?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="group flex items-center justify-center gap-3 w-full sm:w-auto px-6 sm:px-12 py-3.5 sm:py-4 bg-luxury-dark text-white hover:bg-luxury-taupe hover:text-black rounded-full text-[11px] sm:text-xs uppercase tracking-widest font-semibold transition-all duration-300"
+                className="group flex items-center justify-center gap-2 sm:gap-3 flex-1 sm:flex-none px-3 sm:px-12 py-3 sm:py-4 bg-luxury-dark text-white hover:bg-luxury-taupe hover:text-black rounded-full text-[9px] sm:text-[11px] uppercase tracking-widest font-semibold transition-all duration-300"
               >
                 Shop Now
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-300" />
+                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1.5 transition-transform duration-300" />
               </button>
               
               <button 
@@ -88,7 +88,7 @@ export default function Homepage() {
                   const el = document.getElementById("clubs");
                   el?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="flex items-center justify-center w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 border border-white text-white hover:bg-white hover:text-black rounded-full text-[11px] sm:text-xs uppercase tracking-widest font-semibold transition-all duration-300"
+                className="flex items-center justify-center flex-1 sm:flex-none px-3 sm:px-8 py-3 sm:py-4 border border-white text-white hover:bg-white hover:text-black rounded-full text-[9px] sm:text-[11px] uppercase tracking-widest font-semibold transition-all duration-300"
               >
                 Explore Clubs
               </button>

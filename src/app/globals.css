@@ -7,7 +7,7 @@
 :root {
   --font-serif: 'Cormorant Garamond', 'Playfair Display', serif;
   --font-sans: 'Plus Jakarta Sans', sans-serif;
-  
+
   --color-luxury-taupe: #9F7E69;
   --color-luxury-sand: #D2BBA0;
   --color-luxury-cream: #F2EFC7;
@@ -22,13 +22,16 @@
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--color-luxury-ivory);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--color-luxury-taupe);
   border-radius: 3px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-luxury-sand);
 }
@@ -122,23 +125,25 @@ body {
   background: var(--color-luxury-taupe) !important;
 }
 
-.swiper-button-next, .swiper-button-prev {
+.swiper-button-next,
+.swiper-button-prev {
   color: var(--color-luxury-taupe) !important;
+}
+
+/* Force datalist dropdown arrow to be visible always and white */
+input::-webkit-calendar-picker-indicator {
+  opacity: 1 !important;
+  display: block !important;
+  cursor: pointer;
+  filter: invert(1) brightness(100%);
 }
 
 /* Hide scrollbars globally on specific elements */
 .no-scrollbar::-webkit-scrollbar {
   display: none !important;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none !important;
   scrollbar-width: none !important;
 }
-
-/* Force datalist dropdown arrow to be visible always */
-input::-webkit-calendar-picker-indicator {
-  opacity: 1 !important;
-  display: block !important;
-  cursor: pointer;
-}
-
