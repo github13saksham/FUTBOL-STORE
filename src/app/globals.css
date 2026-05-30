@@ -130,12 +130,16 @@ body {
   color: var(--color-luxury-taupe) !important;
 }
 
-/* Force datalist dropdown arrow to be visible always and white */
+/* Force datalist dropdown arrow to be visible always and explicitly white */
 input::-webkit-calendar-picker-indicator {
   opacity: 1 !important;
   display: block !important;
   cursor: pointer;
-  filter: invert(1) brightness(100%);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 14px !important;
+  filter: none !important;
 }
 
 /* Hide scrollbars globally on specific elements */

@@ -7,6 +7,7 @@ import { useStore } from "@/context/StoreContext";
 import { useAuth } from "@/context/AuthContext";
 import { dbService } from "@/backend";
 import { ArrowLeft, ShieldCheck, CreditCard, Lock } from "lucide-react";
+import { State, City } from "country-state-city";
 
 const initializeRazorpay = () => {
   return new Promise((resolve) => {
@@ -29,6 +30,10 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
+  const [stateCode, setStateCode] = useState("");
+  
+  const indianStates = State.getStatesOfCountry("IN");
+  const citiesOfState = stateCode ? City.getCitiesOfState("IN", stateCode) : [];
   const [pincode, setPincode] = useState("");
   const [phone, setPhone] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -237,29 +242,36 @@ export default function CheckoutPage() {
                 className={`w-full px-4 py-3 border bg-[#141414] text-white text-sm focus:outline-none transition-colors ${errors.address ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
               />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <input
-                  type="text"
-                  list="cities"
-                  placeholder="City"
+                <select
+                  value={stateCode}
+                  onChange={(e) => {
+                    const selectedStateCode = e.target.value;
+                    setStateCode(selectedStateCode);
+                    const stateObj = indianStates.find(s => s.isoCode === selectedStateCode);
+                    setState(stateObj ? stateObj.name : "");
+                    setCity("");
+                  }}
+                  style={{ colorScheme: 'dark' }}
+                  className={`w-full px-4 py-3 border bg-[#141414] text-white text-sm focus:outline-none transition-colors ${errors.state ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
+                >
+                  <option value="" disabled>Select State</option>
+                  {indianStates.map((s) => (
+                    <option key={s.isoCode} value={s.isoCode}>{s.name}</option>
+                  ))}
+                </select>
+
+                <select
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className={`w-full px-4 py-3 border bg-[#141414] text-white text-sm focus:outline-none transition-colors ${errors.city ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
-                />
-                <datalist id="cities">
-                  <option value="Mumbai" /><option value="Delhi" /><option value="Bangalore" /><option value="Hyderabad" /><option value="Ahmedabad" /><option value="Chennai" /><option value="Kolkata" /><option value="Surat" /><option value="Pune" /><option value="Jaipur" />
-                </datalist>
-                
-                <input
-                  type="text"
-                  list="states"
-                  placeholder="State"
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  className={`w-full px-4 py-3 border bg-[#141414] text-white text-sm focus:outline-none transition-colors ${errors.state ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
-                />
-                <datalist id="states">
-                  <option value="Maharashtra" /><option value="Karnataka" /><option value="Tamil Nadu" /><option value="Uttar Pradesh" /><option value="Gujarat" /><option value="Rajasthan" /><option value="Punjab" /><option value="Haryana" /><option value="Kerala" /><option value="Delhi" />
-                </datalist>
+                  disabled={!stateCode}
+                  style={{ colorScheme: 'dark' }}
+                  className={`w-full px-4 py-3 border bg-[#141414] text-white text-sm focus:outline-none transition-colors ${errors.city ? 'border-red-500' : 'border-white/10 focus:border-white'} ${!stateCode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <option value="" disabled>{stateCode ? "Select City" : "Select State First"}</option>
+                  {citiesOfState.map((c) => (
+                    <option key={c.name} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
                 
                 <input
                   type="text"
