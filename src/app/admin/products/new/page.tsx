@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FirebaseDatabaseService } from '@/backend/firebase/db.service';
 import { Product } from '@/data/mockData';
 import { Loader2, ArrowLeft, Save, Upload } from 'lucide-react';
 import Link from 'next/link';
 
-export default function SingleProductFormPage() {
+function SingleProductForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams?.get('edit');
@@ -305,5 +305,17 @@ export default function SingleProductFormPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function SingleProductFormPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-luxury-taupe" />
+      </div>
+    }>
+      <SingleProductForm />
+    </Suspense>
   );
 }
