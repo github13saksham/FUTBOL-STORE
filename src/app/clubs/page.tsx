@@ -127,7 +127,7 @@ export default function ClubsPage() {
               </p>
             </div>
           ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-[1px] md:gap-8 bg-[#121212] md:bg-transparent border-t border-[#121212] md:border-transparent">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8 bg-[#121212] md:bg-transparent border-t border-[#121212] md:border-transparent">
             <AnimatePresence>
               {filteredProducts.map((product) => (
                   <motion.div
@@ -141,16 +141,16 @@ export default function ClubsPage() {
                     boxShadow: "0 25px 50px -12px rgba(159, 126, 105, 0.15)"
                   }}
                   transition={{ duration: 0.4 }}
-                  className="bg-luxury-dark rounded-2xl p-3 md:p-5 border border-white/10 flex flex-col justify-between transition-colors duration-500 shadow-sm relative overflow-hidden group/card"
+                  className="bg-luxury-dark rounded-2xl border border-white/10 flex flex-col justify-between transition-colors duration-500 shadow-sm relative overflow-hidden group/card"
                 >
                   {/* Image Display */}
-                  <div className="relative w-full aspect-[35/32] md:aspect-auto md:h-[300px] bg-neutral-100 group">
+                  <div className="relative w-full aspect-square bg-neutral-100 group">
                     <Link href={`/product/${product.id}`}>
                       <Image
                         src={product.image}
                         alt={product.name}
                         fill
-                        className="object-contain md:object-cover transition-transform duration-[1000ms] ease-out md:scale-105 md:group-hover:scale-110"
+                        className="object-cover transition-transform duration-[1000ms] ease-out md:scale-105 md:group-hover:scale-110"
                       />
                       
                       {/* Add overlays */}
@@ -184,7 +184,7 @@ export default function ClubsPage() {
                   </div>
 
                   {/* Specifications */}
-                  <div className="p-3 pt-3 md:p-5 md:pt-4 flex-grow flex flex-col justify-between">
+                  <div className="p-4 md:p-5 md:pt-4 space-y-2 flex-grow flex flex-col justify-between">
                     <div>
                       <div className="flex justify-between items-center text-[10px] uppercase tracking-widest font-semibold text-white/80">
                         <span>{product.category}</span>
@@ -202,7 +202,7 @@ export default function ClubsPage() {
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-end pb-1 border-b border-white/20 pt-1.5 md:pt-4">
+                    <div className="flex justify-between items-end pb-1 border-b border-white/20 pt-1 md:pt-0">
                       <span className="font-serif text-base md:text-lg text-white font-medium">
                         {product.priceStr}
                       </span>

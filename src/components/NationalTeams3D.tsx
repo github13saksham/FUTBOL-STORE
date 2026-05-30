@@ -173,12 +173,12 @@ export default function NationalTeams3D() {
       {/* Background glow beams */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 light-beam opacity-50 z-0" />
       
-      <div className="relative text-center mb-12 z-10">
+      <div className="relative text-center mb-4 md:mb-10 z-10">
         <span className="text-xs uppercase tracking-[0.25em] text-black font-medium">Global Teams</span>
         <h2 className="text-4xl md:text-6xl font-serif text-black mt-2">
           Find Your National Team
         </h2>
-        <p className="max-w-xl mx-auto text-sm text-luxury-ivory mt-4 leading-relaxed font-sans font-light">
+        <p className="max-w-xl mx-auto text-sm text-black/70 mt-4 leading-relaxed font-sans font-light hidden md:block">
           An immersive journey through the world's most elegant colors. Experience custom tailoring and historical pride in perfect 3D fidelity.
         </p>
       </div>

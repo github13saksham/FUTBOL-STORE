@@ -70,7 +70,7 @@ export default function Homepage() {
           loop 
           muted 
           playsInline 
-          className="absolute inset-0 w-full h-full object-cover object-top z-0"
+          className="absolute inset-0 w-full h-full object-cover mt-20  object-top z-0"
         >
           <source src="/images/Hero_Section_vid.MP4" type="video/mp4" />
         </video>
@@ -269,7 +269,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
       <section id="bestsellers" className="py-16 md:py-32 px-6 md:px-12 max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
           <div>
-            <span className="text-xs uppercase tracking-[0.25em] text-black font-semibold">Seasonal Curator</span>
+          
             <h2 className="text-4xl md:text-6xl font-serif text-black mt-2 font-light">
               Best <span className="italic font-medium text-black">Sellers</span>
             </h2>
