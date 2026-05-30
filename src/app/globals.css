@@ -135,3 +135,10 @@ body {
   scrollbar-width: none !important;
 }
 
+/* Force datalist dropdown arrow to be visible always */
+input::-webkit-calendar-picker-indicator {
+  opacity: 1 !important;
+  display: block !important;
+  cursor: pointer;
+}
+
