@@ -1,0 +1,21 @@
+Created At: 2026-05-25T19:36:20Z
+Completed At: 2026-05-25T19:36:20Z
+File Path: `file:///c:/Users/SAKSHAM/Downloads/Futbol%20Store/src/app/product/%5Bid%5D/page.tsx`
+Total Lines: 412
+Total Bytes: 19921
+Showing lines 1 to 412
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: "use client";
+2: 
+3: import { useState } from "react";
+4: import { useParams, useRouter } from "next/navigation";
+5: import Image from "next/image";
+6: import Link from "next/link";
+7: import { motion, AnimatePresence } from "framer-motion";
+8: import {
+9:   Heart, ShoppingBag, Ruler, Check, ChevronRight,
+10:   ArrowRight, ShieldCheck, Truck, RefreshCw, Sparkles, ArrowLeft,
+11:   Minus, Plus, Shield, CreditCard, ChevronDown
+12: } from "lucide-react";
+13: import { useStore } from "@/context/StoreContext";
+14: import { ALL_PROD

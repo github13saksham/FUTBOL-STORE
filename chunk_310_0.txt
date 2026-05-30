@@ -1,0 +1,8 @@
+    const deliveryDate = new Date();
+    deliveryDate.setDate(deliveryDate.getDate() + 5);
+    const dateStr = deliveryDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    
+    setPincodeStatus({
+      type: "success",
+      msg: `ESTIMATED DELIVERY DATE IS ${dateStr.toUpperCase()}`
+    });

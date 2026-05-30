@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-serif: 'Cormorant Garamond', 'Playfair Display', serif;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  
+  --color-luxury-taupe: #9F7E69;
+  --color-luxury-sand: #D2BBA0;
+  --color-luxury-cream: #F2EFC7;
+  --color-luxury-sage: #F7FFE0;
+  --color-luxury-ivory: #FFEEE2;
+  --color-luxury-dark: #0F0F0F;
+  --color-luxury-charcoal: #1C1C1C;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-luxury-ivory);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-luxury-taupe);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-luxury-sand);
+}
+
+/* Smooth Scroll using Lenis */
+html.lenis {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  scroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+body {
+  background-color: var(--color-luxury-ivory);
+  color: var(--color-luxury-dark);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Noise/Grain Overlay */
+.grain-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  content: "";
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Custom glassmorphism utilities */
+.luxury-glass {
+  background: rgba(255, 238, 226, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(159, 126, 105, 0.15);
+}
+
+.luxury-glass-dark {
+  background: rgba(15, 15, 15, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(210, 187, 160, 0.15);
+}
+
+.luxury-card {
+  border: 1px solid rgba(159, 126, 105, 0.1);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.luxury-card:hover {
+  border-color: rgba(159, 126, 105, 0.3);
+  box-shadow: 0 20px 40px -15px rgba(159, 126, 105, 0.12);
+}
+
+/* Light beam glow effects for hero section */
+.light-beam {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(242, 239, 199, 0.4) 0%, rgba(247, 255, 224, 0.1) 40%, rgba(255, 238, 226, 0) 70%);
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+/* Text stroke for editorial layouts */
+.text-stroke {
+  -webkit-text-stroke: 1px var(--color-luxury-taupe);
+  color: transparent;
+}
+
+/* Swiper custom overrides */
+.swiper-pagination-bullet-active {
+  background: var(--color-luxury-taupe) !important;
+}
+
+.swiper-button-next, .swiper-button-prev {
+  color: var(--color-luxury-taupe) !important;
+}
+
+/* Hide scrollbars globally on specific elements */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+

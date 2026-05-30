@@ -1,0 +1,577 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
+import { User, Package, MapPin, Heart, LogOut, ChevronRight, Edit2, Plus, ShieldAlert } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { useStore } from "@/context/StoreContext";
+import { authService, dbService } from "@/backend";
+
+export default function AccountPage() {
+  const { products, wishlist, toggleWishlist, setQuickAddProduct } = useStore();
+  const { user, loading, logout } = useAuth();
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<"profile" | "orders" | "addresses" | "wishlist">("profile");
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setEditName(user.displayName || "");
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user && activeTab === "orders") {
+      setLoadingOrders(true);
+      dbService.getUserOrders(user.uid).then(data => {
+        setOrders(data);
+        setLoadingOrders(false);
+      }).catch(err => {
+        console.error("Failed to fetch orders", err);
+        setLoadingOrders(false);
+      });
+    }
+  }, [user, activeTab]);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen bg-black/95 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-luxury-sand border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  const handleSaveProfile = async () => {
+    if (!editName.trim()) return;
+    setIsSaving(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    try {
+      await authService.updateUserProfile(editName);
+      setIsEditing(false);
+      setSuccessMsg("Details successfully updated!");
+      setTimeout(() => {
+        window.location.reload();
+      }, 1200);
+    } catch (error: any) {
+      console.error("Failed to update profile", error);
+      setErrorMsg(error.message || "Failed to update profile details.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0] && user) {
+      try {
+        setIsSaving(true);
+        setErrorMsg(null);
+        setSuccessMsg(null);
+        const file = e.target.files[0];
+
+        if (!file.type.startsWith("image/")) {
+          throw new Error("Invalid file type. Please select an image file.");
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          throw new Error("File size exceeds 5MB limit.");
+        }
+
+        const photoURL = await authService.uploadProfilePicture(file);
+        await authService.updateUserProfile(user.displayName || "", photoURL);
+        setSuccessMsg("Profile photo updated successfully!");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1200);
+      } catch (err: any) {
+        console.error("Failed to upload image", err);
+        let msg = err.message || "Failed to upload image.";
+        if (msg.toLowerCase().includes("permission") || msg.toLowerCase().includes("unauthorized") || msg.toLowerCase().includes("restricted")) {
+          msg = "Firebase Storage upload denied. Please check your Firebase Storage security rules. They must allow authenticated users to write/upload to 'users/{userId}/...'.";
+        }
+        setErrorMsg(msg);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  };
+
+  const wishlistProducts = products.filter(p => wishlist.includes(p.id));
+
+  return (
+    <div className="min-h-screen text-white bg-black selection:bg-luxury-taupe selection:text-black flex flex-col lg:flex-row pb-20 lg:pb-0">
+      {/* 1. Sidebar Navigation (Sticky) */}
+      <div className="hidden lg:flex w-72 flex-shrink-0 sticky top-0 h-screen bg-black border-r border-white/10 z-40 flex-col pt-[150px] px-4 pb-6 space-y-2 overflow-y-auto shadow-2xl">
+        <div className="px-2 mb-8">
+          <h2 className="text-white/50 text-[10px] uppercase tracking-[0.2em] font-bold">Dashboard</h2>
+        </div>
+        
+        <button 
+          onClick={() => setActiveTab("profile")}
+          className={`w-full text-left px-5 py-4 text-[11px] uppercase tracking-widest font-bold flex justify-between items-center transition-all border-b border-white/5 ${
+            activeTab === "profile" 
+              ? "bg-white/10 text-white border-white/20 shadow-[0_8px_32px_0_rgba(255,255,255,0.05)]" 
+              : "hover:bg-white/10 text-white/60 hover:text-white border-transparent hover:border-white/20 hover:shadow-[0_8px_32px_0_rgba(255,255,255,0.05)]"
+          }`}
+        >
+          <span className="flex items-center gap-3"><User className="w-4 h-4" /> Personal Profile</span>
+          <ChevronRight className="w-3.5 h-3.5 opacity-50" />
+        </button>
+
+        <button 
+          onClick={() => setActiveTab("orders")}
+          className={`w-full text-left px-5 py-4 text-[11px] uppercase tracking-widest font-bold flex justify-between items-center transition-all border-b border-white/5 ${
+            activeTab === "orders" 
+              ? "bg-white/10 text-white border-white/20 shadow-[0_8px_32px_0_rgba(255,255,255,0.05)]" 
+              : "hover:bg-white/10 text-white/60 hover:text-white border-transparent hover:border-white/20 hover:shadow-[0_8px_32px_0_rgba(255,255,255,0.05)]"
+          }`}
+        >
+          <span className="flex items-center gap-3"><Package className="w-4 h-4" /> Order History</span>
+          <ChevronRight className="w-3.5 h-3.5 opacity-50" />
+        </button>
+
+        <button 
+          onClick={() => setActiveTab("addresses")}
+          className={`w-full text-left px-5 py-4 text-[11px] uppercase tracking-widest font-bold flex justify-between items-center transition-all border-b border-white/5 ${
+            activeTab === "addresses" 
+              ? "bg-white/10 text-white border-white/20 shadow-[0_8px_32px_0_rgba(255,255,255,0.05)]" 
+              : "hover:bg-white/10 text-white/60 hover:text-white border-transparent hover:border-white/20 hover:shadow-[0_8px_32px_0_rgba(255,255,255,0.05)]"
+          }`}
+        >
+          <span className="flex items-center gap-3"><MapPin className="w-4 h-4" /> Saved Addresses</span>
+          <ChevronRight className="w-3.5 h-3.5 opacity-50" />
+        </button>
+
+        <button 
+          onClick={() => setActiveTab("wishlist")}
+          className={`w-full text-left px-5 py-4 text-[11px] uppercase tracking-widest font-bold flex justify-between items-center transition-all border-b border-white/5 ${
+            activeTab === "wishlist" 
+              ? "bg-white/10 text-white border-white/20 shadow-[0_8px_32px_0_rgba(255,255,255,0.05)]" 
+              : "hover:bg-white/10 text-white/60 hover:text-white border-transparent hover:border-white/20 hover:shadow-[0_8px_32px_0_rgba(255,255,255,0.05)]"
+          }`}
+        >
+          <span className="flex items-center gap-3"><Heart className="w-4 h-4" /> Wishlist ({wishlist.length})</span>
+          <ChevronRight className="w-3.5 h-3.5 opacity-50" />
+        </button>
+        
+        <div className="pt-6 mt-auto border-t border-luxury-sand/10">
+          <button onClick={async () => { await logout(); router.push('/login'); }} className="w-full text-left px-6 py-4 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-xl text-[10px] uppercase tracking-widest font-bold flex justify-between items-center transition-all hover:backdrop-blur-md border border-transparent hover:border-red-500/30">
+            <span className="flex items-center gap-3"><LogOut className="w-4 h-4" /> Secure Logout</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Sidebar Navigation */}
+      <div className="lg:hidden w-full bg-black pt-[140px] px-4 pb-4 border-b border-white/10">
+        <div className="flex flex-col border border-white/10 rounded-2xl overflow-hidden">
+           <button onClick={() => setActiveTab("profile")} className={`w-full text-left px-5 py-4 text-[11px] uppercase tracking-widest font-bold flex justify-between items-center transition-all border-b border-white/5 ${"text-white"}`}>
+            <span className="flex items-center gap-3"><User className="w-4 h-4" /> Personal Profile</span>
+            <ChevronRight className="w-3.5 h-3.5 opacity-50" />
+          </button>
+          <button onClick={() => setActiveTab("orders")} className={`w-full text-left px-5 py-4 text-[11px] uppercase tracking-widest font-bold flex justify-between items-center transition-all border-b border-white/5 ${"text-white"}`}>
+            <span className="flex items-center gap-3"><Package className="w-4 h-4" /> Order History</span>
+            <ChevronRight className="w-3.5 h-3.5 opacity-50" />
+          </button>
+          <button onClick={() => setActiveTab("addresses")} className={`w-full text-left px-5 py-4 text-[11px] uppercase tracking-widest font-bold flex justify-between items-center transition-all border-b border-white/5 ${"text-white"}`}>
+            <span className="flex items-center gap-3"><MapPin className="w-4 h-4" /> Saved Addresses</span>
+            <ChevronRight className="w-3.5 h-3.5 opacity-50" />
+          </button>
+          <button onClick={() => setActiveTab("wishlist")} className={`w-full text-left px-5 py-4 text-[11px] uppercase tracking-widest font-bold flex justify-between items-center transition-all border-b border-white/5 ${"text-white"}`}>
+            <span className="flex items-center gap-3"><Heart className="w-4 h-4" /> Wishlist</span>
+            <ChevronRight className="w-3.5 h-3.5 opacity-50" />
+          </button>
+        </div>
+      </div>
+
+      {/* 2. Main Content */}
+      <div className="flex-1 pt-8 lg:pt-[150px] pb-24 w-full">
+        {/* Header Section */}
+        <div className="max-w-5xl mx-auto px-6 md:px-12 mb-8 text-left">
+          <span className="text-xs uppercase tracking-[0.25em] text-white font-semibold">
+            {activeTab === "profile" && "My Profile"}
+            {activeTab === "orders" && "Orders"}
+            {activeTab === "addresses" && "Locations"}
+            {activeTab === "wishlist" && "Wishlist"}
+          </span>
+          <h1 className="text-4xl md:text-6xl font-serif text-white mt-2 font-light">
+            My Account
+          </h1>
+          <p className="text-xs md:text-sm text-white font-sans font-light mt-4 leading-relaxed max-w-lg lg:mx-0">
+            Welcome back. Manage your orders, shipping details, and saved items.
+          </p>
+        </div>
+
+        <div className="max-w-5xl mx-auto px-6 md:px-12">
+          {/* Main Dashboard Content Area */}
+          <div className="space-y-10">
+            <AnimatePresence mode="wait">
+
+              {/* PROFILE TAB */}
+              {activeTab === "profile" && (
+                <motion.div
+                  key="profile"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-8"
+                >
+                  {/* Error and Success Banners */}
+                  {errorMsg && (
+                    <div className="bg-red-500/10 border border-red-500/30 text-red-700 p-6 rounded-2xl text-xs space-y-2 flex gap-3 items-start">
+                      <ShieldAlert className="w-5 h-5 flex-shrink-0 text-red-600 mt-0.5" />
+                      <div>
+                        <p className="font-semibold uppercase tracking-wider">An Error Occurred</p>
+                        <p className="mt-1 text-red-600/90 font-light leading-relaxed">{errorMsg}</p>
+                        {errorMsg.includes("Firebase Storage") && (
+                          <div className="mt-4 p-4 bg-black/5 rounded-xl border border-red-500/15 space-y-2">
+                            <p className="font-bold text-red-800 uppercase tracking-widest text-[10px]">How to fix Firebase Storage security rules:</p>
+                            <ol className="list-decimal list-inside space-y-1 text-[11px] text-red-700/80 leading-relaxed font-light">
+                              <li>Go to the <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-950 font-medium">Firebase Console</a></li>
+                              <li>Select your project: <strong>thefutbol-store</strong></li>
+                              <li>Click on <strong>Storage</strong> in the left sidebar, then click the <strong>Rules</strong> tab</li>
+                              <li>Change the rules to allow authenticated writes:
+                                <pre className="bg-black/95 text-green-400 p-3 rounded-lg mt-2 overflow-x-auto text-[10px] font-mono leading-normal">
+{`rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /users/{userId}/{allPaths=**} {
+      allow read;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}`}
+                                </pre>
+                              </li>
+                              <li>Click <strong>Publish</strong>. That's it! Try uploading again.</li>
+                            </ol>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {successMsg && (
+                    <div className="bg-green-500/10 border border-green-500/30 text-green-800 p-6 rounded-2xl text-xs flex gap-3 items-center">
+                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                      <div>
+                        <p className="font-semibold uppercase tracking-wider">Success</p>
+                        <p className="mt-0.5 text-green-700/90 font-light">{successMsg}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="bg-[#121212] rounded-3xl p-8 md:p-12 border border-white/10 shadow-sm">
+                    <div className="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between">
+                      <div className="flex items-center gap-6">
+                        <div className="w-20 h-20 rounded-full bg-luxury-dark text-white flex items-center justify-center text-2xl font-serif shadow-inner overflow-hidden relative group">
+                          {user.photoURL ? (
+                            <Image src={user.photoURL} alt="Profile" fill className="object-cover" />
+                          ) : (
+                            user.displayName ? user.displayName.charAt(0).toUpperCase() : <User className="w-8 h-8" />
+                          )}
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-serif text-white font-medium">{user.displayName || "GUEST USER"}</h2>
+                          <p className="text-xs font-sans text-white mt-1">{user.email || user.phoneNumber || "No contact info"}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+                        <button 
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isSaving}
+                          className="px-6 py-2.5 bg-transparent border border-white/30 hover:border-luxury-dark hover:bg-luxury-dark hover:text-white text-white rounded-full text-[10px] tracking-widest uppercase font-semibold transition-all duration-300 disabled:opacity-50"
+                        >
+                          {isSaving ? "Processing..." : "Upload Image"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#121212] rounded-3xl p-8 md:p-12 border border-white/10 shadow-sm">
+                    <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
+                      <h3 className="text-xl font-serif text-white font-medium">Personal Details</h3>
+                      {!isEditing ? (
+                        <button 
+                          onClick={(e) => { e.preventDefault(); setIsEditing(true); }}
+                          className="text-[9px] uppercase tracking-widest font-bold text-white hover:text-white transition-colors flex items-center gap-2"
+                        >
+                          <Edit2 className="w-3 h-3" /> Edit Details
+                        </button>
+                      ) : (
+                        <div className="flex gap-4">
+                          <button 
+                            onClick={(e) => { e.preventDefault(); setIsEditing(false); setEditName(user?.displayName || ""); }}
+                            className="text-[9px] uppercase tracking-widest font-bold text-white/50 hover:text-white transition-colors flex items-center gap-2"
+                          >
+                            Cancel
+                          </button>
+                          <button 
+                            onClick={(e) => { e.preventDefault(); handleSaveProfile(); }}
+                            disabled={isSaving}
+                            className="text-[9px] uppercase tracking-widest font-bold text-green-600 hover:text-green-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                          >
+                            {isSaving ? "Saving..." : "Save Changes"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={(e) => { e.preventDefault(); handleSaveProfile(); }}>
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest font-bold text-white">Full Name</label>
+                        <input 
+                          type="text" 
+                          value={isEditing ? editName : (user.displayName || "")} 
+                          onChange={(e) => setEditName(e.target.value)}
+                          disabled={!isEditing} 
+                          className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors disabled:opacity-70" 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest font-bold text-white">User ID</label>
+                        <input type="text" value={user.uid} disabled className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors font-mono text-xs" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest font-bold text-white">Email Address</label>
+                        <input type="email" value={user.email || ""} disabled className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest font-bold text-white">Phone Number</label>
+                        <input type="tel" value={user.phoneNumber || ""} disabled className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors" />
+                      </div>
+                    </form>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* ORDERS TAB */}
+              {activeTab === "orders" && (
+                <motion.div
+                  key="orders"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-[#121212] rounded-3xl p-8 md:p-12 border border-white/10 shadow-sm"
+                >
+                  <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
+                    <h3 className="text-xl font-serif text-white font-medium">Recent Orders</h3>
+                  </div>
+
+                  <div className="space-y-6">
+                    {loadingOrders ? (
+                      <div className="text-center py-10">
+                        <div className="w-8 h-8 border-2 border-luxury-dark border-t-transparent rounded-full animate-spin mx-auto"></div>
+                        <p className="text-xs mt-4 uppercase tracking-widest text-white font-semibold">Loading Orders...</p>
+                      </div>
+                    ) : orders.length === 0 ? (
+                      <div className="text-center py-10 space-y-4 bg-black/50 rounded-2xl border border-white/5">
+                        <Package className="w-10 h-10 text-white mx-auto" />
+                        <p className="text-xs uppercase tracking-widest text-white font-semibold">No recent orders</p>
+                        <p className="text-[11px] text-white font-light font-sans max-w-sm mx-auto leading-relaxed">
+                          Your collection awaits. Explore our latest arrivals to buy your next classic jersey.
+                        </p>
+                        <Link 
+                          href="/clubs"
+                          className="inline-block mt-4 px-8 py-3 bg-luxury-dark text-white rounded-full text-[10px] uppercase tracking-widest font-semibold hover:bg-luxury-taupe hover:text-white transition-colors duration-300"
+                        >
+                          Explore Collections
+                        </Link>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {orders.map((order, idx) => (
+                          <div key={order.id || idx} className="bg-black/50 p-6 rounded-2xl border border-white/10 shadow-sm">
+                            <div className="flex justify-between items-start mb-4 border-b border-white/10 pb-4">
+                              <div>
+                                <p className="text-[10px] uppercase tracking-widest font-bold text-white/70">Order ID: {order.id}</p>
+                                <p className="text-xs font-sans text-white mt-1">{new Date(order.createdAt).toLocaleDateString()}</p>
+                              </div>
+                              <div className="text-right">
+                                <span className="px-3 py-1 bg-green-500/10 text-green-700 text-[10px] uppercase tracking-widest font-bold rounded-full">{order.status}</span>
+                                <p className="text-lg font-serif font-bold text-white mt-2">₹{order.totalAmount?.toFixed(2)}</p>
+                              </div>
+                            </div>
+                            <div className="space-y-4">
+                              {order.items?.map((item: any, i: number) => (
+                                <div key={i} className="flex gap-4 items-center">
+                                  <div className="w-12 h-16 relative bg-neutral-100 rounded-lg overflow-hidden shrink-0 border border-white/10">
+                                    <Image src={item.image} alt={item.name} fill style={{ objectFit: 'cover' }} />
+                                  </div>
+                                  <div className="flex-1">
+                                    <p className="text-sm font-serif text-white font-bold leading-tight">{item.name}</p>
+                                    <p className="text-[10px] uppercase tracking-widest text-white/70 mt-1">Qty: {item.quantity} | Size: {item.size}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* ADDRESSES TAB */}
+              {activeTab === "addresses" && (
+                <motion.div
+                  key="addresses"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-8"
+                >
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-xl font-serif text-white font-medium">Saved Locations</h3>
+                    <button className="px-6 py-2.5 bg-luxury-dark text-white hover:bg-luxury-taupe hover:text-white rounded-full text-[10px] tracking-widest uppercase font-semibold transition-all duration-300 flex items-center gap-2 shadow-sm">
+                      <Plus className="w-3 h-3" /> Add Address
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Mock Address Card */}
+                    <div className="bg-[#121212] rounded-3xl p-8 border border-white/10 shadow-sm relative group">
+                      <div className="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button className="p-2 text-white hover:text-white transition-colors"><Edit2 className="w-4 h-4" /></button>
+                      </div>
+                      <span className="text-[9px] uppercase tracking-widest text-white font-bold block mb-4">Default Delivery</span>
+                      <h4 className="text-base font-serif text-white font-medium mb-1">SAKSHAM</h4>
+                      <p className="text-sm text-white font-sans font-light leading-relaxed">
+                        123 Luxury Avenue, Suite 45<br/>
+                        New Delhi, DL 110001<br/>
+                        India
+                      </p>
+                      <p className="text-sm text-white font-sans font-light mt-4 flex items-center gap-2">
+                        <span className="text-[10px] uppercase tracking-widest font-bold">Phone:</span> +91 98765 43210
+                      </p>
+                    </div>
+
+                    <div className="bg-[#FFEEE2]/20 backdrop-blur-md rounded-3xl p-8 border border-dashed border-white/30 hover:border-luxury-taupe hover:bg-white/40 transition-all shadow-sm flex flex-col items-center justify-center text-center cursor-pointer min-h-[220px]">
+                      <Plus className="w-8 h-8 text-white mb-3" />
+                      <span className="text-xs uppercase tracking-widest text-white font-bold">Add New Location</span>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* WISHLIST TAB */}
+              {activeTab === "wishlist" && (
+                <motion.div
+                  key="wishlist"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
+                    <h3 className="text-xl font-serif text-white font-medium">Wishlist</h3>
+                    <span className="text-[9px] uppercase tracking-widest font-bold text-white">{wishlist.length} Items</span>
+                  </div>
+
+                  {wishlistProducts.length === 0 ? (
+                    <div className="text-center py-20 space-y-4 bg-black/50 rounded-2xl border border-white/5">
+                      <Heart className="w-10 h-10 text-white mx-auto" />
+                      <p className="text-xs uppercase tracking-widest text-white font-semibold">Your wishlist is empty</p>
+                      <p className="text-[11px] text-white font-light font-sans max-w-sm mx-auto leading-relaxed">
+                        Discover premium pieces to add to your personal collection.
+                      </p>
+                      <Link 
+                        href="/clubs"
+                        className="inline-block mt-4 px-8 py-3 bg-luxury-dark text-white rounded-full text-[10px] uppercase tracking-widest font-semibold hover:bg-luxury-taupe hover:text-white transition-colors duration-300"
+                      >
+                        Explore Collections
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                      <AnimatePresence>
+                        {wishlistProducts.map((product) => (
+                          <motion.div
+                            key={product.id}
+                            layout
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            whileHover={{ y: -6 }}
+                            transition={{ duration: 0.3 }}
+                            className="rounded-2xl border border-white/10 bg-[#FFEEE2]/60 hover:bg-white flex flex-col justify-between transition-colors duration-500 shadow-sm relative overflow-hidden"
+                          >
+                            <div className="relative w-full h-[200px] bg-neutral-100 group">
+                              <Link href={`/product/${product.id}`}>
+                                <Image
+                                  src={product.image}
+                                  alt={product.name}
+                                  fill
+                                  style={{ objectFit: "cover" }}
+                                  className="transition-transform duration-[1000ms] ease-out group-hover:scale-105"
+                                />
+                              </Link>
+
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  toggleWishlist(product.id);
+                                }}
+                                className="absolute top-3 right-3 p-2 bg-[#FFEEE2]/80 backdrop-blur-md rounded-full text-white hover:text-white transition-colors shadow-sm z-10"
+                                aria-label="Remove from Wishlist"
+                              >
+                                <Heart className="w-3.5 h-3.5 fill-luxury-taupe text-white" />
+                              </button>
+                            </div>
+
+                            <div className="p-4 pt-3 flex flex-col justify-between flex-grow">
+                              <div>
+                                <span className="text-[9px] uppercase tracking-widest font-semibold text-white block mb-1">
+                                  {product.category}
+                                </span>
+                                <Link href={`/product/${product.id}`}>
+                                  <h3 className="text-sm font-serif text-white font-medium leading-tight hover:text-white transition-colors line-clamp-2">
+                                    {product.name}
+                                  </h3>
+                                </Link>
+                              </div>
+                              <div className="flex justify-between items-end border-t border-white/10 pt-3 mt-3">
+                                <span className="font-serif text-base text-white">{product.priceStr}</span>
+                                <button
+                                  onClick={() => setQuickAddProduct(product)}
+                                  className="text-[9px] uppercase tracking-[0.2em] font-semibold text-white hover:text-white flex items-center gap-1 transition-colors"
+                                >
+                                  Quick Add <Plus className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

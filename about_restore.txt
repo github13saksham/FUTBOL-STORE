@@ -1,0 +1,80 @@
+Created At: 2026-05-25T20:42:17Z
+Completed At: 2026-05-25T20:42:17Z
+File Path: `file:///c:/Users/SAKSHAM/Downloads/Futbol%20Store/src/app/about-us/page.tsx`
+Total Lines: 193
+Total Bytes: 10311
+Showing lines 1 to 193
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: "use client";
+2: 
+3: import { motion } from "framer-motion";
+4: import { 
+5:   ShieldCheck, Trophy, Printer, Shirt, Truck, HeartHandshake, ArrowRight 
+6: } from "lucide-react";
+7: import Image from "next/image";
+8: 
+9: export default function AboutUsPage() {
+10:   const focuses = [
+11:     {
+12:       icon: ShieldCheck,
+13:       title: "Premium Quality Football Jerseys",
+14:       desc: "We employ double-pitted premium knit mesh patterns and authentic luxury drapes inside Milanese fashion houses. Each jersey is structured to feel like an artisanal piece."
+15:     },
+16:     {
+17:       icon: Trophy,
+18:       title: "Latest Club & National Team Collections",
+19:       desc: "From limited-time arrivals to the latest 2026 collections and retro historical alignments, we hold the absolute vault of historic footballing campaigns."
+20:     },
+21:     {
+22:       icon: Shirt,
+23:       title: "Player Version & Fan Version Kits",
+24:       desc: "Choose between Player Versions featuring aerodynamic athletic piqué cuts with heat-pressed emblems, or Fan Versions designed for loose drapes, regular comfort and lifestyle styling."
+25:     },
+26:     {
+27:       icon: Printer,
+28:       title: "Custom Name & Number Printing",
+29:       desc: "Coordinate with our bespoke registry to print custom numbers and names using authorized team fonts, metallic details, and vintage-accurate heat locks."
+30:     },
+31:     {
+32:       icon: Truck,
+33:       title: "Pan India Secure Shipping",
+34:       desc: "Delivering digital fashion statements safely across all union territories, ci
+<truncated 7613 bytes>
+ rounded-2xl border border-luxury-sand/10 bg-[#141414] hover:bg-[#1a1a1a] space-y-5 transition-colors duration-300"
+158:                 >
+159:                   <div className="w-12 h-12 rounded-full bg-luxury-sand/10 flex items-center justify-center text-luxury-sand">
+160:                     <Icon className="w-6 h-6 stroke-[1.5px]" />
+161:                   </div>
+162:                   <h3 className="text-lg font-serif font-bold text-white tracking-wide">{item.title}</h3>
+163:                   <p className="text-xs text-luxury-ivory/60 leading-relaxed font-sans font-light">
+164:                     {item.desc}
+165:                   </p>
+166:                 </motion.div>
+167:               );
+168:             })}
+169:           </div>
+170:         </div>
+171:       </section>
+172: 
+173:       {/* 4. The Manifesto Banner */}
+174:       <section className="py-32 px-6 md:px-12 bg-[#FFEEE2] relative overflow-hidden border-b border-luxury-taupe/15">
+175:         <div className="max-w-4xl mx-auto text-center space-y-8 relative z-10">
+176:           <span className="text-xs uppercase tracking-[0.3em] text-luxury-taupe font-bold block">The Manifesto</span>
+177:           
+178:           <h2 className="text-3xl md:text-5xl font-serif font-light text-luxury-dark leading-snug">
+179:             "Football is more than just a game — it’s <span className="italic font-medium text-luxury-taupe">emotion</span>, culture, loyalty, and <span className="italic font-medium text-luxury-taupe">passion</span>. Our mission is to help fans wear that passion every day."
+180:           </h2>
+181: 
+182:           <div className="h-[1px] bg-luxury-taupe/20 w-32 mx-auto my-6" />
+183: 
+184:           <p className="text-xs uppercase tracking-[0.25em] text-luxury-taupe font-bold">
+185:             Thank you for being part of THE FÚTBOL STORE family. 
+186:           </p>
+187:         </div>
+188:       </section>
+189: 
+190:     </div>
+191:   );
+192: }
+193: 
+The above content shows the entire, complete file contents of the requested file.

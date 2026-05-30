@@ -1,0 +1,105 @@
+Created At: 2026-05-25T19:36:42Z
+Completed At: 2026-05-25T19:36:42Z
+File Path: `file:///c:/Users/SAKSHAM/Downloads/Futbol%20Store/src/components/Navbar.tsx`
+Total Lines: 582
+Total Bytes: 28427
+Showing lines 1 to 582
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: "use client";
+2: 
+3: import { useState, useEffect, useRef } from "react";
+4: import { usePathname } from "next/navigation";
+5: import Link from "next/link";
+6: import Image from "next/image";
+7: import { motion, AnimatePresence } from "framer-motion";
+8: import {
+9:   Search, Heart, ShoppingBag, User, Plus, Minus, X,
+10:   ChevronRight, Check
+11: } from "lucide-react";
+12: import { useStore } from "@/context/StoreContext";
+13: import { BEST_SELLERS } from "@/data/mockData";
+14: 
+15: export default function Navbar() {
+16:   const pathname = usePathname();
+17:   const [navbarSolid, setNavbarSolid] = useState(false);
+18:   const searchInputRef = useRef<HTMLInputElement>(null);
+19: 
+20:   const {
+21:     cart,
+22:     wishlist,
+23:     searchOpen,
+24:     wishlistOpen,
+25:     cartOpen,
+26:     sizeGuideOpen,
+27:     quickAddProduct,
+28:     selectedSize,
+29:     setSelectedSize,
+30:     setQuickAddProduct,
+31:     setSearchOpen,
+32:     setWishlistOpen,
+33:     setCartOpen,
+34:     setSizeGuideOpen,
+35:     addToCart,
+36:     removeFromCart,
+37:     updateQuantity,
+38:     toggleWishlist,
+39:     getCartTotal
+40:   } = useStore();
+41: 
+42:   // Monitor scroll for navbar blurring / solid background
+43:   useEffect(() => {
+44:     const handleScroll = () => {
+45:       if (window.scrollY > 50) {
+46:         setNavbarSolid(true);
+47:       } else {
+48:         setNavbarSolid(false);
+49:       }
+50:     };
+51:     window.addEventListener("scroll", handleScroll);
+52:     return () => window.removeEventListener("scroll", handleScroll);
+53:   }, []);
+54: 
+55:   // Autofo
+<truncated 27674 bytes>
+:                         <td className="p-4">Comfortable</td>
+543:                       </tr>
+544:                       <tr>
+545:                         <td className="p-4 font-bold">L</td>
+546:                         <td className="p-4">41 - 43</td>
+547:                         <td className="p-4">35 - 37</td>
+548:                         <td className="p-4">Standard Slim</td>
+549:                         <td className="p-4">Relaxed Fit</td>
+550:                       </tr>
+551:                       <tr>
+552:                         <td className="p-4 font-bold">XL</td>
+553:                         <td className="p-4">44 - 46</td>
+554:                         <td className="p-4">38 - 40</td>
+555:                         <td className="p-4">Standard Fit</td>
+556:                         <td className="p-4">Loose Drape</td>
+557:                       </tr>
+558:                     </tbody>
+559:                   </table>
+560:                 </div>
+561: 
+562:                 <div className="flex justify-between items-center pt-4 border-t border-luxury-taupe/10">
+563:                   <div className="flex items-center gap-2 text-[10px] text-luxury-taupe/70">
+564:                     <Check className="w-4 h-4 text-luxury-taupe" />
+565:                     <span>Free replacements for sizing issues</span>
+566:                   </div>
+567:                   <button
+568:                     onClick={() => setSizeGuideOpen(false)}
+569:                     className="px-6 py-2.5 bg-luxury-dark hover:bg-luxury-taupe hover:text-luxury-dark text-luxury-ivory text-[10px] tracking-widest uppercase font-semibold rounded-full transition-all duration-300"
+570:                   >
+571:                     Acknowledge
+572:                   </button>
+573:                 </div>
+574:               </div>
+575:             </motion.div>
+576:           </motion.div>
+577:         )}
+578:       </AnimatePresence>
+579:     </>
+580:   );
+581: }
+582: 
+The above content shows the entire, complete file contents of the requested file.

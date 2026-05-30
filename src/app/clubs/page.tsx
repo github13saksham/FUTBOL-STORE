@@ -1,0 +1,225 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, ChevronRight, Sparkles, ShieldAlert, ChevronDown } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useStore } from "@/context/StoreContext";
+import { Club, Product } from "@/data/mockData";
+
+export default function ClubsPage() {
+  const [selectedClubId, setSelectedClubId] = useState<string>("all");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { products, clubs, wishlist, toggleWishlist, setQuickAddProduct } = useStore();
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && clubs.length > 0) {
+      const params = new URLSearchParams(window.location.search);
+      const clubId = params.get("id");
+      if (clubId && clubs.some(c => c.id === clubId)) {
+        setSelectedClubId(clubId);
+      }
+    }
+  }, [clubs]);
+
+  const handleClubFilter = (id: string) => {
+    setSelectedClubId(id);
+  };
+
+  const clubProducts = products.filter(p => p.club && p.club.toLowerCase() !== "national team");
+
+  const filteredProducts = selectedClubId === "all" 
+    ? clubProducts 
+    : selectedClubId === "25-26"
+    ? clubProducts.filter(p => p.name.includes("25-26") || p.name.includes("25-26"))
+    : clubProducts.filter(p => p.club.toUpperCase().includes(
+        clubs.find(c => c.id === selectedClubId)?.name.toUpperCase() || ""
+      ));
+
+  return (
+    <div className="min-h-screen flex flex-col text-luxury-dark bg-[#FFEEE2] pt-40 selection:bg-luxury-taupe selection:text-luxury-ivory">
+      
+      {/* 1. Page Header */}
+      <section className="w-full max-w-7xl mx-auto px-6 md:px-12 mb-16 relative flex justify-start">
+        <div className="absolute right-[10%] top-[-20%] w-[300px] h-[300px] bg-luxury-taupe/15 rounded-full blur-[80px] pointer-events-none" />
+        
+        <div className="w-full space-y-4 flex flex-col items-start text-left">
+          <span className="text-[12px] uppercase tracking-[0.3em] text-luxury-dark font-bold block">
+            2025-2026 Jersey's Section
+          </span>
+          <h1 className="text-5xl md:text-7xl font-serif font-light text-luxury-dark tracking-tight leading-none">
+            Club <span className="italic font-medium text-luxury-dark">Jersey's</span> 
+          </h1>
+    
+        </div>
+      </section>
+
+      {/* 2. Club Selector Dropdown */}
+      <section className="w-full max-w-7xl mx-auto px-6 md:px-12 flex justify-start md:justify-end">
+        <div className="w-full relative flex justify-start pb-6 border-b border-luxury-taupe/15">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="inline-flex justify-between items-center w-64 rounded-full border border-luxury-taupe/30 bg-white/40 px-6 py-3 text-xs uppercase tracking-widest font-semibold text-luxury-dark shadow-sm hover:bg-white focus:outline-none transition-colors duration-300"
+            >
+              {selectedClubId === "all" ? "All Clubs" : "25-26 JERSEY'S"}
+              <ChevronDown className={`-mr-1 ml-2 h-4 w-4 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+            </button>
+          </div>
+
+          <AnimatePresence>
+            {isDropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="absolute z-50 mt-2 w-64 origin-top-left rounded-2xl bg-white shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden"
+              >
+                <div className="py-1">
+                  <button
+                    onClick={() => { handleClubFilter("all"); setIsDropdownOpen(false); }}
+                    className={`block w-full text-left px-6 py-3 text-xs uppercase tracking-widest font-semibold transition-colors duration-200 ${selectedClubId === "all" ? "bg-luxury-dark text-luxury-ivory" : "text-luxury-dark hover:bg-luxury-taupe/10"}`}
+                  >
+                    All Clubs
+                  </button>
+                  <button
+                    onClick={() => { handleClubFilter("25-26"); setIsDropdownOpen(false); }}
+                    className={`block w-full text-left px-6 py-3 text-xs uppercase tracking-widest font-semibold transition-colors duration-200 ${selectedClubId === "25-26" ? "bg-luxury-dark text-luxury-ivory" : "text-luxury-dark hover:bg-luxury-taupe/10"}`}
+                  >
+                    25-26 JERSEY'S
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
+
+
+
+      {/* 4. Products Grid */}
+      <div className="w-full flex-grow bg-[#121212] pt-16 pb-24 mt-0">
+        <section className="max-w-7xl mx-auto px-6 md:px-12">
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-24 space-y-4">
+              <ShieldAlert className="w-12 h-12 text-white/40 mx-auto" />
+              <h3 className="text-xl font-serif text-white">No active items in this collection</h3>
+              <p className="text-xs text-white/70 font-sans max-w-md mx-auto">
+                We release items seasonally. Tap "All Clubs" to check our active collections.
+              </p>
+            </div>
+          ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-[1px] md:gap-8 bg-[#121212] md:bg-transparent border-t border-[#121212] md:border-transparent">
+            <AnimatePresence>
+              {filteredProducts.map((product) => (
+                  <motion.div
+                  key={product.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  whileHover={{ 
+                    y: -12, 
+                    boxShadow: "0 25px 50px -12px rgba(159, 126, 105, 0.15)"
+                  }}
+                  transition={{ duration: 0.4 }}
+                  className="bg-[#282828] md:bg-luxury-dark md:rounded-2xl md:p-5 md:border md:border-white/10 flex flex-col justify-between transition-colors duration-500 shadow-sm relative overflow-hidden group/card"
+                >
+                  {/* Image Display */}
+                  <div className="relative w-full aspect-[3/4] md:h-[300px] bg-[#333333] md:bg-neutral-100 group">
+                    <Link href={`/product/${product.id}`}>
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        style={{ objectFit: "cover" }}
+                        className="transition-transform duration-[1000ms] ease-out md:scale-105 md:group-hover:scale-110"
+                      />
+                      
+                      {/* Add overlays */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 hidden md:block" />
+                    </Link>
+
+                    {/* Quick Add Button (Desktop Only) */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setQuickAddProduct(product);
+                      }}
+                      className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-2.5 bg-luxury-dark text-luxury-ivory hover:bg-luxury-taupe hover:text-luxury-dark text-[10px] tracking-widest uppercase font-semibold rounded-full shadow-lg opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 backdrop-blur-md z-10"
+                    >
+                      Quick Add
+                    </button>
+
+                    {/* Wishlist Button (Desktop specific positioning vs Mobile) */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleWishlist(product.id);
+                      }}
+                      className="hidden md:block absolute top-4 right-4 p-2.5 bg-luxury-ivory/80 backdrop-blur-md rounded-full text-luxury-dark hover:text-luxury-dark transition-colors duration-300 shadow-sm z-10"
+                      aria-label="Add to Wishlist"
+                    >
+                      <Heart className={`w-4 h-4 transition-colors duration-300 ${wishlist.includes(product.id) ? "fill-red-500 text-red-500" : "hover:text-red-500"}`} />
+                    </button>
+                  </div>
+
+                  {/* Specifications */}
+                  <div className="p-2.5 pt-3 md:p-5 md:pt-4 flex-grow flex flex-col justify-between">
+                    <div>
+                      <div className="hidden md:flex justify-between items-center text-[10px] uppercase tracking-widest font-semibold text-white/80">
+                        <span>{product.category}</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-start mt-1">
+                        <Link href={`/product/${product.id}`} className="block flex-1 min-w-0">
+                          <h3 className="text-[13px] md:text-base font-bold md:font-serif text-white md:font-medium leading-tight md:tracking-wide hover:text-luxury-ivory transition-colors duration-300 truncate">
+                            {product.club || "Futbol Store"}
+                          </h3>
+                          <p className="text-[11px] text-white/70 font-sans mt-0.5 md:mt-2 truncate md:whitespace-normal md:leading-relaxed">
+                            {product.name}
+                          </p>
+                        </Link>
+                        
+                        {/* Mobile Wishlist Icon */}
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleWishlist(product.id);
+                          }}
+                          className="md:hidden ml-2 p-1 text-white/50 hover:text-red-500 transition-colors"
+                        >
+                          <Heart className={`w-[18px] h-[18px] ${wishlist.includes(product.id) ? "fill-red-500 text-red-500" : ""}`} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-end pb-1 border-b border-transparent md:border-white/20 pt-1.5 md:pt-4">
+                      <span className="font-bold text-[13px] md:font-serif md:text-lg text-white">
+                        {product.priceStr}
+                      </span>
+                      <Link
+                        href={`/product/${product.id}`}
+                        className="hidden md:flex text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 hover:text-white items-center gap-1 transition-colors duration-300"
+                      >
+                        View Item <ChevronRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+        </section>
+      </div>
+
+    </div>
+  );
+}

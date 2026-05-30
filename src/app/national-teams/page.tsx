@@ -1,0 +1,206 @@
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, ChevronRight, Sparkles, ChevronDown, ShieldAlert } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
+import { useStore } from "@/context/StoreContext";
+
+export default function NationalTeamsPage() {
+  const { products, wishlist, toggleWishlist, setQuickAddProduct } = useStore();
+  const [versionFilter, setVersionFilter] = useState<string>("all");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const nationalTeamProducts = products.filter(p => p.club && p.club.toLowerCase() === "national team");
+
+  const filteredProducts = versionFilter === "all" 
+    ? nationalTeamProducts 
+    : nationalTeamProducts.filter(p => 
+        p.category.toLowerCase().includes(versionFilter.toLowerCase()) || 
+        p.name.toLowerCase().includes(versionFilter.toLowerCase())
+      );
+
+  return (
+    <div className="min-h-screen flex flex-col text-luxury-dark bg-[#FFEEE2] pt-40 selection:bg-luxury-taupe selection:text-luxury-ivory">
+      
+      {/* 1. Page Header Section */}
+      <section className="w-full max-w-7xl mx-auto px-6 md:px-12 mb-8 relative z-10 flex justify-start">
+        <div className="absolute right-[5%] top-[-20%] w-[350px] h-[350px] bg-luxury-cream/15 rounded-full blur-[80px] pointer-events-none" />
+        <div className="w-full  space-y-4 flex flex-col items-start text-left">
+          <span className="text-[12px]  uppercase tracking-[0.3em] text-luxury-dark font-bold block">
+            ACTIVE RELEASE
+          </span>
+          <h1 className="text-5xl md:text-8xl font-serif font-light text-luxury-dark tracking-tight leading-none">
+            National <span className="italic font-medium text-luxury-dark">Teams</span>
+          </h1>
+        </div>
+      </section>
+
+    
+
+      {/* 2. Version Selector Dropdown */}
+      <section className="w-full max-w-7xl mx-auto px-6 md:px-12 flex justify-start md:justify-end">
+        <div className="w-full relative flex justify-start pb-6 border-b border-luxury-taupe/15">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="inline-flex justify-between items-center w-64 rounded-full border border-luxury-taupe/30 bg-white/40 px-6 py-3 text-xs uppercase tracking-widest font-semibold text-luxury-dark shadow-sm hover:bg-white focus:outline-none transition-colors duration-300"
+            >
+              {versionFilter === "all" ? "All Versions" : versionFilter === "player" ? "Player Version" : "Fan Version"}
+              <ChevronDown className={`-mr-1 ml-2 h-4 w-4 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+            </button>
+          </div>
+
+          <AnimatePresence>
+            {isDropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="absolute z-50 mt-2 w-64 origin-top-left rounded-2xl bg-white shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden"
+              >
+                <div className="py-1">
+                  <button
+                    onClick={() => { setVersionFilter("all"); setIsDropdownOpen(false); }}
+                    className={`block w-full text-left px-6 py-3 text-xs uppercase tracking-widest font-semibold transition-colors duration-200 ${versionFilter === "all" ? "bg-luxury-dark text-luxury-ivory" : "text-luxury-dark hover:bg-luxury-taupe/10"}`}
+                  >
+                    All Versions
+                  </button>
+                  <button
+                    onClick={() => { setVersionFilter("player"); setIsDropdownOpen(false); }}
+                    className={`block w-full text-left px-6 py-3 text-xs uppercase tracking-widest font-semibold transition-colors duration-200 ${versionFilter === "player" ? "bg-luxury-dark text-luxury-ivory" : "text-luxury-dark hover:bg-luxury-taupe/10"}`}
+                  >
+                    Player Version
+                  </button>
+                  <button
+                    onClick={() => { setVersionFilter("fan"); setIsDropdownOpen(false); }}
+                    className={`block w-full text-left px-6 py-3 text-xs uppercase tracking-widest font-semibold transition-colors duration-200 ${versionFilter === "fan" ? "bg-luxury-dark text-luxury-ivory" : "text-luxury-dark hover:bg-luxury-taupe/10"}`}
+                  >
+                    Fan Version
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
+
+      {/* 4. Products Grid */}
+      <div className="w-full flex-grow bg-[#121212] pt-16 pb-24">
+        <section className="max-w-7xl mx-auto px-6 md:px-12">
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-24 space-y-4">
+              <ShieldAlert className="w-12 h-12 text-white/40 mx-auto" />
+              <h3 className="text-xl font-serif text-white">No active items in this collection</h3>
+              <p className="text-xs text-white/70 font-sans max-w-md mx-auto">
+                We release items seasonally. Tap "All Versions" to check our active collections.
+              </p>
+            </div>
+          ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-[1px] md:gap-8 bg-[#121212] md:bg-transparent border-t border-[#121212] md:border-transparent">
+          {filteredProducts.map((product) => (
+            <motion.div
+              key={product.id}
+              whileHover={{ 
+                y: -12, 
+                boxShadow: "0 25px 50px -12px rgba(159, 126, 105, 0.15)"
+              }}
+              transition={{ duration: 0.4 }}
+              className="bg-[#282828] md:bg-luxury-dark md:rounded-2xl md:p-5 md:border md:border-white/10 flex flex-col justify-between transition-colors duration-500 shadow-sm relative overflow-hidden group/card text-left"
+            >
+              {/* Image Container with zoom overlay */}
+              <div className="relative w-full aspect-[3/4] md:h-[320px] md:rounded-lg overflow-hidden bg-[#333333] md:bg-neutral-100 group">
+                <Link href={`/product/${product.id}`}>
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    style={{ objectFit: "cover" }}
+                    className="transition-transform duration-[1000ms] ease-out md:scale-105 md:group-hover:scale-110"
+                  />
+                  
+                  {/* Overlay with subtle shadow */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 hidden md:block" />
+                </Link>
+
+                {/* Quick Add Button */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setQuickAddProduct(product);
+                  }}
+                  className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-2.5 bg-luxury-dark text-luxury-ivory hover:bg-luxury-taupe hover:text-luxury-dark text-[10px] tracking-widest uppercase font-semibold rounded-full shadow-lg opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 backdrop-blur-md z-10"
+                >
+                  Quick Add
+                </button>
+
+                {/* Wishlist Button */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleWishlist(product.id);
+                  }}
+                  className="hidden md:block absolute top-4 right-4 p-2.5 bg-luxury-ivory/80 backdrop-blur-md rounded-full text-luxury-dark hover:text-luxury-dark transition-colors duration-300 shadow-sm z-10"
+                  aria-label="Add to Wishlist"
+                >
+                  <Heart className={`w-4 h-4 transition-colors duration-300 ${wishlist.includes(product.id) ? "fill-red-500 text-red-500" : "hover:text-red-500"}`} />
+                </button>
+              </div>
+
+              {/* Text Specifications */}
+              <div className="p-2.5 pt-3 md:p-0 md:pt-5 flex-grow flex flex-col justify-between">
+                <div>
+                  <div className="hidden md:flex justify-between items-center text-[10px] uppercase tracking-widest font-semibold text-white/80">
+                    <span>{product.category}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-start mt-1 md:mt-0">
+                    <Link href={`/product/${product.id}`} className="block flex-1 min-w-0">
+                      <h3 className="text-[13px] md:text-base font-bold md:font-serif text-white md:font-medium md:mt-1 leading-tight md:tracking-wide hover:text-luxury-ivory transition-colors duration-300 truncate">
+                        {product.club || "Futbol Store"}
+                      </h3>
+                      <p className="text-[11px] text-white/70 font-sans md:font-light mt-0.5 md:mt-2 truncate md:whitespace-normal md:leading-relaxed">
+                        {product.name}
+                      </p>
+                    </Link>
+
+                    {/* Mobile Wishlist Icon */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleWishlist(product.id);
+                      }}
+                      className="md:hidden ml-2 p-1 text-white/50 hover:text-red-500 transition-colors"
+                    >
+                      <Heart className={`w-[18px] h-[18px] ${wishlist.includes(product.id) ? "fill-red-500 text-red-500" : ""}`} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-end pb-1 border-b border-transparent md:border-white/20 pt-1.5 md:pt-4">
+                  <span className="font-bold text-[13px] md:font-serif md:text-lg text-white">{product.priceStr}</span>
+                  <Link
+                    href={`/product/${product.id}`}
+                    className="hidden md:flex text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 hover:text-white items-center gap-1 transition-colors duration-300"
+                  >
+                    Acquire Item <ChevronRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        )}
+        </section>
+      </div>
+
+    </div>
+  );
+}

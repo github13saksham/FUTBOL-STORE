@@ -1,0 +1,90 @@
+Created At: 2026-05-25T19:36:20Z
+Completed At: 2026-05-25T19:36:20Z
+File Path: `file:///c:/Users/SAKSHAM/Downloads/Futbol%20Store/src/app/product/%5Bid%5D/page.tsx`
+Total Lines: 412
+Total Bytes: 19921
+Showing lines 1 to 412
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: "use client";
+2: 
+3: import { useState } from "react";
+4: import { useParams, useRouter } from "next/navigation";
+5: import Image from "next/image";
+6: import Link from "next/link";
+7: import { motion, AnimatePresence } from "framer-motion";
+8: import {
+9:   Heart, ShoppingBag, Ruler, Check, ChevronRight,
+10:   ArrowRight, ShieldCheck, Truck, RefreshCw, Sparkles, ArrowLeft,
+11:   Minus, Plus, Shield, CreditCard, ChevronDown
+12: } from "lucide-react";
+13: import { useStore } from "@/context/StoreContext";
+14: import { ALL_PRODUCTS, Product } from "@/data/mockData";
+15: 
+16: export default function ProductPage() {
+17:   const params = useParams();
+18:   const router = useRouter();
+19:   const { id } = params;
+20: 
+21:   const {
+22:     cart,
+23:     wishlist,
+24:     toggleWishlist,
+25:     addToCart,
+26:     setSizeGuideOpen
+27:   } = useStore();
+28: 
+29:   // Find product
+30:   const product = ALL_PRODUCTS.find((p) => p.id === id);
+31: 
+32:   // Fallback if product not found
+33:   if (!product) {
+34:     return (
+35:       <div className="min-h-screen text-luxury-dark bg-[#FFEEE2] flex flex-col items-center justify-center pt-32 px-6">
+36:         <h2 className="text-3xl font-serif font-light mb-4">Vault Allocation Issue</h2>
+37:         <p className="text-sm font-sans mb-8">This jersey is currently locked or does not exist in our collections.</p>
+38:         <Link
+39:           href="/"
+40:           className="px-8 py-3 bg-luxury-dark text-luxury-ivory rounded-full text-xs uppercase tracking-widest font-semibold hover:bg-luxury-taupe hover:text-luxury-
+<truncated 18326 bytes>
+rder-t border-luxury-taupe/15 pt-12 space-y-6">
+373:           <div className="text-left">
+374:             <span className="text-[9px] uppercase tracking-[0.2em] text-luxury-taupe font-bold block">Exclusive Pairings</span>
+375:             <h2 className="text-lg font-serif text-luxury-dark mt-0.5 uppercase font-light leading-none">
+376:               Complete the <span className="italic font-medium text-[#cda491]">Look</span>
+377:             </h2>
+378:           </div>
+379: 
+380:           <div className="grid grid-cols-3 gap-6">
+381:             {recommendations.map((item) => (
+382:               <Link
+383:                 key={item.id}
+384:                 href={`/product/${item.id}`}
+385:                 className="group p-4 rounded-xl border border-luxury-taupe/10 bg-white/40 hover:bg-white flex flex-col justify-between transition-all duration-300 shadow-sm"
+386:               >
+387:                 <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-neutral-100 mb-4">
+388:                   <Image
+389:                     src={item.image}
+390:                     alt={item.name}
+391:                     fill
+392:                     style={{ objectFit: "contain" }}
+393:                     className="p-4 transition-transform duration-700 group-hover:scale-105"
+394:                   />
+395:                 </div>
+396:                 <div className="space-y-1 text-left">
+397:                   <h4 className="text-xs font-serif font-bold text-luxury-dark leading-tight group-hover:text-[#cda491] transition-colors duration-300 line-clamp-1">
+398:                     {item.name}
+399:                   </h4>
+400:                   <span className="text-xs font-sans text-neutral-500 block">₹{item.price.toFixed(0)}</span>
+401:                 </div>
+402:               </Link>
+403:             ))}
+404:           </div>
+405:         </div>
+406: 
+407:       </main>
+408: 
+409:     </div>
+410:   );
+411: }
+412: 
+The above content shows the entire, complete file contents of the requested file.

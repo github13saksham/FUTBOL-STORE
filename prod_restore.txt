@@ -1,0 +1,107 @@
+Created At: 2026-05-25T17:50:25Z
+Completed At: 2026-05-25T17:50:25Z
+File Path: `file:///c:/Users/SAKSHAM/Downloads/Futbol%20Store/src/data/mockData.ts`
+Total Lines: 451
+Total Bytes: 21532
+Showing lines 1 to 451
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: export interface Product {
+2:   id: string;
+3:   name: string;
+4:   club: string;
+5:   price: number;
+6:   priceStr: string;
+7:   image: string;
+8:   category: string;
+9:   color: string;
+10:   desc: string;
+11: }
+12: 
+13: export interface Club {
+14:   id: string;
+15:   name: string;
+16:   era: string;
+17:   bgClass: string;
+18:   colorTheme: string;
+19:   highlight: string;
+20:   textClass: string;
+21:   image: string;
+22:   logoBg?: string;
+23:   logoScaleBase?: number;
+24:   logoScaleHover?: number;
+25:   logoObjectFit?: "cover" | "contain";
+26: }
+27: 
+28: export const BEST_SELLERS: Product[] = [
+29:   {
+30:     id: "bs-1",
+31:     name: "ARGENTINA AWAY PLAYER VERSION 2026",
+32:     club: "National Team",
+33:     price: 999.00,
+34:     priceStr: "₹999.00",
+35:     image: "/BESTSELLER_JERSEYS/ARGENTINA_PLAYER_VERSION.jpeg",
+36:     category: "Player Version",
+37:     color: "Albiceleste Blue",
+38:     desc: "Engineered for pure matchday performance."
+39:   },
+40:   {
+41:     id: "bs-2",
+42:     name: "SPAIN AWAY FAN VERSION 2026",
+43:     club: "National Team",
+44:     price: 799.00,
+45:     priceStr: "₹799.00",
+46:     image: "/BESTSELLER_JERSEYS/SPAIN_FAN_VERSION.jpeg",
+47:     category: "Fan Version",
+48:     color: "Furia Red",
+49:     desc: "Crafted for comfort and everyday wear."
+50:   },
+51:   {
+52:     id: "bs-3",
+53:     name: "GERMANY HOME PLAYER VERSION 2026",
+54:     club: "National Team",
+55:     price: 949.00,
+56:     priceStr: "₹949.00",
+57:     image: "/BESTSELLER_JERSEYS/GERMANY_PLAYER_
+<truncated 20119 bytes>
+ilable on selected products."
+412:       },
+413:       {
+414:         title: "How do I choose the correct size?",
+415:         content: "You can refer to our Size Guide available on the website before placing your order."
+416:       },
+417:       {
+418:         title: "Are these original jerseys?",
+419:         content: "We provide premium imported quality football jerseys inspired by official designs."
+420:       },
+421:       {
+422:         title: "Do Player Version and Fan Version fit differently?",
+423:         content: "Yes. Player Version jerseys have a slimmer athletic fit, while Fan Version jerseys offer a more regular and comfortable fit."
+424:       },
+425:       {
+426:         title: "Will sold-out products restock?",
+427:         content: "Popular products may restock depending on availability. Follow our updates for latest drops and restocks."
+428:       },
+429:       {
+430:         title: "How can I contact customer support?",
+431:         content: "You can reach us through Instagram DM or email at thefutbolstore.in@gmail.com."
+432:       }
+433:     ]
+434:   },
+435:   "accessibility-statement": {
+436:     title: "Accessibility Statement",
+437:     subtitle: "Our commitment to digital accessibility",
+438:     icon: "User",
+439:     sections: [
+440:       {
+441:         title: "Digital Elegance for All",
+442:         content: "The Fútbol Store is committed to ensuring digital accessibility for all users, including individuals with disabilities. We continuously improve the user experience and apply the relevant accessibility standards to our luxury interface."
+443:       },
+444:       {
+445:         title: "Feedback & Assistance",
+446:         content: "We welcome your feedback on the accessibility of our website. If you encounter any barriers or need specialized concierge assistance, please contact us at thefutbolstore.in@gmail.com."
+447:       }
+448:     ]
+449:   }
+450: };
+451: 
+The above content shows the entire, complete file contents of the requested file.
