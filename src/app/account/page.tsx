@@ -18,17 +18,46 @@ export default function AccountPage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [dbPhone, setDbPhone] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [addressForm, setAddressForm] = useState({
+    id: "", label: "", name: "", street: "", city: "", state: "", zipCode: "", country: "India", phone: "", isDefault: false
+  });
+  const [isSavingAddress, setIsSavingAddress] = useState(false);
+  
   const [orders, setOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
   useEffect(() => {
     if (user) {
       setEditName(user.displayName || "");
+      setEditEmail(user.email || "");
+      
+      // Fetch extended user profile for phone number and addresses
+      dbService.getUserProfile(user.uid).then((profile) => {
+        if (profile) {
+          const phone = profile.phone || user.phoneNumber || "";
+          setEditPhone(phone);
+          setDbPhone(phone);
+          setAddresses(profile.addresses || []);
+        } else {
+          setEditPhone(user.phoneNumber || "");
+          setDbPhone(user.phoneNumber || "");
+        }
+      }).catch(err => {
+        console.error("Failed to load user profile from DB", err);
+        setEditPhone(user.phoneNumber || "");
+        setDbPhone(user.phoneNumber || "");
+      });
     }
   }, [user]);
 
@@ -60,23 +89,104 @@ export default function AccountPage() {
   }
 
   const handleSaveProfile = async () => {
-    if (!editName.trim()) return;
+    if (!editName.trim()) {
+      setErrorMsg("Full name is required.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (editEmail && !emailRegex.test(editEmail)) {
+      setErrorMsg("Please enter a valid email address.");
+      return;
+    }
+
+    const phoneRegex = /^\+?[\d\s-]{10,15}$/;
+    if (editPhone && !phoneRegex.test(editPhone.replace(/\s+/g, ''))) {
+      setErrorMsg("Please enter a valid phone number.");
+      return;
+    }
+
     setIsSaving(true);
     setErrorMsg(null);
     setSuccessMsg(null);
     try {
       await authService.updateUserProfile(editName);
+      if (user) {
+        await dbService.updateUserProfile(user.uid, { phone: editPhone });
+        setDbPhone(editPhone);
+      }
       setIsEditing(false);
       setSuccessMsg("Details successfully updated!");
       setTimeout(() => {
-        window.location.reload();
-      }, 1200);
+        setSuccessMsg(null);
+      }, 2000);
     } catch (error: any) {
       console.error("Failed to update profile", error);
       setErrorMsg(error.message || "Failed to update profile details.");
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleSaveAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    const phoneRegex = /^\+?[\d\s-]{10,15}$/;
+    if (addressForm.phone && !phoneRegex.test(addressForm.phone.replace(/\s+/g, ''))) {
+      alert("Please enter a valid phone number for the address.");
+      return;
+    }
+
+    setIsSavingAddress(true);
+    try {
+      let updatedAddresses = [...addresses];
+      const newAddress = { ...addressForm };
+
+      if (!newAddress.id) {
+        newAddress.id = Math.random().toString(36).substring(2, 10);
+      }
+
+      if (newAddress.isDefault) {
+        updatedAddresses = updatedAddresses.map(a => ({ ...a, isDefault: false }));
+      } else if (updatedAddresses.length === 0) {
+        newAddress.isDefault = true;
+      }
+
+      if (editingAddressId) {
+        updatedAddresses = updatedAddresses.map(a => a.id === editingAddressId ? newAddress : a);
+      } else {
+        updatedAddresses.push(newAddress);
+      }
+
+      await dbService.updateUserProfile(user.uid, { addresses: updatedAddresses });
+      setAddresses(updatedAddresses);
+      setShowAddressForm(false);
+      setEditingAddressId(null);
+    } catch (error) {
+      console.error("Failed to save address", error);
+      alert("Failed to save address");
+    } finally {
+      setIsSavingAddress(false);
+    }
+  };
+
+  const handleDeleteAddress = async (id: string) => {
+    if (!user || !confirm("Are you sure you want to delete this address?")) return;
+    try {
+      const updatedAddresses = addresses.filter(a => a.id !== id);
+      await dbService.updateUserProfile(user.uid, { addresses: updatedAddresses });
+      setAddresses(updatedAddresses);
+    } catch (error) {
+      console.error("Failed to delete address", error);
+      alert("Failed to delete address");
+    }
+  };
+
+  const handleEditAddress = (address: any) => {
+    setAddressForm({ ...address });
+    setEditingAddressId(address.id);
+    setShowAddressForm(true);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -179,7 +289,7 @@ export default function AccountPage() {
       </div>
 
       {/* Mobile Sidebar Navigation */}
-      <div className="lg:hidden w-full bg-black pt-[140px] px-4 pb-4 border-b border-white/10">
+      <div className="lg:hidden w-full bg-black pt-[160px] px-4 pb-4 border-b border-white/10">
         <div className="flex flex-col border border-white/10 rounded-2xl overflow-hidden">
            <button onClick={() => setActiveTab("profile")} className={`w-full text-left px-5 py-4 text-[11px] uppercase tracking-widest font-bold flex justify-between items-center transition-all border-b border-white/5 ${"text-white"}`}>
             <span className="flex items-center gap-3"><User className="w-4 h-4" /> Personal Profile</span>
@@ -201,7 +311,7 @@ export default function AccountPage() {
       </div>
 
       {/* 2. Main Content */}
-      <div className="flex-1 pt-8 lg:pt-[150px] pb-24 w-full">
+      <div className="flex-1 pt-12 lg:pt-[150px] pb-24 w-full">
         {/* Header Section */}
         <div className="max-w-5xl mx-auto px-6 md:px-12 mb-8 text-left">
           <span className="text-xs uppercase tracking-[0.25em] text-white font-semibold">
@@ -319,7 +429,7 @@ service firebase.storage {
                       ) : (
                         <div className="flex gap-4">
                           <button 
-                            onClick={(e) => { e.preventDefault(); setIsEditing(false); setEditName(user?.displayName || ""); }}
+                            onClick={(e) => { e.preventDefault(); setIsEditing(false); setEditName(user?.displayName || ""); setEditEmail(user?.email || ""); setEditPhone(dbPhone); }}
                             className="text-[9px] uppercase tracking-widest font-bold text-white/50 hover:text-white transition-colors flex items-center gap-2"
                           >
                             Cancel
@@ -351,11 +461,11 @@ service firebase.storage {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] uppercase tracking-widest font-bold text-white">Email Address</label>
-                        <input type="email" value={user.email || ""} disabled className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors" />
+                        <input type="email" value={isEditing ? editEmail : (user.email || "")} onChange={(e) => setEditEmail(e.target.value)} disabled={!isEditing} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors disabled:opacity-70" />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] uppercase tracking-widest font-bold text-white">Phone Number</label>
-                        <input type="tel" value={user.phoneNumber || ""} disabled className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors" />
+                        <input type="tel" value={isEditing ? editPhone : dbPhone} onChange={(e) => setEditPhone(e.target.value)} disabled={!isEditing} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors disabled:opacity-70" />
                       </div>
                     </form>
                   </div>
@@ -443,34 +553,108 @@ service firebase.storage {
                 >
                   <div className="flex justify-between items-center">
                     <h3 className="text-xl font-serif text-white font-medium">Saved Locations</h3>
-                    <button className="px-6 py-2.5 bg-luxury-dark text-white hover:bg-luxury-taupe hover:text-white rounded-full text-[10px] tracking-widest uppercase font-semibold transition-all duration-300 flex items-center gap-2 shadow-sm">
-                      <Plus className="w-3 h-3" /> Add Address
-                    </button>
+                    {!showAddressForm && (
+                      <button 
+                        onClick={() => {
+                          setAddressForm({ id: "", label: "Home", name: "", street: "", city: "", state: "", zipCode: "", country: "India", phone: "", isDefault: false });
+                          setShowAddressForm(true);
+                        }}
+                        className="px-6 py-2.5 bg-luxury-dark text-white hover:bg-luxury-taupe hover:text-white rounded-full text-[10px] tracking-widest uppercase font-semibold transition-all duration-300 flex items-center gap-2 shadow-sm"
+                      >
+                        <Plus className="w-3 h-3" /> Add Address
+                      </button>
+                    )}
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Mock Address Card */}
-                    <div className="bg-[#121212] rounded-3xl p-8 border border-white/10 shadow-sm relative group">
-                      <div className="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 text-white hover:text-white transition-colors"><Edit2 className="w-4 h-4" /></button>
-                      </div>
-                      <span className="text-[9px] uppercase tracking-widest text-white font-bold block mb-4">Default Delivery</span>
-                      <h4 className="text-base font-serif text-white font-medium mb-1">SAKSHAM</h4>
-                      <p className="text-sm text-white font-sans font-light leading-relaxed">
-                        123 Luxury Avenue, Suite 45<br/>
-                        New Delhi, DL 110001<br/>
-                        India
-                      </p>
-                      <p className="text-sm text-white font-sans font-light mt-4 flex items-center gap-2">
-                        <span className="text-[10px] uppercase tracking-widest font-bold">Phone:</span> +91 98765 43210
-                      </p>
+                  {showAddressForm ? (
+                    <div className="bg-[#121212] p-8 rounded-3xl border border-white/10 shadow-sm">
+                      <h4 className="text-lg font-serif text-white mb-6">{editingAddressId ? "Edit Address" : "Add New Address"}</h4>
+                      <form onSubmit={handleSaveAddress} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <label className="text-[10px] uppercase tracking-widest font-bold text-white">Address Label</label>
+                            <input type="text" placeholder="e.g. Home, Work" value={addressForm.label} onChange={e => setAddressForm({...addressForm, label: e.target.value})} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors" required />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] uppercase tracking-widest font-bold text-white">Full Name</label>
+                            <input type="text" value={addressForm.name} onChange={e => setAddressForm({...addressForm, name: e.target.value})} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors" required />
+                          </div>
+                          <div className="space-y-2 md:col-span-2">
+                            <label className="text-[10px] uppercase tracking-widest font-bold text-white">Street Address</label>
+                            <input type="text" value={addressForm.street} onChange={e => setAddressForm({...addressForm, street: e.target.value})} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors" required />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] uppercase tracking-widest font-bold text-white">City</label>
+                            <input type="text" value={addressForm.city} onChange={e => setAddressForm({...addressForm, city: e.target.value})} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors" required />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] uppercase tracking-widest font-bold text-white">State</label>
+                            <input type="text" value={addressForm.state} onChange={e => setAddressForm({...addressForm, state: e.target.value})} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors" required />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] uppercase tracking-widest font-bold text-white">Postal Code</label>
+                            <input type="text" value={addressForm.zipCode} onChange={e => setAddressForm({...addressForm, zipCode: e.target.value})} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors" required />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] uppercase tracking-widest font-bold text-white">Phone</label>
+                            <input type="tel" value={addressForm.phone} onChange={e => setAddressForm({...addressForm, phone: e.target.value})} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors" required />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <input type="checkbox" id="isDefault" checked={addressForm.isDefault} onChange={e => setAddressForm({...addressForm, isDefault: e.target.checked})} className="w-4 h-4 rounded border-white/20 bg-black/50 text-luxury-dark focus:ring-luxury-dark focus:ring-offset-black" />
+                          <label htmlFor="isDefault" className="text-xs text-white">Set as default delivery address</label>
+                        </div>
+                        <div className="flex justify-end gap-4 pt-4 border-t border-white/10">
+                          <button type="button" onClick={() => { setShowAddressForm(false); setEditingAddressId(null); }} className="px-6 py-3 text-white hover:bg-white/10 rounded-xl text-xs uppercase tracking-widest font-bold transition-colors">Cancel</button>
+                          <button type="submit" disabled={isSavingAddress} className="px-8 py-3 bg-luxury-dark text-white rounded-xl text-xs uppercase tracking-widest font-bold hover:bg-luxury-taupe hover:text-luxury-dark transition-all duration-300 disabled:opacity-50">
+                            {isSavingAddress ? "Saving..." : "Save Address"}
+                          </button>
+                        </div>
+                      </form>
                     </div>
-
-                    <div className="bg-[#FFEEE2]/20 backdrop-blur-md rounded-3xl p-8 border border-dashed border-white/30 hover:border-luxury-taupe hover:bg-white/40 transition-all shadow-sm flex flex-col items-center justify-center text-center cursor-pointer min-h-[220px]">
-                      <Plus className="w-8 h-8 text-white mb-3" />
-                      <span className="text-xs uppercase tracking-widest text-white font-bold">Add New Location</span>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {addresses.length === 0 ? (
+                        <div onClick={() => setShowAddressForm(true)} className="md:col-span-2 bg-[#FFEEE2]/20 backdrop-blur-md rounded-3xl p-8 border border-dashed border-white/30 hover:border-luxury-taupe hover:bg-white/40 transition-all shadow-sm flex flex-col items-center justify-center text-center cursor-pointer min-h-[220px]">
+                          <Plus className="w-8 h-8 text-white mb-3" />
+                          <span className="text-xs uppercase tracking-widest text-white font-bold">Add New Location</span>
+                          <p className="text-white/60 text-xs mt-2 font-sans font-light">You haven't saved any addresses yet.</p>
+                        </div>
+                      ) : (
+                        <>
+                          {addresses.map(address => (
+                            <div key={address.id} className="bg-[#121212] rounded-3xl p-8 border border-white/10 shadow-sm relative group transition-all hover:border-white/20">
+                              <div className="absolute top-6 right-6 flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                <button onClick={() => handleEditAddress(address)} className="p-2 text-white/60 hover:text-white bg-black/50 hover:bg-luxury-dark rounded-full transition-colors" title="Edit Address"><Edit2 className="w-4 h-4" /></button>
+                                <button onClick={() => handleDeleteAddress(address.id)} className="p-2 text-red-400 hover:text-red-300 bg-black/50 hover:bg-red-500/20 rounded-full transition-colors" title="Delete Address">
+                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                              </div>
+                              {address.isDefault && (
+                                <span className="text-[9px] uppercase tracking-widest text-luxury-sand font-bold block mb-4">Default Delivery</span>
+                              )}
+                              {!address.isDefault && (
+                                <span className="text-[9px] uppercase tracking-widest text-white/50 font-bold block mb-4">{address.label || "Address"}</span>
+                              )}
+                              <h4 className="text-base font-serif text-white font-medium mb-1">{address.name}</h4>
+                              <p className="text-sm text-white/80 font-sans font-light leading-relaxed">
+                                {address.street}<br/>
+                                {address.city}, {address.state} {address.zipCode}<br/>
+                                {address.country}
+                              </p>
+                              <p className="text-sm text-white/80 font-sans font-light mt-4 flex items-center gap-2">
+                                <span className="text-[10px] uppercase tracking-widest font-bold text-white">Phone:</span> {address.phone}
+                              </p>
+                            </div>
+                          ))}
+                          <div onClick={() => { setAddressForm({ id: "", label: "Home", name: "", street: "", city: "", state: "", zipCode: "", country: "India", phone: "", isDefault: false }); setShowAddressForm(true); }} className="bg-[#FFEEE2]/10 backdrop-blur-md rounded-3xl p-8 border border-dashed border-white/20 hover:border-luxury-taupe hover:bg-white/20 transition-all shadow-sm flex flex-col items-center justify-center text-center cursor-pointer min-h-[220px]">
+                            <Plus className="w-8 h-8 text-white mb-3 opacity-50 group-hover:opacity-100" />
+                            <span className="text-xs uppercase tracking-widest text-white font-bold opacity-70 group-hover:opacity-100">Add New Location</span>
+                          </div>
+                        </>
+                      )}
                     </div>
-                  </div>
+                  )}
                 </motion.div>
               )}
 
@@ -514,16 +698,15 @@ service firebase.storage {
                             exit={{ opacity: 0, scale: 0.95 }}
                             whileHover={{ y: -6 }}
                             transition={{ duration: 0.3 }}
-                            className="rounded-2xl border border-white/10 bg-[#FFEEE2]/60 hover:bg-white flex flex-col justify-between transition-colors duration-500 shadow-sm relative overflow-hidden"
+                            className="rounded-2xl border border-white/10 bg-luxury-dark p-3 md:p-0 md:bg-[#FFEEE2]/60 md:hover:bg-white flex flex-col justify-between transition-colors duration-500 shadow-sm relative overflow-hidden group/card"
                           >
-                            <div className="relative w-full h-[200px] bg-neutral-100 group">
+                            <div className="relative w-full aspect-[35/32] md:aspect-auto md:h-[200px] bg-neutral-100 rounded-lg md:rounded-none overflow-hidden group">
                               <Link href={`/product/${product.id}`}>
                                 <Image
                                   src={product.image}
                                   alt={product.name}
                                   fill
-                                  style={{ objectFit: "cover" }}
-                                  className="transition-transform duration-[1000ms] ease-out group-hover:scale-105"
+                                  className="object-contain md:object-cover transition-transform duration-[1000ms] ease-out group-hover:scale-105"
                                 />
                               </Link>
 
@@ -539,22 +722,22 @@ service firebase.storage {
                               </button>
                             </div>
 
-                            <div className="p-4 pt-3 flex flex-col justify-between flex-grow">
+                            <div className="p-2 pt-3 md:p-4 flex flex-col justify-between flex-grow">
                               <div>
-                                <span className="text-[9px] uppercase tracking-widest font-semibold text-white block mb-1">
+                                <span className="text-[9px] uppercase tracking-widest font-semibold text-white/80 md:text-white block mb-1">
                                   {product.category}
                                 </span>
                                 <Link href={`/product/${product.id}`}>
-                                  <h3 className="text-sm font-serif text-white font-medium leading-tight hover:text-white transition-colors line-clamp-2">
+                                  <h3 className="text-[14px] md:text-sm font-serif text-white font-medium leading-tight hover:text-luxury-ivory md:hover:text-white transition-colors line-clamp-2">
                                     {product.name}
                                   </h3>
                                 </Link>
                               </div>
-                              <div className="flex justify-between items-end border-t border-white/10 pt-3 mt-3">
+                              <div className="flex justify-between items-end border-t border-white/20 md:border-white/10 pt-3 mt-3">
                                 <span className="font-serif text-base text-white">{product.priceStr}</span>
                                 <button
                                   onClick={() => setQuickAddProduct(product)}
-                                  className="text-[9px] uppercase tracking-[0.2em] font-semibold text-white hover:text-white flex items-center gap-1 transition-colors"
+                                  className="text-[8px] md:text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 md:text-white hover:text-white flex items-center gap-1 transition-colors"
                                 >
                                   Quick Add <Plus className="w-3 h-3" />
                                 </button>

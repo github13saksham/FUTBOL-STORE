@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { ArrowLeft, ArrowRight, ShieldCheck, Trophy, Layers } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShieldCheck, Trophy, Layers, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useStore } from "@/context/StoreContext";
 
 interface TeamCard {
   id: number;
@@ -105,6 +107,8 @@ export default function NationalTeams3D() {
   const [mounted, setMounted] = useState(false);
   const [activeIndex, setActiveIndex] = useState(1); // Middle default
   const carouselRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const { products } = useStore();
   
   // Custom drag physics using Framer Motion
   const x = useMotionValue(0);
@@ -148,7 +152,10 @@ export default function NationalTeams3D() {
   };
 
   // Drag handlers
-  const handleDragEnd = () => {
+  const handleDragEnd = (e: any, info: any) => {
+    // If it was just a tap (minimal drag distance), don't snap/rotate
+    if (Math.abs(info.offset.x) < 5) return;
+
     // Snap to the closest step
     const currentAngle = x.get() * 0.4;
     const rawIndex = 1 - (currentAngle / angleStep);
@@ -210,13 +217,16 @@ export default function NationalTeams3D() {
             onPanEnd={handleDragEnd}
             style={{ 
               width: "220px", 
-              height: "320px", 
+              height: "220px", 
               transformStyle: "preserve-3d",
               rotateY: rotationY,
             }}
             className="relative cursor-grab active:cursor-grabbing flex items-center justify-center touch-none"
           >
             {teams.map((team, index) => {
+              // Point to the catalog page pre-filtered for this national team
+              const resolvedLink = `/national-teams?team=${team.name}`;
+
               // Calculate static Y rotation for this item in the cylinder
               const itemAngle = index * angleStep;
               // Radius of the circle (determines spacing/depth of the 3D ring)
@@ -233,8 +243,14 @@ export default function NationalTeams3D() {
                   }}
                 >
                   <motion.div
-                    onClick={() => activeIndex !== index && rotateTo(index)}
-                    className={`relative w-full h-full rounded-2xl p-6 flex flex-col justify-between overflow-hidden shadow-2xl transition-shadow duration-500 bg-gradient-to-b ${team.color} border border-white/20`}
+                    onClick={() => {
+                      if (activeIndex !== index) {
+                        rotateTo(index);
+                      } else {
+                        router.push(resolvedLink);
+                      }
+                    }}
+                    className={`relative w-full h-full rounded-2xl p-6 flex flex-col justify-between overflow-hidden shadow-2xl transition-shadow duration-500 bg-gradient-to-b ${team.color} border border-white/20 cursor-pointer`}
                     whileHover={{ y: -8 }}
                   >
                     {/* Subtle jersey stripes / textures rendered with pure CSS */}
@@ -256,13 +272,11 @@ export default function NationalTeams3D() {
                   {/* Content inside 3D Card */}
                   <div className="flex justify-between items-start z-10">
                     <div>
-                      <span className="text-[8px] uppercase tracking-widest text-luxury-ivory font-semibold">{team.sub}</span>
-                      <h3 className="text-xl font-serif text-luxury-ivory mt-1 tracking-wide">{team.name}</h3>
+                      
+                      <h3 className="text-xl mr-3 font-serif text-luxury-ivory mt-1 tracking-wide">{team.name}</h3>
                     </div>
                     {/* Glowing National Shield Graphic */}
-                    <div className={`w-8 h-10 rounded-b-md ${team.badgeColor} flex items-center justify-center border border-luxury-ivory/20 shadow-lg`}>
-                      <span className="text-luxury-ivory text-[8px] font-bold tracking-tighter">TFS</span>
-                    </div>
+                    
                   </div>
 
                   {/* Interactive floating logo in 3D card */}
@@ -270,7 +284,7 @@ export default function NationalTeams3D() {
                     {/* Shadow overlay */}
                     <div className="absolute bottom-0 w-24 h-3 bg-luxury-dark/30 rounded-full blur-md group-hover:scale-110 transition-transform duration-500" />
                     
-                    <Link href={team.link} className="z-20 cursor-pointer" onClick={(e) => {
+                    <Link href={resolvedLink} className="z-20 cursor-pointer" onClick={(e) => {
                       e.stopPropagation();
                     }}>
                       <motion.div 
@@ -285,21 +299,25 @@ export default function NationalTeams3D() {
                         }}
                       >
                         <Image 
-                        src={team.logo!} 
-                        alt={`${team.name} Logo`} 
-                        fill 
-                        style={{ objectFit: 'cover' }} 
-                        className="pointer-events-none"
-                      />
+                          src={team.logo!} 
+                          alt={`${team.name} Logo`} 
+                          fill 
+                          style={{ objectFit: 'cover' }} 
+                          className="pointer-events-none"
+                        />
                       </motion.div>
                     </Link>
                   </div>
 
                   {/* Card bottom details */}
                   <div className="flex justify-center items-end mt-4 z-10">
-                    <span className="text-[9px] uppercase tracking-widest text-luxury-ivory font-medium hover:text-luxury-ivory transition-colors duration-300">
-                      Explore Edition
-                    </span>
+                  </div>
+                  
+                  {/* Floating Action Button */}
+                  <div className="absolute -bottom-16 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 group-hover:bottom-0 transition-all duration-300 z-30 flex justify-center">
+                    <Link href={resolvedLink} className="flex items-center gap-2 bg-white text-luxury-dark px-6 py-2 rounded-full text-xs font-bold shadow-xl hover:scale-105 transition-transform" onClick={(e) => e.stopPropagation()}>
+                      View Edition <ChevronRight className="w-3 h-3" />
+                    </Link>
                   </div>
                   </motion.div>
                 </div>

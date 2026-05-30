@@ -1,4 +1,4 @@
-import { IDatabaseService } from "../interfaces/db.interface";
+import { IDatabaseService, UserProfile, Address } from "../interfaces/db.interface";
 import { Product, Club, ALL_PRODUCTS, CLUBS } from "../../data/mockData";
 import { db, storage } from "./config";
 import { collection, getDocs, doc, getDoc, query, setDoc, updateDoc, deleteDoc, writeBatch, where } from "firebase/firestore";
@@ -158,6 +158,31 @@ export class FirebaseDatabaseService implements IDatabaseService {
     } catch (error) {
       console.error("Error fetching orders:", error);
       return [];
+    }
+  }
+
+  // --- User Profiles ---
+  async getUserProfile(userId: string): Promise<UserProfile | null> {
+    try {
+      const docRef = doc(db, "users", userId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return docSnap.data() as UserProfile;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      return null;
+    }
+  }
+
+  async updateUserProfile(userId: string, profile: Partial<UserProfile>): Promise<void> {
+    try {
+      const docRef = doc(db, "users", userId);
+      await setDoc(docRef, profile, { merge: true });
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      throw error;
     }
   }
 }

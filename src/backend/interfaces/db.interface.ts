@@ -1,5 +1,22 @@
 import { Product, Club } from "../../data/mockData";
 
+export interface Address {
+  id: string;
+  name: string;
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  phone: string;
+  isDefault: boolean;
+}
+
+export interface UserProfile {
+  phone?: string;
+  addresses?: Address[];
+}
+
 export interface IDatabaseService {
   /**
    * Fetch all products.
@@ -49,4 +66,10 @@ export interface IDatabaseService {
    * Fetch order history for a specific user.
    */
   getUserOrders(userId: string): Promise<any[]>;
+
+  /**
+   * User Profile methods for storing extra user metadata like phone and addresses.
+   */
+  getUserProfile(userId: string): Promise<UserProfile | null>;
+  updateUserProfile(userId: string, profile: Partial<UserProfile>): Promise<void>;
 }

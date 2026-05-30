@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowRight, Heart, ChevronRight, HelpCircle, Truck, RefreshCw, 
@@ -26,7 +26,38 @@ export default function Homepage() {
     setSizeGuideOpen 
   } = useStore();
 
-  const bestSellers = products.slice(0, 8);
+  const bestSellers = useMemo(() => {
+    if (products.length === 0) return [];
+    
+    const targets = [
+      ["SPAIN 2026 AWAY PLAYER", "SPAIN AWAY PLAYER", "SPAIN AWAY FAN", "SPAIN AWAY"],
+      ["PORTUGAL 2026 AWAY FAN", "PORTUGAL AWAY FAN", "PORTUGAL AWAY"],
+      ["REAL MADRID 25/26 HOME PLAYER", "REAL MADRID HOME PLAYER VERSION 25-26", "REAL MADRID HOME PLAYER", "REAL MADRID HOME"],
+      ["ARGENTINA 2026 AWAY PLAYER", "ARGENTINA AWAY PLAYER VERSION 2026", "ARGENTINA AWAY PLAYER", "ARGENTINA AWAY"],
+      ["MANCHESTER CITY 25/26 AWAY PLAYER", "MANCHESTER CITY AWAY PLAYER VERSION 25-26", "MANCHESTER CITY AWAY PLAYER", "MANCHESTER CITY AWAY"]
+    ];
+
+    const res: typeof products = [];
+    
+    for (const fallbacks of targets) {
+      let match = null;
+      for (const target of fallbacks) {
+        match = products.find(p => !res.find(r => r.id === p.id) && p.name.toUpperCase().includes(target.toUpperCase()));
+        if (match) break;
+      }
+      if (match) res.push(match);
+    }
+    
+    // Ensure exactly 5 are shown
+    for (const p of products) {
+      if (res.length >= 5) break;
+      if (!res.find(r => r.id === p.id)) {
+        res.push(p);
+      }
+    }
+    
+    return res.slice(0, 5);
+  }, [products]);
 
   return (
     <div className="min-h-screen selection:bg-luxury-taupe selection:text-white text-black bg-[#FFEEE2]">
@@ -243,8 +274,8 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
               Best <span className="italic font-medium text-black">Sellers</span>
             </h2>
           </div>
-          <p className="max-w-sm text-xs md:text-sm text-black font-light leading-relaxed font-sans">
-            A high-fashion selection of our most wanted matches and accessory designs. Tailored for quality, worn by true fans.
+          <p className="max-w-m text-xs md:text-sm text-black font-light leading-relaxed font-sans">
+           Discover the jerseys trusted and loved by football fans across India.
           </p>
         </div>
 
@@ -269,11 +300,11 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 style={{ perspective: 1000, transformStyle: "preserve-3d" }}
-                className="flex-shrink-0 w-[200px] sm:w-[240px] md:w-[350px] relative md:rounded-2xl border-r border-[#121212] md:border md:border-white/10 bg-[#282828] md:bg-luxury-dark md:hover:bg-black hover:z-20 flex flex-col justify-between transition-colors duration-500 overflow-hidden group/card"
+                className="flex-shrink-0 w-[200px] sm:w-[240px] md:w-[350px] relative rounded-2xl border border-white/10 bg-luxury-dark hover:bg-black hover:z-20 flex flex-col justify-between transition-colors duration-500 overflow-hidden group/card"
               >
                 {/* Image Container with zoom overlay */}
                 <div 
-                  className="relative w-full aspect-[4/5] md:aspect-auto md:h-[320px] bg-[#333333] md:bg-neutral-100 group"
+                  className="relative w-full aspect-[35/32] md:aspect-auto md:h-[320px] bg-neutral-100 group"
                   style={{ transform: "translateZ(30px)" }}
                 >
                   <Link href={`/product/${product.id}`}>
@@ -281,8 +312,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                       src={product.image}
                       alt={product.name}
                       fill
-                      style={{ objectFit: "cover" }}
-                      className="transition-transform duration-[1000ms] ease-out scale-105 group-hover:scale-110"
+                      className="object-contain md:object-cover transition-transform duration-[1000ms] ease-out scale-105 "
                     />
                     
                     {/* Overlay with subtle shadow */}
@@ -308,7 +338,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                       e.stopPropagation();
                       toggleWishlist(product.id);
                     }}
-                    className="hidden md:block absolute top-4 right-4 p-2.5 bg-luxury-ivory/80 backdrop-blur-md rounded-full text-black hover:text-black transition-colors duration-300 shadow-sm z-10"
+                    className="absolute top-3 right-3 md:top-4 md:right-4 p-2 md:p-2.5 bg-luxury-ivory/80 backdrop-blur-md rounded-full text-black hover:text-black transition-colors duration-300 shadow-sm z-10"
                     aria-label="Add to Wishlist"
                   >
                     <Heart className={`w-4 h-4 ${wishlist.includes(product.id) ? "fill-luxury-taupe text-black" : ""}`} />
@@ -316,40 +346,29 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                 </div>
 
                 {/* Text specifications */}
-                <div className="p-2.5 pt-3 md:p-5 md:pt-4 space-y-2 flex-grow flex flex-col justify-between">
+                <div className="p-4 md:p-5 md:pt-4 space-y-2 flex-grow flex flex-col justify-between">
                   <div>
-                    <div className="hidden md:flex justify-between items-center text-[10px] uppercase tracking-widest font-semibold text-white/80">
+                    <div className="flex justify-between items-center text-[10px] uppercase tracking-widest font-semibold text-white/80">
                       <span>{product.category}</span>
                     </div>
                     
                     <div className="flex justify-between items-start mt-1 md:mt-0">
                       <Link href={`/product/${product.id}`} className="block flex-1 min-w-0">
-                        <h3 className="text-[13px] md:text-base font-bold md:font-serif text-white md:font-medium md:mt-1 leading-tight md:tracking-wide hover:text-luxury-ivory transition-colors duration-300 truncate">
+                        <h3 className="text-[14px] md:text-base font-serif text-white font-medium mt-1 leading-tight tracking-wide hover:text-luxury-ivory transition-colors duration-300 truncate">
                           {product.club || "Futbol Store"}
                         </h3>
-                        <p className="text-[11px] text-white/70 md:font-light mt-0.5 truncate md:whitespace-normal">
+                        <p className="text-[11px] text-white/70 font-light mt-0.5 truncate md:whitespace-normal">
                           {product.name}
                         </p>
                       </Link>
-
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          toggleWishlist(product.id);
-                        }}
-                        className="md:hidden ml-1 p-1 text-white/50 hover:text-red-500 transition-colors"
-                      >
-                        <Heart className={`w-[16px] h-[16px] ${wishlist.includes(product.id) ? "fill-red-500 text-red-500" : ""}`} />
-                      </button>
                     </div>
                   </div>
                   
-                  <div className="flex justify-between items-end pb-1 border-b border-transparent md:border-white/20 pt-1 md:pt-0">
-                    <span className="font-bold text-[13px] md:font-serif md:text-lg text-white">{product.priceStr}</span>
+                  <div className="flex justify-between items-end pb-1 border-b border-white/20 pt-1 md:pt-0">
+                    <span className="font-serif text-base md:text-lg text-white font-medium">{product.priceStr}</span>
                     <Link 
                       href={`/product/${product.id}`}
-                      className="hidden md:flex text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 hover:text-white items-center gap-1 transition-colors duration-300"
+                      className="flex text-[8px] md:text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 hover:text-white items-center gap-1 transition-colors duration-300"
                     >
                       View Item <ChevronRight className="w-3 h-3" />
                     </Link>
@@ -369,42 +388,43 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
 
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           <div className="max-w-2xl mb-20 space-y-4">
-            <span className="text-xs uppercase tracking-[0.3em] text-white font-bold">Collectible Alliances</span>
+    
             <h2 className="text-5xl md:text-7xl font-serif text-white tracking-wide">
               Shop By <span className="italic font-light text-white">Clubs</span>
             </h2>
             <p className="text-sm text-white font-sans leading-relaxed font-light">
-              Discover official signature partnership drops with the world's most historic football alliances. Crafted with premium collectible presentation.
+              Discover premium club jerseys inspired by football’s most iconic teams
             </p>
           </div>
 
           {/* Premium layout Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-[1px] md:gap-8 bg-[#121212] md:bg-transparent">
+          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 bg-transparent overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory no-scrollbar">
             {[
-              { id: "club-ars", name: "ARSENAL FC", image: "/images/25-26_club-jerseys/Arsenal_25-26_Home_Player_Version.jpeg" },
-              { id: "club-barca", name: "FC BARCELONA", image: "/images/25-26_club-jerseys/FCB_25-26_HPV.jpeg" },
-              { id: "club-mci", name: "MANCHESTER CITY", image: "/images/25-26_club-jerseys/MC25-26_HPV.jpeg" },
-              { id: "club-rm", name: "REAL MADRID CF", image: "/images/25-26_club-jerseys/real_madrid25-26_HPV.jpeg" },
-            ].map((card) => (
-              <Link key={card.id} href={`/clubs?id=${card.id}`}>
-                <div className="relative aspect-square md:h-[320px] md:max-w-[300px] mx-auto w-full md:rounded-2xl overflow-hidden shadow-sm md:shadow-lg border-b border-r border-[#121212] md:border md:border-luxury-sand/10 group bg-[#282828] transition-all duration-300 md:hover:-translate-y-2 md:hover:shadow-[0_0_30px_rgba(205,164,145,0.15)]">
+              { id: "club-ars", query: "ARSENAL", name: "ARSENAL FC", image: "/images/25-26_club-jerseys/Arsenal_25-26_Home_Player_Version.jpeg" },
+              { id: "club-fcb", query: "BARCELONA", name: "FC BARCELONA", image: "/images/25-26_club-jerseys/FCB_25-26_HPV.jpeg" },
+              { id: "club-mci", query: "MANCHESTER CITY", name: "MANCHESTER CITY", image: "/images/25-26_club-jerseys/MC25-26_HPV.jpeg" },
+              { id: "club-rm", query: "MADRID", name: "REAL MADRID CF", image: "/images/25-26_club-jerseys/real_madrid25-26_HPV.jpeg" },
+            ].map((card) => {
+              const href = `/clubs?club=${encodeURIComponent(card.query)}`;
+              return (
+              <Link key={card.name} href={href} className="w-[55%] sm:w-[45%] md:w-auto shrink-0 snap-start block">
+                <div className="relative aspect-[4/5] md:aspect-auto md:h-[320px] md:max-w-[300px] mx-auto w-full rounded-2xl overflow-hidden shadow-sm md:shadow-lg border border-luxury-sand/10 group bg-[#282828] transition-all duration-300 md:hover:-translate-y-2 md:hover:shadow-[0_0_30px_rgba(205,164,145,0.15)]">
                   <Image
                     src={card.image}
                     alt={card.name}
                     fill
-                    style={{ objectFit: "cover", objectPosition: "top center" }}
-                    className="opacity-90"
+                    className="object-cover object-[top_center] opacity-90"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 md:from-black/90 via-black/20 to-transparent pointer-events-none" />
                   <div className="absolute bottom-0 left-0 right-0 p-3 md:p-5 flex flex-col justify-end">
-                    <h3 className="text-[13px] md:text-lg font-bold md:font-serif text-white md:tracking-wide truncate">{card.name}</h3>
-                    <div className="hidden md:flex mt-2 text-[10px] uppercase tracking-widest text-white items-center gap-2 group-hover:text-white transition-colors duration-300">
-                      Explore Collection <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform duration-300" />
+                    <h3 className="text-[13px] md:text-lg font-serif text-white tracking-wide truncate">{card.name}</h3>
+                    <div className="flex mt-1 md:mt-2 text-[8px] md:text-[10px] uppercase tracking-widest text-white/80 items-center gap-1 md:gap-2 group-hover:text-white transition-colors duration-300">
+                      Explore <ChevronRight className="w-2 h-2 md:w-3 md:h-3 group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
                   </div>
                 </div>
               </Link>
-            ))}
+            )})}
           </div>
         </div>
       </section>

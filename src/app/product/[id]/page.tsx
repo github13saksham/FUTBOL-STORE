@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,7 +11,7 @@ import {
   Minus, Plus, Shield, CreditCard, ChevronDown
 } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
-import { Product } from "@/data/mockData";
+import { Product, BEST_SELLERS, CLUB_PRODUCTS } from "@/data/mockData";
 
 export default function ProductPage() {
   const params = useParams();
@@ -29,7 +29,7 @@ export default function ProductPage() {
   } = useStore();
 
   // Find product
-  const product = products.find((p) => p.id === id);
+  const product = products.find((p) => p.id === id) || [...BEST_SELLERS, ...CLUB_PRODUCTS].find((p) => p.id === id);
 
   if (isLoadingData) {
     return (
@@ -69,8 +69,51 @@ export default function ProductPage() {
   // Accordion state
   const [activeTab, setActiveTab] = useState<string | null>("specs");
 
-  // Filter recommendations (excluding current product)
-  const recommendations = products.filter((p) => p.id !== product.id).slice(0, 3);
+  // Filter recommendations (excluding current product) and ensure diversity
+  const recommendations = useMemo(() => {
+    if (!product || products.length === 0) return [];
+    
+    const getPrefix = (name: string) => {
+      const w = name.toUpperCase().split(' ');
+      if (['REAL', 'MANCHESTER', 'AC', 'FC', 'PARIS'].includes(w[0]) && w.length > 1) {
+        return w[0] + ' ' + w[1];
+      }
+      return w[0];
+    };
+    
+    // Deterministic pseudo-random sort to prevent hydration mismatch
+    const hashString = (str: string) => {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) hash = Math.imul(31, hash) + str.charCodeAt(i) | 0;
+      return hash;
+    };
+
+    const pool = products.filter(p => p.id !== product.id);
+    const shuffled = [...pool].sort((a, b) => hashString(a.id + product.id) - hashString(b.id + product.id));
+    
+    const res: typeof products = [];
+    const used = new Set<string>();
+    
+    // First pass: try to get completely unique teams
+    for (const p of shuffled) {
+      if (res.length >= 3) break;
+      const pre = getPrefix(p.name);
+      if (!used.has(pre)) {
+        used.add(pre);
+        res.push(p);
+      }
+    }
+    
+    // Second pass: fill remaining slots if needed
+    for (const p of shuffled) {
+      if (res.length >= 3) break;
+      if (!res.find(r => r.id === p.id)) {
+        res.push(p);
+      }
+    }
+    
+    return res;
+  }, [products, product]);
 
   const handleAddToCart = () => {
     // Add to cart with custom options
@@ -417,27 +460,26 @@ export default function ProductPage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-3 gap-6">
+          <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory no-scrollbar">
             {recommendations.map((item) => (
               <Link
                 key={item.id}
                 href={`/product/${item.id}`}
-                className="group p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 backdrop-blur-sm flex flex-col justify-between transition-all duration-300 shadow-sm"
+                className="w-[55%] sm:w-[45%] md:w-auto shrink-0 snap-start group rounded-2xl border border-white/10 bg-luxury-dark p-3 md:p-4 md:border-white/5 md:bg-white/5 hover:bg-white/10 md:hover:bg-white/10 backdrop-blur-sm flex flex-col justify-between transition-all duration-300 shadow-sm overflow-hidden"
               >
-                <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-black/40 mb-4 border border-white/5">
+                <div className="relative w-full aspect-[35/32] md:aspect-square rounded-lg overflow-hidden bg-neutral-100 md:bg-black/40 mb-3 md:mb-4 md:border md:border-white/5 group">
                   <Image
                     src={item.image}
                     alt={item.name}
                     fill
-                    style={{ objectFit: "contain" }}
-                    className="p-4 transition-transform duration-700 group-hover:scale-105"
+                    className="object-contain md:p-4 transition-transform duration-700 group-hover:scale-105"
                   />
                 </div>
                 <div className="space-y-1 text-left">
-                  <h4 className="text-xs font-serif font-bold text-white leading-tight group-hover:text-white/80 transition-colors duration-300 line-clamp-1">
+                  <h4 className="text-[13px] md:text-xs font-serif font-medium md:font-bold text-white leading-tight group-hover:text-white/80 transition-colors duration-300 line-clamp-1">
                     {item.name}
                   </h4>
-                  <span className="text-xs font-sans text-white/50 block">₹{item.price.toFixed(0)}</span>
+                  <span className="text-xs font-serif md:font-sans text-white md:text-white/50 block">₹{item.price.toFixed(0)}</span>
                 </div>
               </Link>
             ))}

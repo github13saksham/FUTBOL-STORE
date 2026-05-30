@@ -42,9 +42,9 @@ export default function Footer() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
               <div className="p-4 md:p-8 rounded-2xl border border-luxury-sand/10 bg-[#141414] space-y-2 md:space-y-4">
                 <Truck className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                <h4 className="text-[9px] md:text-xs uppercase tracking-widest text-white font-bold">Complimentary Delivery</h4>
+                <h4 className="text-[9px] md:text-xs uppercase tracking-widest text-white font-bold">PAN INDIA SHIPPING</h4>
                 <p className="text-[9px] md:text-xs text-white/70 md:text-white leading-relaxed font-sans font-light">
-                  We provide secure trackable shipping across all major cities and regions in India, with standard delivery taking 5–10 business days.
+                  We deliver across India with secure packaging and reliable tracking updates.
                 </p>
               </div>
               <div className="p-4 md:p-8 rounded-2xl border border-luxury-sand/10 bg-[#141414] space-y-2 md:space-y-4">
@@ -161,9 +161,9 @@ export default function Footer() {
                 <Instagram className="w-4 h-4" />
               </a>
               <a 
-                href="https://wa.me/1234567890" 
-                target="_blank" 
-                rel="noopener noreferrer"
+                href="https://chat.whatsapp.com/KWrRHklSqb47tIhSJ0EOl5" 
+                target="The Futbol Store" 
+                rel="Community Link"
                 className="w-9 h-9 rounded-full bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500 hover:bg-emerald-500 hover:text-luxury-ivory text-emerald-400 flex items-center justify-center transition-all duration-300"
                 aria-label="WhatsApp"
                 title="WhatsApp"

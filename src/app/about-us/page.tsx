@@ -44,7 +44,7 @@ export default function AboutUsPage() {
     <div className="min-h-screen text-luxury-dark bg-[#FFEEE2] selection:bg-luxury-taupe selection:text-luxury-ivory">
       
       {/* 1. Immersive Editorial Header */}
-      <section className="relative w-full pt-40 pb-24 px-6 md:px-12 max-w-7xl mx-auto overflow-hidden">
+      <section className="relative w-full pt-60 pb-3  md:pb-24 px-6 md:px-12 max-w-7xl mx-auto overflow-hidden">
         {/* Glow beams */}
         <div className="absolute right-[5%] top-[10%] w-[350px] h-[350px] bg-luxury-taupe/10 rounded-full blur-[80px] pointer-events-none" />
         <div className="absolute left-[5%] bottom-[10%] w-[300px] h-[300px] bg-luxury-sage/10 rounded-full blur-[70px] pointer-events-none" />
@@ -54,19 +54,12 @@ export default function AboutUsPage() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-[13px] uppercase tracking-[0.35em] text-luxury-taupe font-bold block"
+            className="text-4xl font-sans md:text-[43px] uppercase tracking-widest md:tracking-[0.35em] text-black font-bold block"
           >
             OUR JOURNEY
           </motion.span>
           
-          <motion.h1 
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
-            className="text-5xl md:text-8xl font-serif font-light text-luxury-dark tracking-tight leading-[0.95]"
-          >
-            THE FÚTBOL STORE
-          </motion.h1>
+          
 
           <motion.p 
             initial={{ opacity: 0, y: 30 }}
@@ -81,7 +74,7 @@ export default function AboutUsPage() {
 
       {/* 2. Visual Storytelling / Parallax Splitting */}
       <section className="mt-[-2rem] md:mt-[-8rem] py-12 md:py-20 px-6 md:px-12 max-w-7xl mx-auto bg-transparent">
-        <div className="grid lg:grid-cols-12 gap-8 md:gap-16 items-center">
+        <div className="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-8 md:gap-16 items-center">
           
           {/* Left Column: Asymmetrical Typography & Manifest */}
           <div className="lg:col-span-6  space-y-6">
@@ -103,15 +96,14 @@ From iconic club kits to the latest international collections, we aim to provide
           </div>
 
           {/* Right Column: Immersive Picture Block */}
-          <div className="lg:col-span-6 relative w-full h-[400px] md:h-[480px] rounded-3xl overflow-hidden border border-luxury-taupe/15 bg-neutral-900 shadow-2xl">
+          <div className="lg:col-span-6 relative w-full h-[300px] md:h-[480px] rounded-3xl overflow-hidden border border-luxury-taupe/15 bg-transparent md:bg-neutral-900 shadow-none md:shadow-2xl">
             <Image 
               src="/images/futbol store logo .JPEG" 
-              alt="Paul Pogba France Jersey"
+              alt="The Futbol Store Logo"
               fill
-              style={{ objectFit: "cover", objectPosition: "center" }}
-              className="opacity-90 transform hover:scale-105 transition-transform duration-[2000ms] pointer-events-none"
+              className="object-contain md:object-cover object-center opacity-90 transform hover:scale-105 transition-transform duration-[2000ms] pointer-events-none"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-luxury-dark/70 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-luxury-dark/70 via-transparent to-transparent pointer-events-none hidden md:block" />
                      
             </div>
 
@@ -119,24 +111,24 @@ From iconic club kits to the latest international collections, we aim to provide
       </section>
 
       {/* 3. Core Focus Grid */}
-      <section className="py-24 bg-luxury-dark text-luxury-ivory relative overflow-hidden">
+      <section className="py-16 md:py-24 bg-luxury-dark text-luxury-ivory relative overflow-hidden">
         {/* Glow overlays */}
         <div className="absolute right-[-10%] top-[20%] w-[500px] h-[500px] bg-[#3B1F0F]/15 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute left-[-5%] bottom-[-5%] w-[400px] h-[400px] bg-luxury-taupe/5 rounded-full blur-[80px] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-          <div className="max-w-2xl mb-16 space-y-4">
-            <span className="text-xs uppercase tracking-[0.3em] text-luxury-sand font-bold">Brand Highlights</span>
-            <h2 className="text-4xl md:text-6xl font-serif text-white tracking-wide font-light">
+          <div className="max-w-2xl mb-12 md:mb-16 space-y-4">
+            <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-luxury-sand font-bold">Brand Highlights</span>
+            <h2 className="text-3xl md:text-6xl font-serif text-white tracking-wide font-light">
               Our Core <span className="italic font-medium text-luxury-sand">Focuses</span>
             </h2>
-            <p className="text-xs md:text-sm text-luxury-ivory/60 font-sans leading-relaxed font-light">
+            <p className="text-[10px] md:text-sm text-luxury-ivory/60 font-sans leading-relaxed font-light">
               At THE FÚTBOL STORE, we focus on every micro-detail of football fashion, ensuring that your apparel matches the historical intensity of your loyalty.
             </p>
           </div>
 
           {/* Grid Layout */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
             {focuses.map((item, idx) => {
               const Icon = item.icon;
               return (
@@ -144,13 +136,13 @@ From iconic club kits to the latest international collections, we aim to provide
                   key={idx}
                   whileHover={{ y: -6 }}
                   transition={{ duration: 0.4 }}
-                  className="p-8 rounded-2xl border border-luxury-sand/10 bg-[#141414] hover:bg-[#1a1a1a] space-y-5 transition-colors duration-300"
+                  className="p-4 md:p-8 rounded-2xl border border-luxury-sand/10 bg-[#141414] hover:bg-[#1a1a1a] space-y-3 md:space-y-5 transition-colors duration-300 flex flex-col items-start"
                 >
-                  <div className="w-12 h-12 rounded-full bg-luxury-sand/10 flex items-center justify-center text-luxury-sand">
-                    <Icon className="w-6 h-6 stroke-[1.5px]" />
+                  <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-luxury-sand/10 flex items-center justify-center text-luxury-sand shrink-0">
+                    <Icon className="w-4 h-4 md:w-6 md:h-6 stroke-[1.5px]" />
                   </div>
-                  <h3 className="text-lg font-serif font-bold text-white tracking-wide">{item.title}</h3>
-                  <p className="text-xs text-luxury-ivory/60 leading-relaxed font-sans font-light">
+                  <h3 className="text-sm md:text-lg font-serif font-bold text-white tracking-wide">{item.title}</h3>
+                  <p className="text-[9px] md:text-xs text-luxury-ivory/60 leading-relaxed font-sans font-light">
                     {item.desc}
                   </p>
                 </motion.div>

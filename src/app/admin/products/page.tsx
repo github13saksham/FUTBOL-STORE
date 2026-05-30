@@ -13,7 +13,7 @@ export default function AdminProductsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'national' | 'club'>('national');
-  const [versionFilter, setVersionFilter] = useState<'all' | 'player' | 'fan'>('all');
+  const [versionFilter, setVersionFilter] = useState<'player' | 'fan'>('player');
 
   const dbService = new FirebaseDatabaseService();
 
@@ -70,13 +70,11 @@ export default function AdminProductsPage() {
     if (activeTab === 'club' && isNationalTeam) return false;
 
     // Version Filter
-    if (versionFilter !== 'all') {
-      const isPlayer = p.category.toLowerCase().includes('player') || p.name.toLowerCase().includes('player');
-      const isFan = p.category.toLowerCase().includes('fan') || p.name.toLowerCase().includes('fan');
-      
-      if (versionFilter === 'player' && !isPlayer) return false;
-      if (versionFilter === 'fan' && !isFan) return false;
-    }
+    const isPlayer = p.category.toLowerCase().includes('player') || p.name.toLowerCase().includes('player');
+    const isFan = p.category.toLowerCase().includes('fan') || p.name.toLowerCase().includes('fan');
+    
+    if (versionFilter === 'player' && !isPlayer) return false;
+    if (versionFilter === 'fan' && !isFan) return false;
 
     return true;
   });
@@ -122,7 +120,6 @@ export default function AdminProductsPage() {
             onChange={(e) => setVersionFilter(e.target.value as any)}
             className="px-4 py-2 text-sm text-luxury-dark bg-white border border-gray-200 rounded-lg outline-none focus:border-luxury-taupe"
           >
-            <option value="all">All Versions</option>
             <option value="player">Player Version</option>
             <option value="fan">Fan Version</option>
           </select>

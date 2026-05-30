@@ -101,7 +101,7 @@ export default function Navbar() {
                 alt="The Futbol Store Logo"
                 height={90}
                 width={90}
-                className="object-contain md:h-[90px] md:w-[90px]"
+                className="object-contain w-16 h-16 md:w-[90px] md:h-[90px]"
                 priority
               />
             </Link>
