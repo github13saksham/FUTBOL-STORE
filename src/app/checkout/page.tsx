@@ -306,6 +306,9 @@ export default function CheckoutPage() {
                       <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" alt="Paytm" className="h-4 w-auto object-contain" />
                     </div>
                     <div className="bg-white px-2 py-1.5 rounded-md flex items-center justify-center shadow-sm">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/d/d1/RuPay.svg" alt="RuPay" className="h-4 w-auto object-contain" />
+                    </div>
+                    <div className="bg-white px-2 py-1.5 rounded-md flex items-center justify-center shadow-sm">
                       <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" alt="Visa" className="h-4 w-auto object-contain" />
                     </div>
                     <div className="bg-white px-2 py-1.5 rounded-md flex items-center justify-center shadow-sm">
