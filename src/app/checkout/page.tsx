@@ -291,11 +291,34 @@ export default function CheckoutPage() {
                 <p className="text-sm text-white/70 font-sans font-light leading-relaxed">
                   All transactions are secure and encrypted. Payments are processed securely via <span className="font-semibold text-white">Razorpay</span>.
                 </p>
-                <div className="flex gap-4 opacity-70">
-                  <CreditCard className="w-8 h-8 text-white" />
-                  <div className="flex flex-col">
-                    <span className="text-xs font-semibold text-white">Razorpay Secure</span>
-                    <span className="text-[9px] text-white/50 uppercase tracking-widest">Cards, UPI, NetBanking</span>
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="bg-white px-2 py-1.5 rounded-md flex items-center justify-center shadow-sm">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg" alt="UPI" className="h-4 w-auto object-contain" />
+                    </div>
+                    <div className="bg-white px-2 py-1.5 rounded-md flex items-center justify-center shadow-sm">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" alt="Google Pay" className="h-4 w-auto object-contain" />
+                    </div>
+                    <div className="bg-white px-2 py-1.5 rounded-md flex items-center justify-center shadow-sm">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" className="h-4 w-auto object-contain" />
+                    </div>
+                    <div className="bg-white px-2 py-1.5 rounded-md flex items-center justify-center shadow-sm">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" alt="Paytm" className="h-4 w-auto object-contain" />
+                    </div>
+                    <div className="bg-white px-2 py-1.5 rounded-md flex items-center justify-center shadow-sm">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" alt="Visa" className="h-4 w-auto object-contain" />
+                    </div>
+                    <div className="bg-white px-2 py-1.5 rounded-md flex items-center justify-center shadow-sm">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-4 w-auto object-contain" />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 opacity-70 border-t border-white/10 pt-4 mt-2">
+                    <ShieldCheck className="w-8 h-8 text-green-500" />
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold text-white">Razorpay Secure Checkout</span>
+                      <span className="text-[9px] text-white/50 uppercase tracking-widest">100% Encrypted Payments</span>
+                    </div>
                   </div>
                 </div>
               </div>
