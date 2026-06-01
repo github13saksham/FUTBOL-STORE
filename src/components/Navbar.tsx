@@ -66,6 +66,10 @@ export default function Navbar() {
     }
   }, [searchOpen]);
 
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   // Derived state for search
   const searchResults = searchQuery.trim() === "" 
     ? [] 
@@ -147,7 +151,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4 md:gap-6 text-luxury-dark">
             <button
               onClick={() => setSearchOpen(true)}
-              className="hidden md:block hover:text-luxury-dark p-1 transition-colors duration-300 relative"
+              className="hover:text-luxury-dark p-1 transition-colors duration-300 relative block"
               aria-label="Open Search"
             >
               <Search className="w-5 h-5 stroke-[1.5px]" />
@@ -191,16 +195,6 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Search Row (Hidden on Desktop) */}
-        <div className="md:hidden px-4 pb-3 pt-1 w-full">
-          <div 
-            onClick={() => setSearchOpen(true)}
-            className="w-full flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-gray-500 text-sm cursor-text shadow-inner"
-          >
-            <Search className="w-4 h-4 text-gray-400" />
-            <span>Search for jerseys, clubs...</span>
-          </div>
-        </div>
       </nav>
 
       {/* 2. Fixed Bottom Navigation Bar (Mobile Only) */}
@@ -325,22 +319,7 @@ export default function Navbar() {
                 />
               </div>
 
-              {searchQuery.trim() === "" ? (
-                <div className="space-y-4 flex-shrink-0">
-                  <h4 className="text-[10px] uppercase tracking-widest text-luxury-ivory font-semibold">TRENDING SEARCHES</h4>
-                  <div className="flex flex-wrap gap-3">
-                    {["Brazil 2024 Home", "Argentina Away Player Version", "Real Madrid Retro"].map((trend, tIdx) => (
-                      <button
-                        key={tIdx}
-                        onClick={() => setSearchQuery(trend)}
-                        className="px-4 py-2 rounded-full border border-white/15 bg-white hover:bg-luxury-sand hover:text-luxury-ivory text-xs text-luxury-dark transition-all duration-300"
-                      >
-                        {trend}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : (
+              {searchQuery.trim() === "" ? null : (
                 <div className="w-full flex-grow overflow-y-auto mt-4 pb-24 min-h-0 pr-4 custom-scrollbar">
                   {searchResults.length === 0 ? (
                     <div className="text-center py-12 space-y-4">

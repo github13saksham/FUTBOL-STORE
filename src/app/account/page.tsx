@@ -457,7 +457,7 @@ service firebase.storage {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] uppercase tracking-widest font-bold text-white">User ID</label>
-                        <input type="text" value={user.uid} disabled className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors font-mono text-xs" />
+                        <input type="text" value={`TFS-${user.uid.substring(0, 6).toUpperCase()}`} disabled className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-luxury-dark transition-colors font-mono text-xs font-bold tracking-widest" />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] uppercase tracking-widest font-bold text-white">Email Address</label>

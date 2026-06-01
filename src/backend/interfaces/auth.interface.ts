@@ -35,21 +35,11 @@ export interface IAuthService {
   loginWithGoogle(): Promise<User>;
 
   /**
-   * Initialize Recaptcha Verifier for Phone Auth.
-   * Returns the verifier instance.
+   * Login with Apple.
    */
-  initializeRecaptcha(containerId: string): any;
+  loginWithApple(): Promise<User>;
 
-  /**
-   * Send OTP to phone number.
-   * Returns a confirmation result that can be used to verify the OTP.
-   */
-  sendPhoneOtp(phoneNumber: string, appVerifier: any): Promise<any>;
 
-  /**
-   * Verify Phone OTP.
-   */
-  verifyPhoneOtp(confirmationResult: any, otp: string): Promise<User>;
 
   /**
    * Update User Profile (e.g. Display Name, Photo URL)

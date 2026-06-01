@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, UploadCloud, ArrowLeft, Database, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, ArrowLeft, Menu, X, ShoppingBag, LayoutTemplate, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -12,79 +12,97 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navItems = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    { name: 'Products', href: '/admin/products', icon: Package },
-    { name: 'Bulk Upload', href: '/admin/bulk-upload', icon: UploadCloud },
-    { name: 'Database', href: '/admin/database', icon: Database },
+    { name: 'Orders', href: '/admin/orders', icon: ShoppingBag, badge: 3 }, // Mock badge for new orders
+    { name: 'Products', href: '/admin/products', icon: Package, alert: true }, // Mock alert for low stock
+    { name: 'Homepage Manager', href: '/admin/homepage', icon: LayoutTemplate },
   ];
 
   if (pathname === '/admin/login') {
     return <>{children}</>;
   }
 
-  return (
-    <div className="min-h-screen bg-[#F8F9FA] flex flex-col md:flex-row font-sans pt-[60px] md:pt-0">
-      
-      {/* Mobile Header (Shows only on small screens) */}
-      <div className="md:hidden bg-luxury-dark text-luxury-ivory p-4 flex justify-between items-center fixed top-0 left-0 w-full z-50">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setMobileMenuOpen(true)}>
-            <Menu className="w-6 h-6" />
-          </button>
-          <h1 className="text-lg font-serif">TFS Admin</h1>
-        </div>
-        <Link href="/" className="text-xs uppercase tracking-widest text-luxury-taupe flex items-center gap-1">
-          <ArrowLeft className="w-3 h-3" /> Store
+  const handleLogout = async () => {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    window.location.href = '/admin/login';
+  };
+
+  const NavContent = () => (
+    <>
+      <div className="flex-1 overflow-y-auto py-6">
+        <ul className="space-y-1 px-3">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(`${item.href}/`));
+            const Icon = item.icon;
+            return (
+              <li key={item.name}>
+                <Link 
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                    isActive 
+                      ? 'bg-black text-white font-medium' 
+                      : 'text-gray-500 hover:bg-gray-100 hover:text-black font-medium'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className="w-4 h-4" />
+                    <span className="text-sm">{item.name}</span>
+                  </div>
+                  {item.badge && (
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white text-black' : 'bg-black text-white'}`}>
+                      {item.badge}
+                    </span>
+                  )}
+                  {item.alert && !item.badge && (
+                    <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                  )}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <div className="p-4 border-t border-gray-100 space-y-2 flex-shrink-0">
+        <Link href="/" className="flex items-center gap-3 w-full py-2.5 px-3 text-gray-500 hover:bg-gray-100 hover:text-black rounded-lg transition-colors text-sm font-medium">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Store
         </Link>
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full py-2.5 px-3 text-gray-500 hover:bg-gray-100 hover:text-black rounded-lg transition-colors text-sm font-medium"
+        >
+          <LogOut className="w-4 h-4" />
+          Logout Admin
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="min-h-screen bg-[#F9FAFB] flex flex-col md:flex-row font-sans pt-[60px] md:pt-0 selection:bg-black selection:text-white">
+      
+      {/* Mobile Header */}
+      <div className="md:hidden bg-white border-b border-gray-200 p-4 flex justify-between items-center fixed top-0 left-0 w-full z-50">
+        <div className="flex items-center gap-3">
+          <button onClick={() => setMobileMenuOpen(true)} className="text-black">
+            <Menu className="w-5 h-5" />
+          </button>
+          <h1 className="text-sm font-bold tracking-tight text-black">THE FÚTBOL STORE</h1>
+        </div>
       </div>
 
       {/* Sidebar Navigation */}
-      <nav className="w-full md:w-64 bg-white border-r border-luxury-taupe/20 hidden md:flex flex-col h-screen sticky top-0">
-        <div className="p-6 border-b border-luxury-taupe/20">
-          <h1 className="text-2xl font-serif text-luxury-dark tracking-wide">TFS Admin</h1>
-          <p className="text-xs text-luxury-taupe mt-1 uppercase tracking-widest">Management Panel</p>
+      <nav className="w-full md:w-64 bg-white border-r border-gray-200 hidden md:flex flex-col h-screen sticky top-0">
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-6 h-6 bg-black rounded-sm flex items-center justify-center">
+              <span className="text-white text-[10px] font-bold">FS</span>
+            </div>
+            <h1 className="text-sm font-bold tracking-tight text-black">THE FÚTBOL STORE</h1>
+          </div>
         </div>
-
-        <div className="flex-1 overflow-y-auto py-6">
-          <ul className="space-y-2 px-4">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-              const Icon = item.icon;
-              return (
-                <li key={item.name}>
-                  <Link 
-                    href={item.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                      isActive 
-                        ? 'bg-luxury-dark text-luxury-ivory shadow-md' 
-                        : 'text-luxury-dark/70 hover:bg-[#F3F4F6] hover:text-luxury-dark'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="font-medium text-sm">{item.name}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-
-
-
-        <div className="p-6 border-t border-luxury-taupe/20 space-y-3 flex-shrink-0">
-          <button 
-            onClick={async () => {
-              await fetch('/api/admin/logout', { method: 'POST' });
-              window.location.href = '/admin/login';
-            }}
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-sm font-medium"
-          >
-            Logout Admin
-          </button>
-          <Link href="/" className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-[#F3F4F6] hover:bg-[#E5E7EB] text-luxury-dark rounded-lg transition-colors text-sm font-medium">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Store
-          </Link>
-        </div>
+        <NavContent />
       </nav>
 
       {/* Mobile Drawer Overlay */}
@@ -94,7 +112,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/60 md:hidden"
+            className="fixed inset-0 z-[100] bg-black/20 backdrop-blur-sm md:hidden"
             onClick={() => setMobileMenuOpen(false)}
           >
             <motion.div 
@@ -102,62 +120,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
-              className="absolute top-0 left-0 h-full w-64 bg-white flex flex-col"
+              className="absolute top-0 left-0 h-full w-64 bg-white flex flex-col shadow-2xl"
               onClick={e => e.stopPropagation()}
             >
-              <div className="p-4 flex justify-between items-center border-b border-luxury-taupe/20">
-                <h1 className="text-xl font-serif text-luxury-dark tracking-wide">TFS Admin</h1>
-                <button onClick={() => setMobileMenuOpen(false)}>
-                  <X className="w-6 h-6 text-luxury-dark" />
+              <div className="p-5 flex justify-between items-center border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-black rounded-sm flex items-center justify-center">
+                    <span className="text-white text-[10px] font-bold">FS</span>
+                  </div>
+                  <h1 className="text-sm font-bold tracking-tight text-black">TFS ADMIN</h1>
+                </div>
+                <button onClick={() => setMobileMenuOpen(false)} className="text-gray-400 hover:text-black">
+                  <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto py-4">
-                <ul className="space-y-2 px-4">
-                  {navItems.map((item) => {
-                    const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-                    const Icon = item.icon;
-                    return (
-                      <li key={item.name}>
-                        <Link 
-                          href={item.href}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                            isActive 
-                              ? 'bg-luxury-dark text-luxury-ivory shadow-md' 
-                              : 'text-luxury-dark/70 hover:bg-[#F3F4F6] hover:text-luxury-dark'
-                          }`}
-                        >
-                          <Icon className="w-5 h-5" />
-                          <span className="font-medium text-sm">{item.name}</span>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-              <div className="p-4 border-t border-luxury-taupe/20 space-y-3 flex-shrink-0">
-                <button 
-                  onClick={async () => {
-                    await fetch('/api/admin/logout', { method: 'POST' });
-                    window.location.href = '/admin/login';
-                  }}
-                  className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-sm font-medium"
-                >
-                  Logout Admin
-                </button>
-              </div>
+              <NavContent />
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6 pt-10 md:p-10 md:pt-16 overflow-x-hidden">
+      <main className="flex-1 overflow-x-hidden relative">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="h-full"
+          className="h-full min-h-screen p-4 md:p-8 lg:p-10"
         >
           {children}
         </motion.div>

@@ -5,6 +5,7 @@ import StoreProvider from "@/context/StoreContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
+import AuthGuard from "@/components/AuthGuard";
 
 export const metadata: Metadata = {
   title: "THE FÚTBOL STORE | Premium Football Fashion & Luxury Jerseys",
@@ -26,12 +27,14 @@ export default function RootLayout({
       <body className="antialiased">
         <AuthProvider>
           <StoreProvider>
-            <div className="grain-overlay" />
-            <SmoothScroll>
-              <Navbar />
-              {children}
-              <Footer />
-            </SmoothScroll>
+            <AuthGuard>
+              <div className="grain-overlay" />
+              <SmoothScroll>
+                <Navbar />
+                {children}
+                <Footer />
+              </SmoothScroll>
+            </AuthGuard>
           </StoreProvider>
         </AuthProvider>
       </body>

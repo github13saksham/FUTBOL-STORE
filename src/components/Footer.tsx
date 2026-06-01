@@ -15,6 +15,8 @@ export default function Footer() {
   const [emailInput, setEmailInput] = useState("");
   const pathname = usePathname();
   const isAccountPage = pathname?.startsWith("/account");
+  const isAdminPage = pathname?.startsWith("/admin");
+  const shouldHideFooter = isAccountPage || isAdminPage;
 
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
@@ -35,7 +37,7 @@ export default function Footer() {
 
   return (
     <>
-      {!isAccountPage && (
+      {!shouldHideFooter && (
         <footer className="bg-luxury-dark text-luxury-ivory pt-12 pb-12 relative overflow-hidden">
           {/* Global Policy Cards (Shown on all pages except Account) */}
           <div className="max-w-7xl mx-auto px-4 md:px-12 pb-12 md:pb-24 border-b border-white/5 mb-12">

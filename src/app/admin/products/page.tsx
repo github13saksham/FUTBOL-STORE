@@ -3,16 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { FirebaseDatabaseService } from '@/backend/firebase/db.service';
 import { Product } from '@/data/mockData';
-import { Loader2, Plus, Edit2, Trash2, Search, Power } from 'lucide-react';
+import { Loader2, Plus, Edit2, Trash2, Search, Power, Package } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'national' | 'club'>('national');
+  const [activeTab, setActiveTab] = useState<'national' | 'club'>('club');
   const [versionFilter, setVersionFilter] = useState<'player' | 'fan'>('player');
 
   const dbService = new FirebaseDatabaseService();
@@ -80,56 +79,56 @@ export default function AdminProductsPage() {
   });
 
   return (
-    <div className="max-w-6xl mx-auto pb-12">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+    <div className="max-w-[1400px] mx-auto pb-12">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4 border-b border-gray-200 pb-6">
         <div>
-          <h1 className="text-3xl font-serif text-luxury-dark mb-1">Products Inventory</h1>
-          <p className="text-luxury-taupe text-sm">Manage your individual jerseys here.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-black mb-1">Products Inventory</h1>
+          <p className="text-gray-500 text-sm">Manage your individual jerseys, stock, and pricing.</p>
         </div>
         <Link 
           href="/admin/products/new"
-          className="flex items-center gap-2 bg-luxury-dark text-luxury-ivory px-5 py-2.5 rounded hover:bg-black transition-colors font-medium text-sm"
+          className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors font-medium text-sm"
         >
-          <Plus className="w-4 h-4" /> Add New Jersey
+          <Plus className="w-4 h-4" /> Add Jersey
         </Link>
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white p-4 rounded-xl border border-luxury-taupe/20 shadow-sm mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-6">
         
         {/* Tabs */}
         <div className="flex bg-gray-100 p-1 rounded-lg w-full md:w-auto overflow-x-auto">
           <button 
+            onClick={() => setActiveTab('club')}
+            className={`flex-1 md:flex-none px-4 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${activeTab === 'club' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'}`}
+          >
+            Club Teams
+          </button>
+          <button 
             onClick={() => setActiveTab('national')}
-            className={`flex-1 md:flex-none px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${activeTab === 'national' ? 'bg-white text-luxury-dark shadow-sm' : 'text-gray-500 hover:text-luxury-dark'}`}
+            className={`flex-1 md:flex-none px-4 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${activeTab === 'national' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'}`}
           >
             National Teams
           </button>
-          <button 
-            onClick={() => setActiveTab('club')}
-            className={`flex-1 md:flex-none px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${activeTab === 'club' ? 'bg-white text-luxury-dark shadow-sm' : 'text-gray-500 hover:text-luxury-dark'}`}
-          >
-            Club Jerseys
-          </button>
         </div>
 
-        <div className="flex flex-col sm:flex-row w-full md:w-auto gap-4 flex-1 md:justify-end">
+        <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3 flex-1 md:justify-end">
           {/* Version Filter */}
           <select 
             value={versionFilter}
             onChange={(e) => setVersionFilter(e.target.value as any)}
-            className="px-4 py-2 text-sm text-luxury-dark bg-white border border-gray-200 rounded-lg outline-none focus:border-luxury-taupe"
+            className="px-4 py-2 text-sm text-black bg-white border border-gray-200 rounded-lg outline-none focus:border-gray-300"
           >
             <option value="player">Player Version</option>
             <option value="fan">Fan Version</option>
           </select>
 
           <div className="relative flex-1 sm:max-w-xs">
-            <Search className="w-4 h-4 text-luxury-taupe absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input 
               type="text"
               placeholder="Search jerseys..."
-              className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg outline-none text-sm text-luxury-dark focus:border-luxury-taupe"
+              className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm text-black focus:border-gray-300"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -138,66 +137,70 @@ export default function AdminProductsPage() {
       </div>
 
       {/* Products Table */}
-      <div className="bg-white rounded-xl border border-luxury-taupe/20 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex justify-center items-center p-12">
-            <Loader2 className="w-8 h-8 animate-spin text-luxury-taupe" />
+            <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="p-12 text-center text-luxury-taupe">
-            <p>No products found.</p>
+          <div className="p-12 text-center text-gray-500">
+            <p>No products found matching your criteria.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-[#F8F9FA] border-b border-luxury-taupe/20 text-xs uppercase tracking-wider text-luxury-taupe">
-                  <th className="p-4 font-medium">Product</th>
-                  <th className="p-4 font-medium hidden sm:table-cell">Price</th>
-                  <th className="p-4 font-medium hidden md:table-cell">Category</th>
-                  <th className="p-4 font-medium">Status</th>
-                  <th className="p-4 font-medium">Actions</th>
+            <table className="w-full text-left border-collapse text-sm">
+              <thead className="bg-gray-50 text-gray-500 text-xs font-medium border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-4">Product</th>
+                  <th className="px-6 py-4 hidden sm:table-cell">Price</th>
+                  <th className="px-6 py-4 hidden md:table-cell">Category</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-100">
                 {filteredProducts.map((product) => (
-                  <tr key={product.id} className="border-b border-luxury-taupe/10 hover:bg-[#F8F9FA] transition-colors">
-                    <td className="p-4 flex items-center gap-4">
-                      <div className="w-12 h-12 relative bg-[#F3F4F6] rounded overflow-hidden flex-shrink-0">
+                  <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 flex items-center gap-4">
+                      <div className="w-12 h-12 relative bg-gray-100 rounded-md border border-gray-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
                         {product.image ? (
-                          <Image src={product.image} alt={product.name} fill className="object-cover" />
+                          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xs text-luxury-taupe">No Img</div>
+                          <Package className="w-5 h-5 text-gray-400" />
                         )}
                       </div>
                       <div>
-                        <p className="font-medium text-sm text-luxury-dark">{product.name}</p>
-                        <p className="text-xs text-luxury-taupe mt-0.5">{product.club}</p>
+                        <p className="font-medium text-black max-w-[300px] truncate">{product.name}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{product.club}</p>
                       </div>
                     </td>
-                    <td className="p-4 hidden sm:table-cell text-sm text-luxury-dark">
+                    <td className="px-6 py-4 hidden sm:table-cell font-medium text-black">
                       ₹{product.price.toLocaleString('en-IN')}
                     </td>
-                    <td className="p-4 hidden md:table-cell text-sm text-luxury-taupe capitalize">
+                    <td className="px-6 py-4 hidden md:table-cell text-gray-500 capitalize">
                       {product.category.replace('_', ' ')}
                     </td>
-                    <td className="p-4 text-sm">
-                      <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-widest ${product.inStock !== false ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider ${
+                        product.inStock !== false 
+                          ? 'bg-black text-white' 
+                          : 'bg-red-50 text-red-600 border border-red-100'
+                      }`}>
                         {product.inStock !== false ? 'In Stock' : 'Out of Stock'}
                       </span>
                     </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-3">
                         <button
                           onClick={() => handleToggleStock(product)}
-                          className={`${product.inStock !== false ? 'text-green-500 hover:text-red-500' : 'text-red-500 hover:text-green-500'} transition-colors`}
+                          className={`${product.inStock !== false ? 'text-gray-400 hover:text-red-500' : 'text-red-500 hover:text-black'} transition-colors`}
                           title="Toggle Stock"
                         >
                           <Power className="w-4 h-4" />
                         </button>
                         <Link 
                           href={`/admin/products/new?edit=${product.id}`}
-                          className="text-luxury-taupe hover:text-luxury-dark transition-colors"
+                          className="text-gray-400 hover:text-black transition-colors"
                           title="Edit"
                         >
                           <Edit2 className="w-4 h-4" />
@@ -205,7 +208,7 @@ export default function AdminProductsPage() {
                         <button 
                           onClick={() => handleDelete(product.id)}
                           disabled={deletingId === product.id}
-                          className="text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                          className="text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
                           title="Delete"
                         >
                           {deletingId === product.id ? (

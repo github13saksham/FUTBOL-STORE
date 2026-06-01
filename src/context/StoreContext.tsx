@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Product, Club } from "@/data/mockData";
 import { dbService } from "@/backend";
+import { useAuth } from "./AuthContext";
 
 export interface CartItem {
   id: string;
@@ -53,13 +54,18 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     async function fetchData() {
       setIsLoadingData(true);
       try {
-        const fetchedProducts = await dbService.getProducts();
-        const fetchedClubs = await dbService.getClubs();
+        const [productsRes, clubsRes] = await Promise.all([
+          fetch('/api/data/products'),
+          fetch('/api/data/clubs')
+        ]);
+        const fetchedProducts = await productsRes.json();
+        const fetchedClubs = await clubsRes.json();
         setProducts(fetchedProducts);
         setClubs(fetchedClubs);
       } catch (e) {
@@ -72,24 +78,38 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   }, []);
 
   useEffect(() => {
+    if (authLoading) return;
+
     try {
-      const storedCart = localStorage.getItem("futbol_cart");
-      if (storedCart) setCart(JSON.parse(storedCart));
-      const storedWishlist = localStorage.getItem("futbol_wishlist");
-      if (storedWishlist) setWishlist(JSON.parse(storedWishlist));
+      if (user) {
+        const storedCart = localStorage.getItem(`futbol_cart_${user.uid}`);
+        if (storedCart) setCart(JSON.parse(storedCart));
+        else setCart([]);
+
+        const storedWishlist = localStorage.getItem(`futbol_wishlist_${user.uid}`);
+        if (storedWishlist) setWishlist(JSON.parse(storedWishlist));
+        else setWishlist([]);
+      } else {
+        setCart([]);
+        setWishlist([]);
+      }
     } catch (e) {
       console.error("Failed to load store data", e);
     }
     setIsInitialized(true);
-  }, []);
+  }, [user, authLoading]);
 
   useEffect(() => {
-    if (isInitialized) localStorage.setItem("futbol_cart", JSON.stringify(cart));
-  }, [cart, isInitialized]);
+    if (isInitialized && user) {
+      localStorage.setItem(`futbol_cart_${user.uid}`, JSON.stringify(cart));
+    }
+  }, [cart, isInitialized, user]);
 
   useEffect(() => {
-    if (isInitialized) localStorage.setItem("futbol_wishlist", JSON.stringify(wishlist));
-  }, [wishlist, isInitialized]);
+    if (isInitialized && user) {
+      localStorage.setItem(`futbol_wishlist_${user.uid}`, JSON.stringify(wishlist));
+    }
+  }, [wishlist, isInitialized, user]);
 
   // Sync cart and wishlist with live products to handle updates and deletions
   useEffect(() => {

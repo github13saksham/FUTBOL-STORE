@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowRight, Heart, ChevronRight, HelpCircle, Truck, RefreshCw, 
-  Shield, Check, Instagram, Send, Mail, User, FileText
+  Shield, Check, Instagram, Send, Mail, User, FileText, Loader2
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import NationalTeams3D from "@/components/NationalTeams3D";
 import { useStore } from "@/context/StoreContext";
 import { FAQS } from "@/data/mockData";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/backend/firebase/config";
 
 export default function Homepage() {
   const bestSellersRef = useRef<HTMLDivElement>(null);
@@ -26,107 +28,149 @@ export default function Homepage() {
     setSizeGuideOpen 
   } = useStore();
 
+  const [homepageSettings, setHomepageSettings] = useState<any>(null);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const docRef = doc(db, 'settings', 'homepage');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setHomepageSettings(docSnap.data());
+        }
+      } catch (error) {
+        console.error("Error fetching homepage settings:", error);
+      } finally {
+        setSettingsLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
   const bestSellers = useMemo(() => {
-    if (products.length === 0) return [];
-    
-    const targets = [
-      ["SPAIN 2026 AWAY PLAYER", "SPAIN AWAY PLAYER", "SPAIN AWAY FAN", "SPAIN AWAY"],
-      ["PORTUGAL 2026 AWAY FAN", "PORTUGAL AWAY FAN", "PORTUGAL AWAY"],
-      ["REAL MADRID 25/26 HOME PLAYER", "REAL MADRID HOME PLAYER VERSION 25-26", "REAL MADRID HOME PLAYER", "REAL MADRID HOME"],
-      ["ARGENTINA 2026 AWAY PLAYER", "ARGENTINA AWAY PLAYER VERSION 2026", "ARGENTINA AWAY PLAYER", "ARGENTINA AWAY"],
-      ["MANCHESTER CITY 25/26 AWAY PLAYER", "MANCHESTER CITY AWAY PLAYER VERSION 25-26", "MANCHESTER CITY AWAY PLAYER", "MANCHESTER CITY AWAY"]
+    const items = homepageSettings?.bestSellersItems || [
+      { id: "bs-1", name: "SPAIN 2026 AWAY PLAYER", category: "PLAYER VERSION", club: "SPAIN", priceStr: "₹949.00", image: "/NATIONAL_TEAM_LOGO/national_team5.png" },
+      { id: "bs-2", name: "PORTUGAL 2026 AWAY FAN", category: "FAN VERSION", club: "PORTUGAL", priceStr: "₹799.00", image: "/NATIONAL_TEAM_LOGO/national_team4.jpeg" },
+      { id: "bs-3", name: "REAL MADRID 25/26 HOME PLAYER", category: "PLAYER VERSION", club: "REAL MADRID CF", priceStr: "₹999.00", image: "/images/25-26_club-jerseys/real_madrid25-26_HPV.jpeg" },
+      { id: "bs-4", name: "ARGENTINA 2026 AWAY PLAYER", category: "PLAYER VERSION", club: "ARGENTINA", priceStr: "₹999.00", image: "/NATIONAL_TEAM_LOGO/national_team1.jpeg" },
+      { id: "bs-5", name: "MANCHESTER CITY 25/26 AWAY PLAYER", category: "PLAYER VERSION", club: "MANCHESTER CITY", priceStr: "₹999.00", image: "/images/25-26_club-jerseys/MC25-26_HPV.jpeg" }
     ];
 
-    const res: typeof products = [];
-    
-    for (const fallbacks of targets) {
-      let match = null;
-      for (const target of fallbacks) {
-        match = products.find(p => !res.find(r => r.id === p.id) && p.name.toUpperCase().includes(target.toUpperCase()));
-        if (match) break;
-      }
-      if (match) res.push(match);
-    }
-    
-    // Ensure exactly 5 are shown
-    for (const p of products) {
-      if (res.length >= 5) break;
-      if (!res.find(r => r.id === p.id)) {
-        res.push(p);
-      }
-    }
-    
-    return res.slice(0, 5);
-  }, [products]);
+    return items.map((item: any) => {
+      // Find a matching product in the real database
+      const realProduct = products.find(p => 
+        p.name.toUpperCase() === item.name.toUpperCase() || 
+        p.name.toUpperCase().includes(item.name.toUpperCase()) ||
+        item.name.toUpperCase().includes(p.name.toUpperCase())
+      );
+      
+      return {
+        ...item,
+        realId: realProduct ? realProduct.id : item.id,
+        realProduct: realProduct || null
+      };
+    });
+  }, [homepageSettings, products]);
 
   return (
     <div className="min-h-screen selection:bg-luxury-taupe selection:text-white text-black bg-[#FFEEE2]">
       
       {/* 2. Cinematic Hero Section */}
       <section className="relative w-full max-h-screen flex flex-col justify-center items-start overflow-hidden py-48 px-6 md:px-46 lg:px-44">
-        {/* Background Video */}
-        <video 
-          autoPlay 
-          loop 
-          muted 
-          playsInline 
-          className="absolute inset-0 w-full h-full object-cover mt-20  object-top z-0"
-        >
-          <source src="/images/Hero_Section_vid.MP4" type="video/mp4" />
-        </video>
-
-        {/* Stadium lighting overlay */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-luxury-cream/30 via-luxury-ivory/10 to-luxury-dark/40 mix-blend-multiply opacity-80 z-0" />
         
-        {/* Cinematic Background Spotlights */}
-        <div className="absolute right-[10%] top-[15%] w-[500px] h-[500px] bg-luxury-taupe/15 rounded-full blur-[100px] z-0 animate-pulse-subtle" />
-        <div className="absolute left-[-5%] bottom-[-5%] w-[400px] h-[400px] bg-luxury-sage/20 rounded-full blur-[80px] z-0" />
-
-        {/* Hero content layout - Centered */}
-        <div className="relative w-full max-w-7xl mx-auto flex flex-col items-center justify-center text-center z-10">
-          
-          {/* Text Block */}
-          <div className="flex flex-col items-center mt-40 space-y-10">
-            
-            <motion.h1 
-              initial={{ opacity: 0, y: 60 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, delay: 0.7, ease: "easeOut" }}
-              className="text-4xl sm:text-6xl md:text-8xl lg:text-[90px] font-serif text-white leading-[1.1] sm:leading-[0.9] italic tracking-tight font-light sm:whitespace-nowrap text-center px-4"
-            >
-              "Inspired By Greatness"
-            </motion.h1>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.6, ease: "easeOut" }}
-              className="flex flex-row gap-3 sm:gap-4 w-full sm:w-auto pt-6 sm:pt-4 justify-center px-4 sm:px-0"
-            >
-              <button 
-                onClick={() => {
-                  const el = document.getElementById("bestsellers");
-                  el?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="group flex items-center justify-center gap-2 sm:gap-3 flex-1 sm:flex-none px-3 sm:px-12 py-3 sm:py-4 bg-luxury-dark text-white hover:bg-luxury-taupe hover:text-black rounded-full text-[9px] sm:text-[11px] uppercase tracking-widest font-semibold transition-all duration-300"
-              >
-                Shop Now
-                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1.5 transition-transform duration-300" />
-              </button>
-              
-              <button 
-                onClick={() => {
-                  const el = document.getElementById("clubs");
-                  el?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="flex items-center justify-center flex-1 sm:flex-none px-3 sm:px-8 py-3 sm:py-4 border border-white text-white hover:bg-white hover:text-black rounded-full text-[9px] sm:text-[11px] uppercase tracking-widest font-semibold transition-all duration-300"
-              >
-                Explore Clubs
-              </button>
-            </motion.div>
+        {settingsLoading ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-black">
+            <Loader2 className="w-12 h-12 animate-spin text-white/50" />
           </div>
+        ) : (
+          <>
+            {/* Background Media */}
+            {homepageSettings?.hero?.mediaType === 'video' ? (
+              <>
+                <video autoPlay loop muted playsInline className="hidden md:block absolute inset-0 w-full h-full object-cover mt-20 object-top z-0">
+                  <source src={homepageSettings.hero.desktopMediaUrl || "/images/Hero_Section_vid.MP4"} type="video/mp4" />
+                </video>
+                <video autoPlay loop muted playsInline className="block md:hidden absolute inset-0 w-full h-full object-cover mt-20 object-top z-0">
+                  <source src={homepageSettings.hero.mobileMediaUrl || homepageSettings.hero.desktopMediaUrl || "/images/Hero_Section_vid.MP4"} type="video/mp4" />
+                </video>
+              </>
+            ) : (
+              <>
+                <div className="hidden md:block absolute inset-0 w-full h-full z-0 mt-20">
+                  <Image 
+                    src={homepageSettings?.hero?.desktopMediaUrl || ""} 
+                    alt="Hero Desktop" 
+                    fill 
+                    className="object-cover object-top"
+                  />
+                </div>
+                <div className="block md:hidden absolute inset-0 w-full h-full z-0 mt-20">
+                  <Image 
+                    src={homepageSettings?.hero?.mobileMediaUrl || homepageSettings?.hero?.desktopMediaUrl || ""} 
+                    alt="Hero Mobile" 
+                    fill 
+                    className="object-cover object-top"
+                  />
+                </div>
+              </>
+            )}
 
-        </div>
+            {/* Stadium lighting / Overlay opacity from settings */}
+            <div 
+              className="absolute inset-0 bg-black z-0 pointer-events-none" 
+              style={{ opacity: (homepageSettings?.hero?.overlayOpacity ?? 40) / 100 }}
+            />
+            
+            {/* Cinematic Background Spotlights */}
+            <div className="absolute right-[10%] top-[15%] w-[500px] h-[500px] bg-luxury-taupe/15 rounded-full blur-[100px] z-0 animate-pulse-subtle" />
+            <div className="absolute left-[-5%] bottom-[-5%] w-[400px] h-[400px] bg-luxury-sage/20 rounded-full blur-[80px] z-0" />
+
+            {/* Hero content layout - Centered */}
+            <div className="relative w-full max-w-7xl mx-auto flex flex-col items-center justify-center text-center z-10">
+              
+              {/* Text Block */}
+              <div className="flex flex-col items-center mt-40 space-y-10">
+                
+                <motion.h1 
+                  initial={{ opacity: 0, y: 60 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1.2, delay: 0.7, ease: "easeOut" }}
+                  className="text-4xl sm:text-6xl md:text-8xl lg:text-[90px] font-serif text-white leading-[1.1] sm:leading-[0.9] italic tracking-tight font-light sm:whitespace-nowrap text-center px-4 drop-shadow-lg"
+                >
+                  "{homepageSettings?.hero?.title || 'Inspired By Greatness'}"
+                </motion.h1>
+
+                <motion.div 
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1, delay: 0.6, ease: "easeOut" }}
+                  className="flex flex-row gap-3 sm:gap-4 w-full sm:w-auto pt-6 sm:pt-4 justify-center px-4 sm:px-0"
+                >
+                  <Link href={homepageSettings?.hero?.ctaLink || '/shop'} passHref>
+                    <button 
+                      className="group flex items-center justify-center gap-2 sm:gap-3 flex-1 sm:flex-none px-3 sm:px-12 py-3 sm:py-4 bg-luxury-dark text-white hover:bg-luxury-taupe hover:text-black rounded-full text-[9px] sm:text-[11px] uppercase tracking-widest font-semibold transition-all duration-300"
+                    >
+                      {homepageSettings?.hero?.ctaText || 'Shop Now'}
+                      <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1.5 transition-transform duration-300" />
+                    </button>
+                  </Link>
+                  
+                  <button 
+                    onClick={() => {
+                      const el = document.getElementById("clubs");
+                      el?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className="flex items-center justify-center flex-1 sm:flex-none px-3 sm:px-8 py-3 sm:py-4 border border-white text-white hover:bg-white hover:text-black rounded-full text-[9px] sm:text-[11px] uppercase tracking-widest font-semibold transition-all duration-300 backdrop-blur-sm"
+                  >
+                    Explore Clubs
+                  </button>
+                </motion.div>
+              </div>
+
+            </div>
+          </>
+        )}
       </section>
 
       {/* 2.5 Built for Football Culture Section */}
@@ -141,8 +185,8 @@ export default function Homepage() {
             </span>
             
             <h2 className="text-5xl md:text-7xl font-serif text-black font-light leading-[1.05] tracking-tight">
-              The Road to Glory <br />
-              <span className="italic font-medium text-black">Begins Now.</span>
+              {homepageSettings?.hero?.subtitle?.split(' ').slice(0, 4).join(' ') || "The Road to Glory"} <br />
+              <span className="italic font-medium text-black">{homepageSettings?.hero?.subtitle?.split(' ').slice(4).join(' ') || "Begins Now."}</span>
             </h2>
             
             <p className="text-lg text-black font-sans leading-relaxed max-w-md">
@@ -152,8 +196,7 @@ export default function Homepage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 pt-4">
               <button 
                 onClick={() => {
-                  const el = document.getElementById("clubs");
-                  el?.scrollIntoView({ behavior: "smooth" });
+                  window.location.href = "/national-teams";
                 }}
                 className="text-xs uppercase tracking-widest font-semibold text-black hover:text-black flex items-center gap-2 transition-colors duration-300"
               >
@@ -290,7 +333,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
             dragElastic={0.1}
             className="flex gap-8 w-max"
           >
-            {bestSellers.map((product) => (
+            {bestSellers.map((product: any) => (
               <motion.div 
                 key={product.id}
                 whileHover={{ 
@@ -307,7 +350,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                   className="relative w-full aspect-[35/32] md:aspect-auto md:h-[320px] bg-neutral-100 group"
                   style={{ transform: "translateZ(30px)" }}
                 >
-                  <Link href={`/product/${product.id}`}>
+                  <Link href={`/product/${product.realId}`}>
                     <Image 
                       src={product.image}
                       alt={product.name}
@@ -324,7 +367,11 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      setQuickAddProduct(product);
+                      if (product.realProduct) {
+                        setQuickAddProduct(product.realProduct);
+                      } else {
+                        window.location.href = `/product/${product.realId}`;
+                      }
                     }}
                     className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-2.5 bg-luxury-dark text-white hover:bg-luxury-taupe hover:text-black text-[10px] tracking-widest uppercase font-semibold rounded-full shadow-lg opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 backdrop-blur-md z-10"
                   >
@@ -336,38 +383,31 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      toggleWishlist(product.id);
+                      toggleWishlist(product.realId);
                     }}
                     className="absolute top-3 right-3 md:top-4 md:right-4 p-2 md:p-2.5 bg-luxury-ivory/80 backdrop-blur-md rounded-full text-black hover:text-black transition-colors duration-300 shadow-sm z-10"
                     aria-label="Add to Wishlist"
                   >
-                    <Heart className={`w-4 h-4 ${wishlist.includes(product.id) ? "fill-luxury-taupe text-black" : ""}`} />
+                    <Heart className={`w-4 h-4 ${wishlist.includes(product.realId) ? "fill-luxury-taupe text-black" : ""}`} />
                   </button>
                 </div>
 
                 {/* Text specifications */}
                 <div className="p-4 md:p-5 md:pt-4 space-y-2 flex-grow flex flex-col justify-between">
                   <div>
-                    <div className="flex justify-between items-center text-[10px] uppercase tracking-widest font-semibold text-white/80">
-                      <span>{product.category}</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-start mt-1 md:mt-0">
-                      <Link href={`/product/${product.id}`} className="block flex-1 min-w-0">
-                        <h3 className="text-[14px] md:text-base font-serif text-white font-medium mt-1 leading-tight tracking-wide hover:text-luxury-ivory transition-colors duration-300 truncate">
-                          {product.club || "Futbol Store"}
-                        </h3>
-                        <p className="text-[11px] text-white/70 font-light mt-0.5 truncate md:whitespace-normal">
-                          {product.name}
-                        </p>
-                      </Link>
-                    </div>
+                    <Link href={`/product/${product.realId}`} className="block mt-2">
+                      <h3 className="font-serif text-[13px] md:text-[15px] font-medium leading-tight text-white hover:text-luxury-taupe transition-colors md:whitespace-normal" style={{ transform: "translateZ(20px)" }}>
+                        {product.realProduct?.name || product.name}
+                      </h3>
+                    </Link>
                   </div>
-                  
+
                   <div className="flex justify-between items-end pb-1 border-b border-white/20 pt-1 md:pt-0">
-                    <span className="font-serif text-base md:text-lg text-white font-medium">{product.priceStr}</span>
-                    <Link 
-                      href={`/product/${product.id}`}
+                    <span className="font-serif text-base md:text-lg text-white font-medium">
+                      {product.realProduct?.priceStr || product.priceStr}
+                    </span>
+                    <Link
+                      href={`/product/${product.realId}`}
                       className="flex text-[8px] md:text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 hover:text-white items-center gap-1 transition-colors duration-300"
                     >
                       View Item <ChevronRight className="w-3 h-3" />
@@ -399,12 +439,12 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
 
           {/* Premium layout Grid */}
           <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 bg-transparent overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory no-scrollbar">
-            {[
+            {(homepageSettings?.clubs || [
               { id: "club-ars", query: "ARSENAL", name: "ARSENAL FC", image: "/images/25-26_club-jerseys/Arsenal_25-26_Home_Player_Version.jpeg" },
               { id: "club-fcb", query: "BARCELONA", name: "FC BARCELONA", image: "/images/25-26_club-jerseys/FCB_25-26_HPV.jpeg" },
               { id: "club-mci", query: "MANCHESTER CITY", name: "MANCHESTER CITY", image: "/images/25-26_club-jerseys/MC25-26_HPV.jpeg" },
               { id: "club-rm", query: "MADRID", name: "REAL MADRID CF", image: "/images/25-26_club-jerseys/real_madrid25-26_HPV.jpeg" },
-            ].map((card) => {
+            ]).map((card: any) => {
               const href = `/clubs?club=${encodeURIComponent(card.query)}`;
               return (
               <Link key={card.name} href={href} className="w-[55%] sm:w-[45%] md:w-auto shrink-0 snap-start block">
@@ -431,7 +471,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
 
       {/* 6. Find Your National Team Jersey (Interactive 3D Carousel Component) */}
       <section className="bg-[#FFEEE2] relative overflow-hidden border-t border-luxury-taupe/15">
-        <NationalTeams3D />
+        <NationalTeams3D teams={homepageSettings?.nationalTeams} />
       </section>
 
 

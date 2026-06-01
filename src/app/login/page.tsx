@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, KeyRound, ArrowRight, Loader2, ChevronLeft } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, ArrowRight, Loader2, ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { authService } from '@/backend';
@@ -10,13 +10,12 @@ import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 
 export default function LoginPage() {
-  const [authMode, setAuthMode] = useState<'selection' | 'phone'>('selection');
+  const [authMode, setAuthMode] = useState<'selection' | 'email'>('selection');
+  const [emailMode, setEmailMode] = useState<'login' | 'signup'>('login');
   
-  // Phone Auth State
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [otp, setOtp] = useState('');
-  const [verificationResult, setVerificationResult] = useState<any>(null);
-  const [otpSent, setOtpSent] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +26,7 @@ export default function LoginPage() {
   useEffect(() => {
     // If user is already logged in, redirect to home or account page
     if (user && !authLoading) {
-      router.push('/account');
+      router.push('/');
     }
   }, [user, authLoading, router]);
 
@@ -42,34 +41,30 @@ export default function LoginPage() {
     }
   };
 
-  const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAppleAuth = async () => {
     setError(null);
     setLoading(true);
-
     try {
-      const appVerifier = authService.initializeRecaptcha('recaptcha-container');
-      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
-      const result = await authService.sendPhoneOtp(formattedPhone, appVerifier);
-      setVerificationResult(result);
-      setOtpSent(true);
-      setLoading(false);
+      await authService.loginWithApple();
     } catch (err: any) {
-      setError(err.message || "Failed to send OTP. Please check your phone number.");
+      setError(err.message || "Failed to sign in with Apple.");
       setLoading(false);
     }
   };
 
-  const handleVerifyOtp = async (e: React.FormEvent) => {
+  const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
-      await authService.verifyPhoneOtp(verificationResult, otp);
-      // Redirection handled by useEffect
+      if (emailMode === 'signup') {
+        await authService.signupWithEmail(email, password, name);
+      } else {
+        await authService.loginWithEmail(email, password);
+      }
     } catch (err: any) {
-      setError("Invalid OTP. Please try again.");
+      setError(err.message || "Authentication failed. Please check your credentials.");
       setLoading(false);
     }
   };
@@ -105,11 +100,9 @@ export default function LoginPage() {
         {/* Right Side - Form Panel */}
         <div className="w-full md:w-1/2 bg-[#FAFAFA] p-8 sm:p-12 lg:p-16 flex flex-col justify-center relative">
           <Link href="/" className="absolute top-8 right-8 text-[10px] uppercase tracking-widest font-semibold text-black/40 hover:text-black transition-colors flex items-center gap-1">
-            <ChevronLeft className="w-3 h-3" /> Back to Store
+            <ChevronLeft className="w-3 h-3" /> Back to Home
           </Link>
 
-          <div id="recaptcha-container"></div>
-          
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -118,10 +111,10 @@ export default function LoginPage() {
           >
             <div className="mb-10 text-center md:text-left">
               <h1 className="text-3xl font-serif text-[#0F0F0F] mb-3">
-                Welcome User
+                {authMode === 'selection' ? 'Welcome' : (emailMode === 'login' ? 'Sign In' : 'Create Account')}
               </h1>
               <p className="text-black/50 font-sans text-sm font-light">
-                Sign in to your account for a seamless luxury shopping experience.
+                Secure access for a premium shopping experience.
               </p>
             </div>
 
@@ -141,6 +134,17 @@ export default function LoginPage() {
                   Continue with Google
                 </button>
 
+                <button
+                  onClick={handleAppleAuth}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 bg-black text-white py-3.5 rounded-lg hover:bg-black/80 transition-all duration-300 font-sans text-sm font-medium shadow-sm disabled:opacity-50"
+                >
+                  <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24">
+                    <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.19 2.31-.88 3.5-.84 1.5.05 2.78.8 3.59 2.07-3.11 1.9-2.6 5.46.36 6.61-.75 1.83-1.78 3.65-2.53 4.33zm-2.73-14.73c.6-1.53-.16-3.32-1.81-4.05-.59 1.69.41 3.46 1.81 4.05z" />
+                  </svg>
+                  Continue with Apple
+                </button>
+
                 <div className="flex items-center my-6">
                   <div className="flex-grow border-t border-black/10"></div>
                   <span className="px-4 text-[10px] uppercase tracking-widest text-black/40 font-semibold">Or</span>
@@ -148,50 +152,69 @@ export default function LoginPage() {
                 </div>
 
                 <button
-                  onClick={() => setAuthMode('phone')}
-                  className="w-full flex items-center justify-center gap-3 bg-[#0F0F0F] text-white py-3.5 rounded-lg hover:bg-black/80 transition-all duration-300 font-sans text-sm font-medium shadow-md"
+                  onClick={() => setAuthMode('email')}
+                  className="w-full flex items-center justify-center gap-3 bg-[#FAFAFA] border border-black/10 text-black py-3.5 rounded-lg hover:bg-black/5 transition-all duration-300 font-sans text-sm font-medium shadow-sm"
                 >
-                  <Phone className="w-4 h-4" />
-                  Continue with Phone
+                  <Mail className="w-4 h-4" />
+                  Continue with Email
                 </button>
               </div>
             ) : (
-              <form onSubmit={otpSent ? handleVerifyOtp : handleSendOtp} className="space-y-5">
-                {!otpSent ? (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-1">
-                    <label className="block text-[11px] uppercase tracking-widest text-black/60 font-semibold mb-2">Mobile Number</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Phone className="h-4 w-4 text-black/40" />
+              <form onSubmit={handleEmailAuth} className="space-y-5">
+                <AnimatePresence mode="wait">
+                  {emailMode === 'signup' && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-1">
+                      <label className="block text-[11px] uppercase tracking-widest text-black/60 font-semibold mb-2">Full Name</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <UserIcon className="h-4 w-4 text-black/40" />
+                        </div>
+                        <input
+                          type="text"
+                          required
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          className="w-full pl-11 pr-4 py-3.5 bg-white border border-black/10 rounded-lg focus:border-black/30 focus:ring-1 focus:ring-black/10 focus:outline-none transition-all duration-300 font-sans text-[#0F0F0F] placeholder-black/30 text-sm shadow-sm"
+                          placeholder="Lionel Messi"
+                        />
                       </div>
-                      <input
-                        type="tel"
-                        required
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3.5 bg-white border border-black/10 rounded-lg focus:border-black/30 focus:ring-1 focus:ring-black/10 focus:outline-none transition-all duration-300 font-sans text-[#0F0F0F] placeholder-black/30 text-sm shadow-sm"
-                        placeholder="9876543210"
-                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-1">
+                  <label className="block text-[11px] uppercase tracking-widest text-black/60 font-semibold mb-2">Email Address</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Mail className="h-4 w-4 text-black/40" />
                     </div>
-                  </motion.div>
-                ) : (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-1">
-                    <label className="block text-[11px] uppercase tracking-widest text-black/60 font-semibold mb-2">Enter 6-Digit OTP</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <KeyRound className="h-4 w-4 text-black/40" />
-                      </div>
-                      <input
-                        type="text"
-                        required
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3.5 bg-white border border-black/10 rounded-lg focus:border-black/30 focus:ring-1 focus:ring-black/10 focus:outline-none transition-all duration-300 font-sans text-[#0F0F0F] placeholder-black/30 text-base tracking-[0.3em] font-mono shadow-sm"
-                        placeholder="123456"
-                      />
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-11 pr-4 py-3.5 bg-white border border-black/10 rounded-lg focus:border-black/30 focus:ring-1 focus:ring-black/10 focus:outline-none transition-all duration-300 font-sans text-[#0F0F0F] placeholder-black/30 text-sm shadow-sm"
+                      placeholder="you@example.com"
+                    />
+                  </div>
+                </motion.div>
+
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-1">
+                  <label className="block text-[11px] uppercase tracking-widest text-black/60 font-semibold mb-2">Password</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Lock className="h-4 w-4 text-black/40" />
                     </div>
-                  </motion.div>
-                )}
+                    <input
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full pl-11 pr-4 py-3.5 bg-white border border-black/10 rounded-lg focus:border-black/30 focus:ring-1 focus:ring-black/10 focus:outline-none transition-all duration-300 font-sans text-[#0F0F0F] placeholder-black/30 text-sm shadow-sm"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                </motion.div>
 
                 <button
                   type="submit"
@@ -203,12 +226,25 @@ export default function LoginPage() {
                   ) : (
                     <>
                       <span className="font-sans text-sm font-medium">
-                        {otpSent ? 'Verify Code' : 'Send Code'}
+                        {emailMode === 'login' ? 'Sign In' : 'Create Account'}
                       </span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
                 </button>
+
+                <div className="mt-4 text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmailMode(emailMode === 'login' ? 'signup' : 'login');
+                      setError(null);
+                    }}
+                    className="text-xs text-black/60 hover:text-black transition-colors"
+                  >
+                    {emailMode === 'login' ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+                  </button>
+                </div>
 
                 <div className="mt-6 text-center">
                   <button
@@ -216,9 +252,6 @@ export default function LoginPage() {
                     onClick={() => {
                       setAuthMode('selection');
                       setError(null);
-                      setOtpSent(false);
-                      setPhoneNumber('');
-                      setOtp('');
                     }}
                     className="text-black/50 font-medium text-xs hover:text-black transition-colors focus:outline-none flex items-center justify-center gap-1 mx-auto"
                   >

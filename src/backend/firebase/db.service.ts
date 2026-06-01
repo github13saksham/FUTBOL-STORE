@@ -1,7 +1,7 @@
 import { IDatabaseService, UserProfile, Address } from "../interfaces/db.interface";
 import { Product, Club, ALL_PRODUCTS, CLUBS } from "../../data/mockData";
 import { db, storage } from "./config";
-import { collection, getDocs, doc, getDoc, query, setDoc, updateDoc, deleteDoc, writeBatch, where } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, query, setDoc, updateDoc, deleteDoc, writeBatch, where, onSnapshot, runTransaction } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export class FirebaseDatabaseService implements IDatabaseService {
@@ -59,21 +59,39 @@ export class FirebaseDatabaseService implements IDatabaseService {
     }
   }
 
+  // --- Helper to Trigger Revalidation ---
+  private async triggerRevalidation() {
+    try {
+      if (typeof window !== 'undefined') {
+        await fetch('/api/revalidate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+      }
+    } catch (e) {
+      console.error("Error triggering cache revalidation:", e);
+    }
+  }
+
   // --- Admin Methods ---
 
   async addProduct(product: Product): Promise<void> {
     const docRef = doc(db, "products", product.id);
     await setDoc(docRef, product);
+    await this.triggerRevalidation();
   }
 
   async updateProduct(id: string, updates: Partial<Product>): Promise<void> {
     const docRef = doc(db, "products", id);
     await updateDoc(docRef, updates as any);
+    await this.triggerRevalidation();
   }
 
   async deleteProduct(id: string): Promise<void> {
     const docRef = doc(db, "products", id);
     await deleteDoc(docRef);
+    await this.triggerRevalidation();
   }
 
   async clearDatabase(): Promise<void> {
@@ -86,6 +104,7 @@ export class FirebaseDatabaseService implements IDatabaseService {
       batch.delete(doc.ref);
     });
     await batch.commit();
+    await this.triggerRevalidation();
   }
 
   async clearProductsBySection(section: 'national' | 'club'): Promise<void> {
@@ -103,6 +122,7 @@ export class FirebaseDatabaseService implements IDatabaseService {
       }
     });
     await batch.commit();
+    await this.triggerRevalidation();
   }
 
   async uploadProductImage(file: File): Promise<string> {
@@ -136,11 +156,34 @@ export class FirebaseDatabaseService implements IDatabaseService {
   }
 
   // --- Orders ---
+  private async getNextOrderId(): Promise<string> {
+    const counterRef = doc(db, "counters", "orders");
+    try {
+      const newCount = await runTransaction(db, async (transaction) => {
+        const sfDoc = await transaction.get(counterRef);
+        if (!sfDoc.exists()) {
+          transaction.set(counterRef, { count: 1 });
+          return 1;
+        }
+        const newCount = sfDoc.data().count + 1;
+        transaction.update(counterRef, { count: newCount });
+        return newCount;
+      });
+      return `TFS-${newCount.toString().padStart(4, "0")}`;
+    } catch (e) {
+      console.error("Transaction failed: ", e);
+      // Fallback to random if transaction fails
+      return `TFS-${Math.floor(Math.random() * 10000).toString().padStart(4, "0")}`;
+    }
+  }
+
   async createOrder(userId: string, orderData: any): Promise<void> {
-    const docRef = doc(collection(db, "orders"));
+    const orderId = await this.getNextOrderId();
+    const docRef = doc(db, "orders", orderId);
+    
     await setDoc(docRef, {
       ...orderData,
-      id: docRef.id,
+      id: orderId,
       userId,
       createdAt: new Date().toISOString()
     });
@@ -158,6 +201,47 @@ export class FirebaseDatabaseService implements IDatabaseService {
     } catch (error) {
       console.error("Error fetching orders:", error);
       return [];
+    }
+  }
+
+  // --- Admin Orders ---
+  async getAllOrders(): Promise<any[]> {
+    try {
+      // Limit to 50 for cost optimization as requested
+      const { limit, orderBy } = await import('firebase/firestore');
+      const q = query(collection(db, "orders"), limit(50));
+      const querySnapshot = await getDocs(q);
+      const orders: any[] = [];
+      querySnapshot.forEach((doc) => {
+        orders.push(doc.data());
+      });
+      return orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } catch (error) {
+      console.error("Error fetching all orders:", error);
+      return [];
+    }
+  }
+
+  listenToAllOrders(callback: (orders: any[]) => void): () => void {
+    const q = query(collection(db, "orders"));
+    return onSnapshot(q, (querySnapshot) => {
+      const orders: any[] = [];
+      querySnapshot.forEach((doc) => {
+        orders.push(doc.data());
+      });
+      callback(orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+    }, (error) => {
+      console.error("Error listening to orders:", error);
+    });
+  }
+
+  async updateOrderStatus(orderId: string, status: string): Promise<void> {
+    try {
+      const docRef = doc(db, "orders", orderId);
+      await updateDoc(docRef, { status, updatedAt: new Date().toISOString() });
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      throw error;
     }
   }
 

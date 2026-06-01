@@ -150,7 +150,7 @@ export default function ClubsPage() {
                         src={product.image}
                         alt={product.name}
                         fill
-                        className="object-cover transition-transform duration-[1000ms] ease-out md:scale-105 md:group-hover:scale-110"
+                        className="object-cover"
                       />
                       
                       {/* Add overlays */}
@@ -186,18 +186,11 @@ export default function ClubsPage() {
                   {/* Specifications */}
                   <div className="p-4 md:p-5 md:pt-4 space-y-2 flex-grow flex flex-col justify-between">
                     <div>
-                      <div className="flex justify-between items-center text-[10px] uppercase tracking-widest font-semibold text-white/80">
-                        <span>{product.category}</span>
-                      </div>
-                      
                       <div className="flex justify-between items-start mt-1">
                         <Link href={`/product/${product.id}`} className="block flex-1 min-w-0">
-                          <h3 className="text-[14px] md:text-base font-serif text-white font-medium leading-tight tracking-wide hover:text-luxury-ivory transition-colors duration-300 truncate">
-                            {product.club || "Futbol Store"}
-                          </h3>
-                          <p className="text-[11px] text-white/70 font-sans mt-0.5 md:mt-2 truncate md:whitespace-normal md:leading-relaxed">
+                          <h3 className="text-[14px] md:text-base font-serif text-white font-medium leading-tight tracking-wide hover:text-luxury-ivory transition-colors duration-300 truncate md:whitespace-normal">
                             {product.name}
-                          </p>
+                          </h3>
                         </Link>
                       </div>
                     </div>

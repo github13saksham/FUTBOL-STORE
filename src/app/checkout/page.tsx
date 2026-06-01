@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/context/StoreContext";
@@ -38,6 +38,49 @@ export default function CheckoutPage() {
   const [phone, setPhone] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      dbService.getUserProfile(user.uid).then((profile) => {
+        if (profile) {
+          if (profile.addresses && profile.addresses.length > 0) {
+            const defaultAddress = profile.addresses.find((a: any) => a.isDefault) || profile.addresses[0];
+            
+            if (defaultAddress.name) {
+              const parts = defaultAddress.name.split(" ");
+              setFirstName(parts[0] || "");
+              setLastName(parts.slice(1).join(" ") || "");
+            }
+            if (defaultAddress.street) setAddress(defaultAddress.street);
+            if (defaultAddress.city) setCity(defaultAddress.city);
+            if (defaultAddress.state) {
+              setState(defaultAddress.state);
+              const sObj = State.getStatesOfCountry("IN").find(s => s.name === defaultAddress.state);
+              if (sObj) setStateCode(sObj.isoCode);
+            }
+            if (defaultAddress.zipCode) setPincode(defaultAddress.zipCode);
+            if (defaultAddress.phone || profile.phone) setPhone(defaultAddress.phone || profile.phone || "");
+            if (user.email) setEmail(user.email || "");
+          } else {
+            if (user.email) setEmail(user.email || "");
+            if (profile.phone) setPhone(profile.phone || "");
+            if (user.displayName) {
+              const parts = user.displayName.split(" ");
+              setFirstName(parts[0] || "");
+              setLastName(parts.slice(1).join(" ") || "");
+            }
+          }
+        } else {
+            if (user.email) setEmail(user.email || "");
+            if (user.displayName) {
+              const parts = user.displayName.split(" ");
+              setFirstName(parts[0] || "");
+              setLastName(parts.slice(1).join(" ") || "");
+            }
+        }
+      }).catch(err => console.error("Error fetching profile for autofill:", err));
+    }
+  }, [user]);
 
   const cartTotal = getCartTotal();
   // We calculate +199 for items with personalization in the map loop, so getCartTotal() should ideally include it. 
@@ -110,20 +153,74 @@ export default function CheckoutPage() {
             }).then(t => t.json());
             
             if (verifyRes.message === "Payment verified successfully") {
-              if (user) {
-                try {
-                  await dbService.createOrder(user.uid, {
-                    items: cart,
-                    totalAmount: total,
-                    shippingAddress: {
-                      firstName, lastName, email, phone, address, city, state, pincode
-                    },
-                    paymentId: response.razorpay_payment_id,
-                    status: "PAID"
-                  });
-                } catch (e) {
-                  console.error("Failed to save order to DB:", e);
+              try {
+                const customerName = `${firstName} ${lastName}`;
+                const productName = cart.map((item: any) => item.name).join(", ");
+                const finalAmount = total;
+                const finalDate = new Date().toLocaleDateString();
+                const userId = user ? user.uid : "GUEST";
+                const rawPayload = {
+                  items: cart,
+                  totalAmount: finalAmount,
+                  amount: finalAmount,
+                  customerName: customerName,
+                  product: productName,
+                  date: finalDate,
+                  shippingAddress: {
+                    firstName: firstName || "", 
+                    lastName: lastName || "", 
+                    email: email || "", 
+                    phone: phone || "", 
+                    address: address || "", 
+                    city: city || "", 
+                    state: state || "", 
+                    pincode: pincode || ""
+                  },
+                  paymentId: response.razorpay_payment_id || "UNKNOWN",
+                  status: "New Order",
+                  history: [{ status: "New Order", date: new Date().toISOString(), completed: true }]
+                };
+
+                // Firebase will crash if any property is undefined. 
+                // JSON parse/stringify drops all undefined keys safely.
+                const safePayload = JSON.parse(JSON.stringify(rawPayload));
+
+                await dbService.createOrder(userId, safePayload);
+
+                // Auto-save address to user profile if logged in and not already saved
+                if (user) {
+                  try {
+                    const profile = await dbService.getUserProfile(user.uid);
+                    let addresses = profile?.addresses || [];
+                    
+                    const exists = addresses.some((a: any) => 
+                      a.street.toLowerCase().includes(address.toLowerCase()) && 
+                      a.zipCode === pincode
+                    );
+                    
+                    if (!exists) {
+                      const newAddress = {
+                        id: Math.random().toString(36).substring(2, 10),
+                        label: addresses.length === 0 ? "Home" : "Other",
+                        name: `${firstName} ${lastName}`,
+                        street: address,
+                        city: city,
+                        state: state,
+                        zipCode: pincode,
+                        country: "India",
+                        phone: phone,
+                        isDefault: addresses.length === 0
+                      };
+                      addresses.push(newAddress);
+                      await dbService.updateUserProfile(user.uid, { addresses });
+                    }
+                  } catch (err) {
+                    console.error("Failed to auto-save address", err);
+                  }
                 }
+              } catch (e: any) {
+                console.error("Failed to save order to DB:", e);
+                alert("Failed to save order to database: " + (e.message || "Unknown error"));
               }
               clearCart();
               router.push("/account"); 
@@ -170,7 +267,7 @@ export default function CheckoutPage() {
           onClick={() => router.push("/")}
           className="px-8 py-3 bg-white text-black hover:bg-neutral-200 text-xs uppercase tracking-widest font-semibold rounded-full transition-all duration-300"
         >
-          Return to Boutique
+          Return to Store
         </button>
       </div>
     );
@@ -322,6 +419,15 @@ export default function CheckoutPage() {
                       <span className="text-xs font-semibold text-white">Razorpay Secure Checkout</span>
                       <span className="text-[9px] text-white/50 uppercase tracking-widest">100% Encrypted Payments</span>
                     </div>
+                  </div>
+                  
+                  <div className="bg-white/5 p-4 rounded-lg mt-4 border border-white/10">
+                    <p className="text-xs text-white/80 leading-relaxed font-light">
+                      <span className="font-semibold text-white">Notice:</span> If the jersey wouldn't be available due to any unforeseen condition (e.g. stock shortage), the refund process will be initiated automatically. 
+                      <a href="/refund-policy" target="_blank" rel="noopener noreferrer" className="ml-1 underline text-white/50 hover:text-white transition-colors">
+                        View Refund Policy
+                      </a>
+                    </p>
                   </div>
                 </div>
               </div>

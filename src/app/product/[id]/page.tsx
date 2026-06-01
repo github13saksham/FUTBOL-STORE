@@ -175,6 +175,8 @@ export default function ProductPage() {
                 fill
                 style={{ objectFit: "contain" }}
                 className="p-8 object-center"
+                quality={100}
+                unoptimized
                 priority
               />
 
@@ -392,7 +394,7 @@ export default function ProductPage() {
                   onClick={() => setActiveTab(activeTab === "specs" ? null : "specs")}
                   className="w-full flex justify-between items-center py-3 px-4 text-[10px] uppercase font-bold tracking-wider text-white bg-transparent hover:bg-white/5 transition-all text-left"
                 >
-                  <span>Garment Specifications</span>
+                  <span>Product Description</span>
                   <ChevronDown className={`w-3.5 h-3.5 transition-transform ${activeTab === "specs" ? "rotate-180" : ""}`} />
                 </button>
                 <AnimatePresence initial={false}>
@@ -454,8 +456,8 @@ export default function ProductPage() {
         {/* C. Exclusive Pairings recommended collection */}
         <div className="border-t border-white/10 pt-12 space-y-6">
           <div className="text-left">
-            <span className="text-[9px] uppercase tracking-[0.2em] text-white/80 font-bold block">Exclusive Pairings</span>
-            <h2 className="text-lg font-serif text-white mt-0.5  font-light leading-none">
+           
+            <h2 className="text-xl font-serif text-white mt-0.5  font-light leading-none">
               You May Also Like
             </h2>
           </div>
@@ -465,21 +467,39 @@ export default function ProductPage() {
               <Link
                 key={item.id}
                 href={`/product/${item.id}`}
-                className="w-[55%] sm:w-[45%] md:w-auto shrink-0 snap-start group rounded-2xl border border-white/10 bg-luxury-dark p-3 md:p-4 md:border-white/5 md:bg-white/5 hover:bg-white/10 md:hover:bg-white/10 backdrop-blur-sm flex flex-col justify-between transition-all duration-300 shadow-sm overflow-hidden"
+                className="w-[55%] sm:w-[45%] md:w-auto shrink-0 snap-start bg-luxury-dark rounded-2xl border border-white/10 flex flex-col justify-between transition-colors duration-500 shadow-sm relative overflow-hidden group"
               >
-                <div className="relative w-full aspect-[35/32] md:aspect-square rounded-lg overflow-hidden bg-neutral-100 md:bg-black/40 mb-3 md:mb-4 md:border md:border-white/5 group">
+                {/* Image Display */}
+                <div className="relative w-full aspect-square bg-neutral-100 group-hover:bg-neutral-200 transition-colors">
                   <Image
                     src={item.image}
                     alt={item.name}
                     fill
-                    className="object-contain md:p-4 transition-transform duration-700 group-hover:scale-105"
+                    className="object-cover"
                   />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 hidden md:block" />
                 </div>
-                <div className="space-y-1 text-left">
-                  <h4 className="text-[13px] md:text-xs font-serif font-medium md:font-bold text-white leading-tight group-hover:text-white/80 transition-colors duration-300 line-clamp-1">
-                    {item.name}
-                  </h4>
-                  <span className="text-xs font-serif md:font-sans text-white md:text-white/50 block">₹{item.price.toFixed(0)}</span>
+
+                {/* Specifications */}
+                <div className="p-4 md:p-5 md:pt-4 space-y-2 flex-grow flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start mt-1">
+                      <div className="block flex-1 min-w-0">
+                        <h3 className="text-[14px] md:text-base font-serif text-white font-medium leading-tight tracking-wide group-hover:text-luxury-ivory transition-colors duration-300 truncate md:whitespace-normal">
+                          {item.name}
+                        </h3>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-end pb-1 border-b border-white/20 pt-1 md:pt-0">
+                    <span className="font-serif text-base md:text-lg text-white font-medium">
+                      ₹{item.price.toFixed(2)}
+                    </span>
+                    <span className="flex text-[8px] md:text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 group-hover:text-white items-center gap-1 transition-colors duration-300">
+                      View Item <ChevronRight className="w-3 h-3" />
+                    </span>
+                  </div>
                 </div>
               </Link>
             ))}

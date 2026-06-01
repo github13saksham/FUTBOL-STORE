@@ -1,6 +1,6 @@
 import { IAuthService, User as AppUser } from "../interfaces/auth.interface";
 import { auth, storage } from "./config";
-import { onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, signInWithPhoneNumber, RecaptchaVerifier, User as FirebaseUser } from "firebase/auth";
+import { onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, OAuthProvider, User as FirebaseUser } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export class FirebaseAuthService implements IAuthService {
@@ -75,21 +75,13 @@ export class FirebaseAuthService implements IAuthService {
     };
   }
 
-  initializeRecaptcha(containerId: string): any {
-    if (typeof window !== "undefined" && !(window as any).recaptchaVerifier) {
-      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
-        size: 'invisible'
-      });
-    }
-    return (window as any).recaptchaVerifier;
-  }
-
-  async sendPhoneOtp(phoneNumber: string, appVerifier: any): Promise<any> {
-    return await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-  }
-
-  async verifyPhoneOtp(confirmationResult: any, otp: string): Promise<AppUser> {
-    const userCredential = await confirmationResult.confirm(otp);
+  async loginWithApple(): Promise<AppUser> {
+    const provider = new OAuthProvider('apple.com');
+    // Request additional scopes if needed
+    // provider.addScope('email');
+    // provider.addScope('name');
+    
+    const userCredential = await signInWithPopup(auth, provider);
     const firebaseUser = userCredential.user;
     return {
       uid: firebaseUser.uid,

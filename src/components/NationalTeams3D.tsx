@@ -100,10 +100,53 @@ const teams: TeamCard[] = [
       { title: "Fabric", val: "Breathe Knit" },
       { title: "Crest", val: "Gold 3D TPU" }
     ]
+  },
+  {
+    id: 5,
+    name: "FRANCE",
+    sub: "L'Élégance Edition",
+    price: "₹999.00",
+    link: "/national-teams?team=france",
+    color: "from-[#002395] to-[#1434A4]",
+    badgeColor: "bg-[#FFFFFF]",
+    accent: "#ED2939",
+    jerseyColor: "#002395",
+    logo: "/NATIONAL_TEAM_LOGO/france_logo.jpg",
+    stripes: "linear-gradient(90deg, rgba(255,255,255,0.05) 0%, transparent 50%)",
+    desc: "Experience French excellence. A perfect blend of classic Parisian tailoring and modern athletic performance technology.",
+    stats: [
+      { title: "Fit", val: "Aero Tailored" },
+      { title: "Fabric", val: "Performance Knit" },
+      { title: "Crest", val: "Premium Gold TPU" }
+    ]
+  },
+  {
+    id: 6,
+    name: "ENGLAND",
+    sub: "Three Lions Edition",
+    price: "₹999.00",
+    link: "/national-teams?team=england",
+    color: "from-[#FFFFFF] to-[#F3F4F6]",
+    badgeColor: "bg-[#00247D]",
+    accent: "#CE1126",
+    jerseyColor: "#FFFFFF",
+    logo: "/NATIONAL_TEAM_LOGO/england_logo.png",
+    stripes: "linear-gradient(to right, transparent, rgba(206,17,38,0.03), transparent)",
+    desc: "Classic English heritage woven into every thread. Clean, crisp white design complemented by bold navy accents and the iconic Three Lions crest.",
+    stats: [
+      { title: "Fit", val: "Classic Fit" },
+      { title: "Fabric", val: "Breathe Elite" },
+      { title: "Crest", val: "High-Density Woven" }
+    ]
   }
 ];
 
-export default function NationalTeams3D() {
+interface NationalTeams3DProps {
+  teams?: TeamCard[];
+}
+
+export default function NationalTeams3D({ teams: propTeams }: NationalTeams3DProps) {
+  const displayTeams = propTeams && propTeams.length > 0 ? propTeams : teams;
   const [mounted, setMounted] = useState(false);
   const [activeIndex, setActiveIndex] = useState(1); // Middle default
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -115,7 +158,7 @@ export default function NationalTeams3D() {
   const springX = useSpring(x, { stiffness: 120, damping: 25 });
   
   // Calculate carousel angle based on drag x offset
-  const angleStep = 360 / teams.length;
+  const angleStep = 360 / displayTeams.length;
   const rotationY = useTransform(springX, (value) => value * 0.4);
 
   useEffect(() => {
@@ -142,12 +185,12 @@ export default function NationalTeams3D() {
   };
 
   const handleNext = () => {
-    const nextIndex = (activeIndex + 1) % teams.length;
+    const nextIndex = (activeIndex + 1) % displayTeams.length;
     rotateTo(nextIndex);
   };
 
   const handlePrev = () => {
-    const prevIndex = (activeIndex - 1 + teams.length) % teams.length;
+    const prevIndex = (activeIndex - 1 + displayTeams.length) % displayTeams.length;
     rotateTo(prevIndex);
   };
 
@@ -161,7 +204,7 @@ export default function NationalTeams3D() {
     const rawIndex = 1 - (currentAngle / angleStep);
     let snappedIndex = Math.round(rawIndex);
     // Wrap index safely
-    snappedIndex = ((snappedIndex % teams.length) + teams.length) % teams.length;
+    snappedIndex = ((snappedIndex % displayTeams.length) + displayTeams.length) % displayTeams.length;
     
     rotateTo(snappedIndex);
   };
@@ -223,7 +266,7 @@ export default function NationalTeams3D() {
             }}
             className="relative cursor-grab active:cursor-grabbing flex items-center justify-center touch-none"
           >
-            {teams.map((team, index) => {
+            {displayTeams.map((team, index) => {
               // Point to the catalog page pre-filtered for this national team
               const resolvedLink = `/national-teams?team=${team.name}`;
 
