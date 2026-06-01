@@ -471,7 +471,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
 
       {/* 6. Find Your National Team Jersey (Interactive 3D Carousel Component) */}
       <section className="bg-[#FFEEE2] relative overflow-hidden border-t border-luxury-taupe/15">
-        <NationalTeams3D teams={homepageSettings?.nationalTeams} />
+        <NationalTeams3D />
       </section>
 
 
