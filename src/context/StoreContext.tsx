@@ -46,10 +46,10 @@ interface StoreContextType {
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-export default function StoreProvider({ children }: { children: React.ReactNode }) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [clubs, setClubs] = useState<Club[]>([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
+export default function StoreProvider({ children, initialProducts = [], initialClubs = [] }: { children: React.ReactNode, initialProducts?: Product[], initialClubs?: Club[] }) {
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [clubs, setClubs] = useState<Club[]>(initialClubs);
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
@@ -57,24 +57,27 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
   const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    async function fetchData() {
-      setIsLoadingData(true);
-      try {
-        const [productsRes, clubsRes] = await Promise.all([
-          fetch('/api/data/products'),
-          fetch('/api/data/clubs')
-        ]);
-        const fetchedProducts = await productsRes.json();
-        const fetchedClubs = await clubsRes.json();
-        setProducts(fetchedProducts);
-        setClubs(fetchedClubs);
-      } catch (e) {
-        console.error("Failed to load global data", e);
-      } finally {
-        setIsLoadingData(false);
+    // If not passed initially (e.g. somehow rendered without layout data), fetch them.
+    if (products.length === 0 && clubs.length === 0) {
+      async function fetchData() {
+        setIsLoadingData(true);
+        try {
+          const [productsRes, clubsRes] = await Promise.all([
+            fetch('/api/data/products'),
+            fetch('/api/data/clubs')
+          ]);
+          const fetchedProducts = await productsRes.json();
+          const fetchedClubs = await clubsRes.json();
+          setProducts(fetchedProducts);
+          setClubs(fetchedClubs);
+        } catch (e) {
+          console.error("Failed to load global data", e);
+        } finally {
+          setIsLoadingData(false);
+        }
       }
+      fetchData();
     }
-    fetchData();
   }, []);
 
   useEffect(() => {
@@ -217,7 +220,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
             item.customNumber === customNumber
           ) {
             const newQty = item.quantity + change;
-            return newQty > 0 ? { ...item, quantity: newQty } : item;
+            return { ...item, quantity: newQty };
           }
           return item;
         })

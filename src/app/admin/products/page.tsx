@@ -13,6 +13,7 @@ export default function AdminProductsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'national' | 'club'>('club');
   const [versionFilter, setVersionFilter] = useState<'player' | 'fan'>('player');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   const dbService = new FirebaseDatabaseService();
 
@@ -78,6 +79,13 @@ export default function AdminProductsPage() {
     return true;
   });
 
+  // Sort by Uploaded
+  if (sortOrder === 'newest') {
+    // Assuming newer products are at the end of the original list or have newer IDs
+    // If no timestamp, we just reverse the natural array order for 'newest' (assuming added to end)
+    filteredProducts.reverse();
+  }
+
   return (
     <div className="max-w-[1400px] mx-auto pb-12">
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4 border-b border-gray-200 pb-6">
@@ -121,6 +129,16 @@ export default function AdminProductsPage() {
           >
             <option value="player">Player Version</option>
             <option value="fan">Fan Version</option>
+          </select>
+
+          {/* Sort Filter */}
+          <select 
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as any)}
+            className="px-4 py-2 text-sm text-black bg-white border border-gray-200 rounded-lg outline-none focus:border-gray-300"
+          >
+            <option value="newest">New Uploaded</option>
+            <option value="oldest">Past Uploaded</option>
           </select>
 
           <div className="relative flex-1 sm:max-w-xs">

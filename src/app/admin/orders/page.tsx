@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FirebaseDatabaseService } from '@/backend/firebase/db.service';
-import { Search, Filter, Loader2, ArrowUpRight, Copy, CheckCircle2, ChevronRight, Truck, Package, X, Clock } from 'lucide-react';
+import { Search, Filter, Loader2, ArrowUpRight, Copy, CheckCircle2, ChevronRight, Truck, Package, X, Clock, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminOrdersPage() {
@@ -11,6 +11,8 @@ export default function AdminOrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [isGeneratingShipment, setIsGeneratingShipment] = useState(false);
+  const [selectedPickupLocation, setSelectedPickupLocation] = useState('TFS');
   
   const dbService = new FirebaseDatabaseService();
 
@@ -44,6 +46,74 @@ export default function AdminOrdersPage() {
       }
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!confirm("Are you sure you want to delete this order? This cannot be undone.")) return;
+    
+    try {
+      await dbService.deleteOrder(orderId);
+      setOrders(orders.filter(o => o.id !== orderId));
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder(null);
+      }
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      alert("Failed to delete order.");
+    }
+  };
+
+  const generateShipment = async (order: any) => {
+    setIsGeneratingShipment(true);
+    try {
+      const response = await fetch('/api/delhivery/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          orderId: order.id, 
+          orderData: order,
+          pickupLocation: selectedPickupLocation 
+        })
+      });
+      const data = await response.json();
+      
+      if (!response.ok) {
+        alert("Failed to create shipment: " + (data.error || "Unknown error"));
+        return;
+      }
+      
+      // Delhivery B2C JSON payload usually returns packages[0].waybill
+      const waybill = data.packages?.[0]?.waybill || data.waybill || data.upload_wbn || "GENERATED_AWB";
+      
+      await dbService.updateOrder(order.id, { 
+        delhiveryAwb: waybill, 
+        status: "Packed" 
+      });
+      
+      alert(`Shipment generated successfully! AWB: ${waybill}`);
+      
+      // Update local state
+      const newHistory = order.history.map((h: any) => {
+        if (h.status === "Packed") return { ...h, completed: true, date: new Date().toISOString() };
+        return h;
+      });
+      
+      const updatedOrders = orders.map(o => {
+        if (o.id === order.id) {
+          return { ...o, status: "Packed", history: newHistory, delhiveryAwb: waybill };
+        }
+        return o;
+      });
+      
+      setOrders(updatedOrders);
+      setSelectedOrder({ ...order, status: "Packed", history: newHistory, delhiveryAwb: waybill });
+      
+    } catch (error) {
+      console.error(error);
+      alert("Error generating shipment");
+    } finally {
+      setIsGeneratingShipment(false);
     }
   };
 
@@ -136,9 +206,14 @@ export default function AdminOrdersPage() {
                     <td className="px-6 py-4 font-medium text-gray-900">₹{order.amount}</td>
                     <td className="px-6 py-4">{getStatusBadge(order.status)}</td>
                     <td className="px-6 py-4 text-right">
-                      <button onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); }} className="text-gray-400 hover:text-black">
-                        <ArrowUpRight className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center justify-end gap-3">
+                        <button onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); }} className="text-gray-400 hover:text-black" title="View Order">
+                          <ArrowUpRight className="w-4 h-4" />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteOrder(order.id); }} className="text-red-400 hover:text-red-600" title="Delete Order">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -315,6 +390,18 @@ export default function AdminOrdersPage() {
                         <Truck className="w-4 h-4 text-gray-400" /> {selectedOrder.status}
                       </span>
                     </div>
+                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
+                      <span className="text-gray-500">Delhivery AWB</span>
+                      <span className="font-mono text-xs font-medium text-black flex items-center gap-2">
+                        {selectedOrder.delhiveryAwb || "Not Generated"} 
+                        {selectedOrder.delhiveryAwb && (
+                          <Copy 
+                            className="w-3 h-3 text-gray-400 cursor-pointer hover:text-black" 
+                            onClick={() => navigator.clipboard.writeText(selectedOrder.delhiveryAwb)}
+                          />
+                        )}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -326,9 +413,33 @@ export default function AdminOrdersPage() {
                   <button onClick={() => navigator.clipboard.writeText(JSON.stringify(selectedOrder, null, 2))} className="flex-1 py-2.5 px-4 bg-white border border-gray-200 text-black text-xs font-bold rounded-lg hover:bg-gray-50 transition-colors">
                     Copy Details
                   </button>
-                  <button className="flex-1 py-2.5 px-4 bg-black text-white text-xs font-bold rounded-lg hover:bg-gray-900 transition-colors">
-                    View Tracking
-                  </button>
+                  {!selectedOrder.delhiveryAwb ? (
+                    <div className="flex-1 flex gap-2">
+                      <select 
+                        value={selectedPickupLocation}
+                        onChange={(e) => setSelectedPickupLocation(e.target.value)}
+                        className="py-2.5 px-3 bg-white border border-gray-200 text-black text-xs font-bold rounded-lg focus:outline-none focus:border-black"
+                      >
+                        <option value="TFS">TFS</option>
+                        <option value="Venu Sports">Venu Sports</option>
+                        <option value="AY Enterprises">AY Enterprises</option>
+                      </select>
+                      <button 
+                        onClick={() => generateShipment(selectedOrder)}
+                        disabled={isGeneratingShipment || selectedOrder.status === 'Rejected (Out of Stock)'}
+                        className="flex-1 py-2.5 px-4 bg-black text-white text-xs font-bold rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50"
+                      >
+                        {isGeneratingShipment ? "Generating..." : "Generate Shipment"}
+                      </button>
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={() => window.open(`https://www.delhivery.com/tracking?id=${selectedOrder.delhiveryAwb}`, '_blank')}
+                      className="flex-1 py-2.5 px-4 bg-green-600 text-white text-xs font-bold rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Track Shipment
+                    </button>
+                  )}
                 </div>
                 {selectedOrder.status !== 'Rejected (Out of Stock)' && (
                   <button 

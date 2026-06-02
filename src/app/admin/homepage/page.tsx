@@ -11,7 +11,7 @@ export default function HomepageManagerPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'hero' | 'featured' | 'seo' | 'clubs' | 'national'>('hero');
+  const [activeTab, setActiveTab] = useState<'hero' | 'featured' | 'seo' | 'clubs' | 'national' | 'banner'>('hero');
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
   
   const defaultNationalTeams = [
@@ -147,6 +147,10 @@ export default function HomepageManagerPage() {
   ];
 
   const [settings, setSettings] = useState({
+    banner: {
+      enabled: true,
+      text: 'Get Flat ₹100 OFF on all orders above ₹999.'
+    },
     hero: {
       mediaType: 'video', 
       desktopMediaUrl: '/images/Hero_Section_vid.MP4',
@@ -195,6 +199,7 @@ export default function HomepageManagerPage() {
           data.nationalTeams = [...data.nationalTeams, ...defaultNationalTeams.slice(data.nationalTeams.length)];
         }
         if (!data.bestSellersItems) data.bestSellersItems = defaultBestSellers;
+        if (!data.banner) data.banner = { enabled: true, text: 'Get Flat ₹100 OFF on all orders above ₹999.' };
         
         setSettings(data);
       }
@@ -210,6 +215,14 @@ export default function HomepageManagerPage() {
     try {
       const docRef = doc(db, 'settings', 'homepage');
       await setDoc(docRef, settings);
+      
+      // Revalidate the homepage cache
+      await fetch('/api/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: '/' })
+      });
+      
       alert('Homepage settings saved successfully!');
     } catch (error) {
       console.error("Error saving homepage settings:", error);
@@ -239,6 +252,17 @@ export default function HomepageManagerPage() {
   };
 
   // --- Change Handlers ---
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setSettings(prev => ({
+      ...prev,
+      banner: {
+        ...prev.banner,
+        [name]: type === 'checkbox' ? checked : value
+      }
+    }));
+  };
+
   const handleHeroChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setSettings(prev => ({ ...prev, hero: { ...prev.hero, [name]: value } }));
@@ -333,6 +357,12 @@ export default function HomepageManagerPage() {
               className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-bold transition-colors ${activeTab === 'hero' ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <ImageIcon className="w-4 h-4" /> Hero Section
+            </button>
+            <button
+              onClick={() => setActiveTab('banner')}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-bold transition-colors ${activeTab === 'banner' ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+            >
+              <LayoutGrid className="w-4 h-4" /> Promo Banner
             </button>
             <button
               onClick={() => setActiveTab('clubs')}
@@ -608,6 +638,64 @@ export default function HomepageManagerPage() {
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Meta Keywords</label>
                   <input type="text" name="keywords" value={settings.seo.keywords} onChange={handleSeoChange} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" />
                 </div>
+                <SaveButton />
+              </div>
+            </div>
+          )}
+
+          {/* Banner Tab */}
+          {activeTab === 'banner' && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+                <h2 className="text-base font-bold text-black border-b border-gray-100 pb-3">Promo Banner Configuration</h2>
+                
+                <div className="flex items-center gap-3 mb-6">
+                  <input 
+                    type="checkbox" 
+                    id="bannerEnabled" 
+                    name="enabled"
+                    checked={settings.banner.enabled} 
+                    onChange={handleBannerChange}
+                    className="w-5 h-5 accent-black cursor-pointer rounded border-gray-300"
+                  />
+                  <label htmlFor="bannerEnabled" className="text-sm font-bold text-gray-700 cursor-pointer select-none">
+                    Enable Promo Banner
+                  </label>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Banner Text</label>
+                  <input 
+                    type="text" 
+                    name="text" 
+                    value={settings.banner.text} 
+                    onChange={handleBannerChange} 
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" 
+                    placeholder="e.g. Get Flat ₹100 OFF on all orders above ₹999."
+                  />
+                  <p className="text-xs text-gray-500 mt-2">This text will scroll horizontally at the top of the homepage.</p>
+                </div>
+                
+                {/* Live Preview of Banner */}
+                {settings.banner.enabled && (
+                  <div className="mt-8 border border-gray-200 rounded-lg overflow-hidden relative bg-black">
+                    <style>{`
+                      @keyframes marquee {
+                        0% { transform: translateX(0%); }
+                        100% { transform: translateX(-50%); }
+                      }
+                      .animate-marquee {
+                        animation: marquee 20s linear infinite;
+                      }
+                    `}</style>
+                    <div className="bg-luxury-dark text-luxury-ivory py-2 overflow-hidden flex whitespace-nowrap">
+                      <div className="animate-marquee px-4 font-sans text-xs md:text-sm tracking-widest uppercase font-semibold">
+                        {settings.banner.text} &nbsp; • &nbsp; {settings.banner.text} &nbsp; • &nbsp; {settings.banner.text} &nbsp; • &nbsp; {settings.banner.text}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 <SaveButton />
               </div>
             </div>

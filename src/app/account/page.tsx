@@ -516,11 +516,17 @@ service firebase.storage {
                                 <p className="text-xs font-sans text-white mt-1">{new Date(order.createdAt).toLocaleDateString()}</p>
                               </div>
                               <div className="text-right">
-                                <span className="px-3 py-1 bg-green-500/10 text-green-700 text-[10px] uppercase tracking-widest font-bold rounded-full">{order.status}</span>
+                                <span className={`px-3 py-1 text-[10px] uppercase tracking-widest font-bold rounded-full ${
+                                  order.status === 'Rejected (Out of Stock)' || order.status?.toLowerCase().includes('cancel')
+                                    ? 'bg-red-500/10 text-red-400'
+                                    : order.status === 'Delivered'
+                                    ? 'bg-green-500/10 text-green-400'
+                                    : 'bg-white/10 text-white/70'
+                                }`}>{order.status}</span>
                                 <p className="text-lg font-serif font-bold text-white mt-2">₹{order.totalAmount?.toFixed(2)}</p>
                               </div>
                             </div>
-                            <div className="space-y-4">
+                            <div className="space-y-4 mb-4">
                               {order.items?.map((item: any, i: number) => (
                                 <div key={i} className="flex gap-4 items-center">
                                   <div className="w-12 h-16 relative bg-neutral-100 rounded-lg overflow-hidden shrink-0 border border-white/10">
@@ -532,6 +538,21 @@ service firebase.storage {
                                   </div>
                                 </div>
                               ))}
+                            </div>
+                            
+                            <div className="pt-4 border-t border-white/10 text-right">
+                              {order.status === 'Rejected (Out of Stock)' || order.status?.toLowerCase().includes('cancel') ? (
+                                <span className="inline-flex items-center gap-2 px-6 py-2 bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] uppercase tracking-widest font-bold rounded-full">
+                                  ✕ Order Cancelled
+                                </span>
+                              ) : (
+                                <Link
+                                  href={`/track/${order.id}`}
+                                  className="inline-block px-6 py-2 bg-white text-black hover:bg-neutral-200 text-[10px] uppercase tracking-widest font-bold rounded-full transition-colors"
+                                >
+                                  Track Order
+                                </Link>
+                              )}
                             </div>
                           </div>
                         ))}

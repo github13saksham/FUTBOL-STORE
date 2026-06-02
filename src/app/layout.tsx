@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
 import AuthGuard from "@/components/AuthGuard";
+import { fetchProductsRest, fetchClubsRest } from "@/backend/firebase/rest";
 
 export const metadata: Metadata = {
   title: "THE FÚTBOL STORE | Premium Football Fashion & Luxury Jerseys",
@@ -17,16 +18,29 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let initialProducts = [];
+  let initialClubs = [];
+  try {
+    const [products, clubs] = await Promise.all([
+      fetchProductsRest(),
+      fetchClubsRest()
+    ]);
+    initialProducts = products;
+    initialClubs = clubs;
+  } catch (error) {
+    console.error("Failed to load initial data in layout", error);
+  }
+
   return (
     <html lang="en">
       <body className="antialiased">
         <AuthProvider>
-          <StoreProvider>
+          <StoreProvider initialProducts={initialProducts} initialClubs={initialClubs}>
             <AuthGuard>
               <div className="grain-overlay" />
               <SmoothScroll>
@@ -41,4 +55,3 @@ export default function RootLayout({
     </html>
   );
 }
-

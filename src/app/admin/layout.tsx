@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, ArrowLeft, Menu, X, ShoppingBag, LayoutTemplate, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, ArrowLeft, Menu, X, ShoppingBag, LayoutTemplate, LogOut, Ticket, Database } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -14,7 +14,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingBag, badge: 3 }, // Mock badge for new orders
     { name: 'Products', href: '/admin/products', icon: Package, alert: true }, // Mock alert for low stock
+    { name: 'Coupons', href: '/admin/coupons', icon: Ticket },
     { name: 'Homepage Manager', href: '/admin/homepage', icon: LayoutTemplate },
+    { name: 'Database', href: '/admin/database', icon: Database },
   ];
 
   if (pathname === '/admin/login') {

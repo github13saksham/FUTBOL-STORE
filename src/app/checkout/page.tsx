@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { useStore } from "@/context/StoreContext";
 import { useAuth } from "@/context/AuthContext";
 import { dbService } from "@/backend";
-import { ArrowLeft, ShieldCheck, CreditCard, Lock } from "lucide-react";
+import { ArrowLeft, ShieldCheck, CreditCard, Lock, Tag, XCircle } from "lucide-react";
 import { State, City } from "country-state-city";
+import { Coupon } from "@/backend/interfaces/db.interface";
 
 const initializeRazorpay = () => {
   return new Promise((resolve) => {
@@ -21,7 +22,7 @@ const initializeRazorpay = () => {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, getCartTotal, clearCart } = useStore();
+  const { cart, getCartTotal, clearCart, updateQuantity } = useStore();
   const { user } = useAuth();
   
   const [email, setEmail] = useState("");
@@ -39,31 +40,40 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Delhivery Pincode State
+  const [isCheckingPincode, setIsCheckingPincode] = useState(false);
+  const [pincodeServiceable, setPincodeServiceable] = useState<boolean | null>(null);
+  const [pincodeMessage, setPincodeMessage] = useState("");
+  const [shippingCharge, setShippingCharge] = useState<number | null>(null);
+
+  // User Profile Addresses
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("new");
+
+  // Coupon State
+  const [couponCodeInput, setCouponCodeInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [couponError, setCouponError] = useState("");
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState<Coupon[]>([]);
+  const [showCoupons, setShowCoupons] = useState(false);
+
   useEffect(() => {
+    dbService.getCoupons().then(coupons => {
+      setAvailableCoupons(coupons.filter(c => c.isActive));
+    }).catch(err => console.error("Error fetching available coupons:", err));
+
     if (user) {
       dbService.getUserProfile(user.uid).then((profile) => {
         if (profile) {
+          if (profile.phone) setPhone(profile.phone || "");
+          if (user.email) setEmail(user.email || "");
+          
           if (profile.addresses && profile.addresses.length > 0) {
+            setSavedAddresses(profile.addresses);
             const defaultAddress = profile.addresses.find((a: any) => a.isDefault) || profile.addresses[0];
-            
-            if (defaultAddress.name) {
-              const parts = defaultAddress.name.split(" ");
-              setFirstName(parts[0] || "");
-              setLastName(parts.slice(1).join(" ") || "");
-            }
-            if (defaultAddress.street) setAddress(defaultAddress.street);
-            if (defaultAddress.city) setCity(defaultAddress.city);
-            if (defaultAddress.state) {
-              setState(defaultAddress.state);
-              const sObj = State.getStatesOfCountry("IN").find(s => s.name === defaultAddress.state);
-              if (sObj) setStateCode(sObj.isoCode);
-            }
-            if (defaultAddress.zipCode) setPincode(defaultAddress.zipCode);
-            if (defaultAddress.phone || profile.phone) setPhone(defaultAddress.phone || profile.phone || "");
-            if (user.email) setEmail(user.email || "");
+            handleSelectAddress(defaultAddress);
           } else {
-            if (user.email) setEmail(user.email || "");
-            if (profile.phone) setPhone(profile.phone || "");
             if (user.displayName) {
               const parts = user.displayName.split(" ");
               setFirstName(parts[0] || "");
@@ -82,30 +92,176 @@ export default function CheckoutPage() {
     }
   }, [user]);
 
+  const handleSelectAddress = (addr: any) => {
+    if (addr === 'new') {
+      setSelectedAddressId('new');
+      setFirstName("");
+      setLastName("");
+      setAddress("");
+      setCity("");
+      setState("");
+      setStateCode("");
+      setPincode("");
+      setPincodeServiceable(null);
+      setShippingCharge(null);
+      setPincodeMessage("");
+      return;
+    }
+    
+    setSelectedAddressId(addr.id);
+    if (addr.name) {
+      const parts = addr.name.split(" ");
+      setFirstName(parts[0] || "");
+      setLastName(parts.slice(1).join(" ") || "");
+    }
+    if (addr.street) setAddress(addr.street);
+    if (addr.city) setCity(addr.city);
+    if (addr.state) {
+      setState(addr.state);
+      const sObj = State.getStatesOfCountry("IN").find(s => s.name === addr.state);
+      if (sObj) setStateCode(sObj.isoCode);
+    }
+    if (addr.zipCode) {
+      setPincode(addr.zipCode);
+      checkPincode(addr.zipCode); // auto-check when they select an address!
+    }
+    if (addr.phone) setPhone(addr.phone);
+  };
+
+  useEffect(() => {
+    // If the user has a valid pincode and adds/removes items, re-check to get the correct weight-based price from Delhivery
+    if (pincodeServiceable && pincode.length === 6) {
+      checkPincode(pincode);
+    }
+  }, [cart]);
+
   const cartTotal = getCartTotal();
   // We calculate +199 for items with personalization in the map loop, so getCartTotal() should ideally include it. 
   // If getCartTotal doesn't, we add it here manually.
   const personalizationTotal = cart.reduce((acc, item) => {
     return acc + ((item.customName || item.customNumber) ? 199 * item.quantity : 0);
   }, 0);
-  const total = cartTotal + personalizationTotal;
+  const subTotal = cartTotal + personalizationTotal;
+
+  // Calculate Discount
+  let discountAmount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.discountType === 'percentage') {
+      discountAmount = (subTotal * appliedCoupon.discountValue) / 100;
+    } else if (appliedCoupon.discountType === 'flat') {
+      discountAmount = appliedCoupon.discountValue;
+    }
+    // Prevent negative total
+    if (discountAmount > subTotal) discountAmount = subTotal;
+  }
+  
+  const finalTotal = subTotal - discountAmount + (shippingCharge || 0);
+
+  const handleApplyCoupon = async (overrideCode?: string) => {
+    setCouponError("");
+    const codeToApply = (overrideCode || couponCodeInput).trim();
+    
+    if (!codeToApply) {
+      setCouponError("Please enter a coupon code");
+      return;
+    }
+    
+    setIsApplyingCoupon(true);
+    try {
+      const coupon = await dbService.getCouponByCode(codeToApply);
+      if (!coupon) {
+        setCouponError("Invalid coupon code");
+      } else if (!coupon.isActive) {
+        setCouponError("This coupon is currently disabled");
+      } else if (coupon.minOrderValue && subTotal < coupon.minOrderValue) {
+        setCouponError(`Minimum order value to use this coupon is ₹${coupon.minOrderValue}`);
+      } else if (coupon.expiryDate && new Date(coupon.expiryDate).getTime() < new Date().getTime()) {
+        setCouponError("This coupon has expired");
+      } else {
+        setAppliedCoupon(coupon);
+        setCouponCodeInput("");
+      }
+    } catch (err) {
+      console.error(err);
+      setCouponError("Failed to apply coupon");
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError("");
+  };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    if (!email.includes("@")) newErrors.email = "Valid email required";
-    if (!firstName) newErrors.firstName = "First name required";
-    if (!address) newErrors.address = "Address required";
-    if (!city) newErrors.city = "City required";
-    if (!state) newErrors.state = "State required";
-    if (pincode.length < 6) newErrors.pincode = "Valid PIN code required";
-    if (phone.length < 10) newErrors.phone = "Valid phone number required";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) newErrors.email = "Valid email required";
+    if (!firstName.trim()) newErrors.firstName = "First name required";
+    if (!address.trim()) newErrors.address = "Address required";
+    if (!city.trim()) newErrors.city = "City required";
+    if (!state.trim()) newErrors.state = "State required";
+    if (pincode.length !== 6 || !/^\d{6}$/.test(pincode)) newErrors.pincode = "Valid 6-digit PIN code required";
+    if (pincodeServiceable === false) newErrors.pincode = "Delivery not available at this pincode";
+    if (phone.length !== 10 || !/^\d{10}$/.test(phone)) newErrors.phone = "Valid 10-digit phone number required";
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  const checkPincode = async (code: string) => {
+    if (code.length < 6) return false;
+    setIsCheckingPincode(true);
+    setPincodeMessage("");
+    try {
+      const totalJerseys = cart.reduce((acc, item) => acc + item.quantity, 0);
+      const weight = Math.max(1, totalJerseys) * 500; // Assume 500g per jersey
+
+      const res = await fetch(`/api/delhivery/pincode?pincode=${code}&weight=${weight}`);
+      const data = await res.json();
+      
+      if (data.delivery_codes && data.delivery_codes.length > 0) {
+        setPincodeServiceable(true);
+        let calculatedCost = 0;
+        
+        if (totalJerseys < 3) {
+          calculatedCost = data.shipping_cost ? Number(data.shipping_cost) : 100;
+        }
+        
+        setShippingCharge(calculatedCost);
+        setPincodeMessage(`Delivery available! (Shipping: ${calculatedCost === 0 ? 'FREE' : '₹' + calculatedCost})`);
+        return true;
+      } else {
+        setPincodeServiceable(false);
+        setShippingCharge(null);
+        setPincodeMessage("Delivery not available at this pincode.");
+        return false;
+      }
+    } catch (err) {
+      console.error(err);
+      setPincodeServiceable(null);
+      setShippingCharge(null);
+      setPincodeMessage("Error checking pincode");
+      return false;
+    } finally {
+      setIsCheckingPincode(false);
+    }
+  };
+
   const handlePayment = async () => {
     if (!validateForm()) return;
+
+    if (pincodeServiceable === null) {
+      const serviceable = await checkPincode(pincode);
+      if (!serviceable) {
+        alert("Delivery is not available at the entered PIN Code.");
+        return;
+      }
+    } else if (pincodeServiceable === false) {
+       alert("Delivery is not available at the entered PIN Code.");
+       return;
+    }
     
     setIsProcessing(true);
     
@@ -122,7 +278,7 @@ export default function CheckoutPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ amount: total }),
+        body: JSON.stringify({ amount: finalTotal }),
       }).then((t) => t.json());
 
       if (!data.id) {
@@ -156,12 +312,16 @@ export default function CheckoutPage() {
               try {
                 const customerName = `${firstName} ${lastName}`;
                 const productName = cart.map((item: any) => item.name).join(", ");
-                const finalAmount = total;
+                const finalAmount = finalTotal;
                 const finalDate = new Date().toLocaleDateString();
                 const userId = user ? user.uid : "GUEST";
                 const rawPayload = {
                   items: cart,
                   totalAmount: finalAmount,
+                  subTotal: subTotal,
+                  shippingCharges: shippingCharge || 0,
+                  discountAmount: discountAmount,
+                  appliedCoupon: appliedCoupon ? appliedCoupon.code : null,
                   amount: finalAmount,
                   customerName: customerName,
                   product: productName,
@@ -185,7 +345,7 @@ export default function CheckoutPage() {
                 // JSON parse/stringify drops all undefined keys safely.
                 const safePayload = JSON.parse(JSON.stringify(rawPayload));
 
-                await dbService.createOrder(userId, safePayload);
+                const createdOrderId = await dbService.createOrder(userId, safePayload);
 
                 // Auto-save address to user profile if logged in and not already saved
                 if (user) {
@@ -218,12 +378,13 @@ export default function CheckoutPage() {
                     console.error("Failed to auto-save address", err);
                   }
                 }
+                
+                clearCart();
+                router.push(`/track/${createdOrderId}`); 
               } catch (e: any) {
                 console.error("Failed to save order to DB:", e);
                 alert("Failed to save order to database: " + (e.message || "Unknown error"));
               }
-              clearCart();
-              router.push("/account"); 
             } else {
               alert("Payment Verification Failed!");
               setIsProcessing(false);
@@ -274,10 +435,10 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0B0C] text-white selection:bg-white/20 selection:text-white pt-24 pb-32">
-      <div className="max-w-6xl mx-auto px-6 md:px-12">
+    <div className="min-h-screen bg-[#0B0B0C] text-white selection:bg-white/20 selection:text-white pt-20 pb-20">
+      <div className="max-w-5xl mx-auto px-6 md:px-8">
         
-        <div className="flex justify-between items-center mb-12">
+        <div className="flex justify-between items-center mb-6">
           <button 
             onClick={() => router.back()}
             className="flex items-center gap-2 text-xs uppercase tracking-widest text-white/50 hover:text-white transition-colors duration-300"
@@ -289,46 +450,86 @@ export default function CheckoutPage() {
           </span>
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-16">
+        <div className="grid lg:grid-cols-12 gap-10">
           
-          <div className="lg:col-span-7 space-y-12">
+          <div className="lg:col-span-7 space-y-8">
             
-            <section className="space-y-6">
-              <h2 className="text-2xl font-serif text-white">Contact Information</h2>
-              <div className="space-y-4">
+            {savedAddresses.length > 0 && (
+              <section className="space-y-4">
+                <h2 className="text-lg font-serif text-white">Select Saved Address</h2>
+                <div className="space-y-2 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {savedAddresses.map((addr) => (
+                      <button
+                        key={addr.id}
+                        onClick={() => handleSelectAddress(addr)}
+                        className={`text-left p-3 rounded-lg border text-xs transition-colors flex flex-col gap-1 ${
+                          selectedAddressId === addr.id 
+                            ? 'border-white bg-white/10' 
+                            : 'border-white/10 bg-[#141414] hover:border-white/30'
+                        }`}
+                      >
+                        <span className="font-bold text-white flex items-center justify-between w-full">
+                          {addr.label}
+                          {addr.isDefault && <span className="bg-white text-black px-1.5 py-0.5 rounded text-[8px] uppercase tracking-widest">Default</span>}
+                        </span>
+                        <span className="text-white/70 truncate w-full">{addr.name}</span>
+                        <span className="text-white/50 truncate w-full">{addr.street}, {addr.city}</span>
+                        <span className="text-white/50 truncate w-full">{addr.state} - {addr.zipCode}</span>
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => handleSelectAddress('new')}
+                      className={`text-left p-3 rounded-lg border text-xs transition-colors flex items-center justify-center ${
+                        selectedAddressId === 'new' 
+                          ? 'border-white bg-white/10' 
+                          : 'border-white/10 bg-[#141414] hover:border-white/30 text-white/50'
+                      }`}
+                    >
+                      <span className="font-bold uppercase tracking-widest">+ Use New Address</span>
+                    </button>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            <section className="space-y-4">
+              <h2 className="text-lg font-serif text-white">Contact Information</h2>
+              <div className="space-y-3">
                 <input
                   type="email"
                   placeholder="Email Address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`w-full px-4 py-3 border bg-[#141414] text-white text-sm focus:outline-none transition-colors ${errors.email ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
+                  className={`w-full px-3 py-2 border bg-[#141414] text-white text-xs focus:outline-none transition-colors ${errors.email ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
                 />
                 <input
                   type="tel"
                   placeholder="Phone Number (for delivery updates)"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className={`w-full px-4 py-3 border bg-[#141414] text-white text-sm focus:outline-none transition-colors ${errors.phone ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
+                  className={`w-full px-3 py-2 border bg-[#141414] text-white text-xs focus:outline-none transition-colors ${errors.phone ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
                 />
               </div>
             </section>
 
-            <section className="space-y-6">
-              <h2 className="text-2xl font-serif text-white">Shipping Address</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <section className="space-y-4">
+              <h2 className="text-lg font-serif text-white">Shipping Address</h2>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input
                   type="text"
                   placeholder="First Name"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className={`w-full px-4 py-3 border bg-[#141414] text-white text-sm focus:outline-none transition-colors ${errors.firstName ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
+                  className={`w-full px-3 py-2 border bg-[#141414] text-white text-xs focus:outline-none transition-colors ${errors.firstName ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
                 />
                 <input
                   type="text"
                   placeholder="Last Name"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="w-full px-4 py-3 border border-white/10 bg-[#141414] text-white text-sm focus:outline-none focus:border-white transition-colors"
+                  className="w-full px-3 py-2 border border-white/10 bg-[#141414] text-white text-xs focus:outline-none focus:border-white transition-colors"
                 />
               </div>
               <input
@@ -336,9 +537,9 @@ export default function CheckoutPage() {
                 placeholder="Complete Address"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className={`w-full px-4 py-3 border bg-[#141414] text-white text-sm focus:outline-none transition-colors ${errors.address ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
+                className={`w-full px-3 py-2 border bg-[#141414] text-white text-xs focus:outline-none transition-colors ${errors.address ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
               />
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <select
                   value={stateCode}
                   onChange={(e) => {
@@ -349,7 +550,7 @@ export default function CheckoutPage() {
                     setCity("");
                   }}
                   style={{ colorScheme: 'dark' }}
-                  className={`w-full px-4 py-3 border bg-[#141414] text-white text-sm focus:outline-none transition-colors ${errors.state ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
+                  className={`w-full px-3 py-2 border bg-[#141414] text-white text-xs focus:outline-none transition-colors ${errors.state ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
                 >
                   <option value="" disabled>Select State</option>
                   {indianStates.map((s) => (
@@ -362,7 +563,7 @@ export default function CheckoutPage() {
                   onChange={(e) => setCity(e.target.value)}
                   disabled={!stateCode}
                   style={{ colorScheme: 'dark' }}
-                  className={`w-full px-4 py-3 border bg-[#141414] text-white text-sm focus:outline-none transition-colors ${errors.city ? 'border-red-500' : 'border-white/10 focus:border-white'} ${!stateCode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`w-full px-3 py-2 border bg-[#141414] text-white text-xs focus:outline-none transition-colors ${errors.city ? 'border-red-500' : 'border-white/10 focus:border-white'} ${!stateCode ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <option value="" disabled>{stateCode ? "Select City" : "Select State First"}</option>
                   {citiesOfState.map((c) => (
@@ -370,27 +571,48 @@ export default function CheckoutPage() {
                   ))}
                 </select>
                 
-                <input
-                  type="text"
-                  placeholder="PIN Code"
-                  value={pincode}
-                  onChange={(e) => setPincode(e.target.value)}
-                  className={`w-full px-4 py-3 border bg-[#141414] text-white text-sm focus:outline-none transition-colors ${errors.pincode ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
-                />
+                <div className="relative flex-col flex gap-1">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="PIN Code"
+                      value={pincode}
+                      onChange={(e) => {
+                        setPincode(e.target.value);
+                        setPincodeServiceable(null);
+                        setShippingCharge(null);
+                        setPincodeMessage("");
+                      }}
+                      className={`w-full px-3 py-2 border bg-[#141414] text-white text-xs focus:outline-none transition-colors pr-16 ${errors.pincode ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
+                    />
+                    <button 
+                      onClick={() => checkPincode(pincode)}
+                      disabled={isCheckingPincode || pincode.length < 6}
+                      className="absolute right-1 top-1 bottom-1 px-3 text-[10px] font-bold uppercase bg-white/10 hover:bg-white/20 rounded disabled:opacity-50 transition-colors"
+                    >
+                      {isCheckingPincode ? '...' : 'Check'}
+                    </button>
+                  </div>
+                  {pincodeMessage && (
+                    <p className={`text-[10px] ${pincodeServiceable ? 'text-green-400' : 'text-red-400'}`}>
+                      {pincodeMessage}
+                    </p>
+                  )}
+                </div>
               </div>
             </section>
             
-            <section className="space-y-6 pt-6 border-t border-white/10">
-              <h2 className="text-2xl font-serif text-white flex items-center gap-3">
+            <section className="space-y-4 pt-4 border-t border-white/10">
+              <h2 className="text-lg font-serif text-white flex items-center gap-2">
                 Payment <Lock className="w-5 h-5 text-white/50" />
               </h2>
-              <div className="bg-[#141414] p-6 border border-white/10 rounded-xl space-y-4">
-                <p className="text-sm text-white/70 font-sans font-light leading-relaxed">
+              <div className="bg-[#141414] p-5 border border-white/10 rounded-xl space-y-3">
+                <p className="text-xs text-white/70 font-sans font-light leading-relaxed">
                   All transactions are secure and encrypted. Payments are processed securely via <span className="font-semibold text-white">Razorpay</span>.
                 </p>
-                <div className="flex flex-col gap-4">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="bg-white px-2 py-1.5 rounded-md flex items-center justify-center shadow-sm">
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="bg-white px-2 py-1 rounded-md flex items-center justify-center shadow-sm">
                       <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg" alt="UPI" className="h-4 w-auto object-contain" />
                     </div>
                     <div className="bg-white px-2 py-1.5 rounded-md flex items-center justify-center shadow-sm">
@@ -413,16 +635,16 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  <div className="flex gap-4 opacity-70 border-t border-white/10 pt-4 mt-2">
-                    <ShieldCheck className="w-8 h-8 text-green-500" />
+                  <div className="flex gap-3 opacity-70 border-t border-white/10 pt-3 mt-1">
+                    <ShieldCheck className="w-6 h-6 text-green-500" />
                     <div className="flex flex-col">
-                      <span className="text-xs font-semibold text-white">Razorpay Secure Checkout</span>
-                      <span className="text-[9px] text-white/50 uppercase tracking-widest">100% Encrypted Payments</span>
+                      <span className="text-[11px] font-semibold text-white">Razorpay Secure Checkout</span>
+                      <span className="text-[8px] text-white/50 uppercase tracking-widest">100% Encrypted Payments</span>
                     </div>
                   </div>
                   
-                  <div className="bg-white/5 p-4 rounded-lg mt-4 border border-white/10">
-                    <p className="text-xs text-white/80 leading-relaxed font-light">
+                  <div className="bg-white/5 p-3 rounded-lg mt-2 border border-white/10">
+                    <p className="text-[11px] text-white/80 leading-relaxed font-light">
                       <span className="font-semibold text-white">Notice:</span> If the jersey wouldn't be available due to any unforeseen condition (e.g. stock shortage), the refund process will be initiated automatically. 
                       <a href="/refund-policy" target="_blank" rel="noopener noreferrer" className="ml-1 underline text-white/50 hover:text-white transition-colors">
                         View Refund Policy
@@ -436,57 +658,173 @@ export default function CheckoutPage() {
           </div>
 
           <div className="lg:col-span-5 relative">
-            <div className="sticky top-32 bg-[#141414] p-8 border border-white/10 rounded-2xl space-y-8 shadow-2xl">
-              <h2 className="text-2xl font-serif text-white">Order Summary</h2>
+            <div className="sticky top-20 bg-[#141414] p-5 border border-white/10 rounded-xl space-y-5 shadow-2xl">
+              <h2 className="text-lg font-serif text-white">Order Summary</h2>
               
-              <div className="space-y-6 max-h-[40vh] overflow-y-auto pr-2">
+              <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
                 {cart.map((item, idx) => (
-                  <div key={idx} className="flex gap-4 items-start">
-                    <div className="relative w-20 h-24 bg-black border border-white/10 rounded-lg overflow-hidden shrink-0">
+                  <div key={idx} className="flex gap-3 items-start">
+                    <div className="relative w-14 h-16 bg-black border border-white/10 rounded-lg overflow-hidden shrink-0">
                       <Image src={item.image} alt={item.name} fill style={{ objectFit: "cover" }} />
-                      <span className="absolute -top-2 -right-2 w-6 h-6 bg-white text-black text-[10px] font-bold rounded-full flex items-center justify-center z-10 shadow-md">
-                        {item.quantity}
-                      </span>
                     </div>
-                    <div className="flex-1 space-y-1 mt-1">
-                      <h4 className="text-xs font-serif font-bold text-white leading-tight">{item.name}</h4>
-                      <p className="text-[10px] text-white/50 font-sans uppercase font-semibold">Size: {item.size}</p>
+                    <div className="flex-1 space-y-0.5 mt-0.5">
+                      <h4 className="text-[11px] font-serif font-bold text-white leading-tight">{item.name}</h4>
+                      <p className="text-[9px] text-white/50 font-sans uppercase font-semibold">Size: {item.size}</p>
                       {(item.customName || item.customNumber) && (
-                        <div className="text-[9px] font-mono bg-black/50 border border-white/10 px-2 py-0.5 rounded text-white/70 inline-block mt-1">
+                        <div className="text-[8px] font-mono bg-black/50 border border-white/10 px-1.5 py-0.5 rounded text-white/70 inline-block mt-0.5">
                           PRINT: <span className="text-white font-bold">{item.customName || "NONE"}</span> #{item.customNumber || "00"} (+₹199)
                         </div>
                       )}
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span className="text-[9px] text-white/50 font-sans uppercase font-semibold">QTY:</span>
+                        <div className="flex items-center gap-1.5 bg-[#1a1a1a] rounded-md px-1.5 py-0.5 border border-white/10">
+                          <button 
+                            onClick={() => updateQuantity(item.id, item.size, -1, item.customName, item.customNumber)}
+                            className="text-white/50 hover:text-white transition-colors w-3 flex justify-center text-[10px]"
+                          >
+                            -
+                          </button>
+                          <span className="text-[10px] font-bold text-white min-w-[1ch] text-center">{item.quantity}</span>
+                          <button 
+                            onClick={() => updateQuantity(item.id, item.size, 1, item.customName, item.customNumber)}
+                            className="text-white/50 hover:text-white transition-colors w-3 flex justify-center text-[10px]"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-xs font-bold text-white mt-1 shrink-0">
+                    <div className="text-[11px] font-bold text-white mt-0.5 shrink-0">
                       ₹{((item.price + ((item.customName || item.customNumber) ? 199 : 0)) * item.quantity).toFixed(2)}
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="space-y-4 pt-6 border-t border-white/10">
-                <div className="flex justify-between text-xs text-white/70 font-sans">
-                  <span>Subtotal</span>
-                  <span>₹{total.toFixed(2)}</span>
+              {/* Coupon Section */}
+              <div className="pt-4 border-t border-white/10 space-y-3">
+                <h3 className="text-xs font-serif text-white flex items-center gap-1.5"><Tag className="w-3 h-3 text-white/70" /> Discount Code</h3>
+                
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between bg-[#1f1f1f] border border-white/10 p-2 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded bg-white/10 flex items-center justify-center">
+                        <Tag className="w-3 h-3 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-bold text-white uppercase tracking-wider">{appliedCoupon.code}</p>
+                        <p className="text-[9px] text-green-400 font-semibold uppercase tracking-wider">Coupon Applied</p>
+                      </div>
+                    </div>
+                    <button onClick={removeCoupon} className="text-white/40 hover:text-red-400 transition-colors">
+                      <XCircle className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        placeholder="Enter code" 
+                        value={couponCodeInput}
+                        onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase())}
+                        className="flex-1 bg-[#141414] border border-white/10 px-3 py-2 rounded-md text-xs text-white focus:outline-none focus:border-white transition-colors uppercase"
+                      />
+                      <button 
+                        onClick={() => handleApplyCoupon()}
+                        disabled={isApplyingCoupon || !couponCodeInput}
+                        className="bg-white text-black px-4 rounded-md text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors disabled:opacity-50"
+                      >
+                        {isApplyingCoupon ? '...' : 'Apply'}
+                      </button>
+                    </div>
+                    {couponError && <p className="text-red-400 text-[10px]">{couponError}</p>}
+                      
+                      {/* Available Coupons List */}
+                      {availableCoupons.length > 0 && (
+                        <div className="mt-2 space-y-2">
+                          <button 
+                            onClick={() => setShowCoupons(!showCoupons)}
+                            className="text-[10px] text-white/50 hover:text-white uppercase tracking-widest font-semibold flex items-center gap-1 transition-colors"
+                          >
+                            View All Coupons {showCoupons ? '▲' : '▼'}
+                          </button>
+                          
+                          {showCoupons && (
+                            <div className="flex flex-col gap-2 max-h-[150px] overflow-y-auto pr-2 custom-scrollbar border-t border-white/10 pt-2">
+                              {availableCoupons.map(coupon => (
+                                <button
+                                  key={coupon.id}
+                                  onClick={() => {
+                                    setCouponCodeInput(coupon.code);
+                                    handleApplyCoupon(coupon.code);
+                                    setShowCoupons(false);
+                                  }}
+                                  className="px-3 py-2 border border-dashed border-white/20 bg-white/5 hover:bg-white/10 rounded-md text-[11px] text-white uppercase tracking-wider transition-all flex flex-col items-start gap-1 w-full text-left"
+                                >
+                                  <div className="flex items-center gap-2 w-full justify-between">
+                                    <span className="font-bold tracking-widest">{coupon.code}</span>
+                                    <span className="text-green-400 font-bold ml-3 bg-green-400/10 px-2 py-0.5 rounded text-[10px]">
+                                      {coupon.discountType === 'percentage' ? `${coupon.discountValue}% OFF` : `₹${coupon.discountValue} OFF`}
+                                    </span>
+                                  </div>
+                                  {coupon.minOrderValue ? (
+                                    <span className="text-[9px] text-white/40 normal-case tracking-normal">
+                                      Applicable on orders above ₹{coupon.minOrderValue}
+                                    </span>
+                                  ) : (
+                                    <span className="text-[9px] text-white/40 normal-case tracking-normal">
+                                      Applicable on all orders
+                                    </span>
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div className="flex justify-between text-xs text-white/70 font-sans">
-                  <span>Shipping Charges</span>
-                  <span className="text-white/50 uppercase tracking-widest font-semibold text-[9px]">Calculated at next step</span>
-                </div>
-                <div className="flex justify-between text-lg font-serif font-bold text-white pt-4 border-t border-white/10">
-                  <span>Total</span>
-                  <span>₹{total.toFixed(2)}</span>
-                </div>
-              </div>
 
-              <button
-                onClick={handlePayment}
-                disabled={isProcessing}
-                className="w-full py-4 bg-white text-black hover:bg-neutral-200 transition-all duration-300 text-xs uppercase tracking-[0.2em] font-bold shadow-[0_0_20px_rgba(255,255,255,0.1)] disabled:opacity-50 flex items-center justify-center gap-3"
-              >
-                {isProcessing ? "Processing..." : `Pay ₹${total.toFixed(2)}`}
-                {!isProcessing && <ShieldCheck className="w-4 h-4" />}
-              </button>
+                <div className="space-y-3 pt-4 border-t border-white/10">
+                  <div className="flex justify-between text-[11px] text-white/70 font-sans">
+                    <span>Subtotal</span>
+                    <span>₹{subTotal.toFixed(2)}</span>
+                  </div>
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-[11px] text-green-400 font-sans">
+                      <span>Discount ({appliedCoupon.code})</span>
+                      <span>-₹{discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-[11px] text-white/70 font-sans">
+                    <span>Shipping Charges</span>
+                    {shippingCharge !== null ? (
+                      <span>{shippingCharge === 0 ? <span className="text-green-400 font-bold text-[10px] tracking-widest">FREE SHIPPING</span> : `₹${shippingCharge.toFixed(2)}`}</span>
+                    ) : (
+                      <span className="text-white/50 uppercase tracking-widest font-semibold text-[8px]">Calculated after checking PIN</span>
+                    )}
+                  </div>
+                  <div className="flex justify-between items-end text-base font-serif font-bold text-white pt-3 border-t border-white/10">
+                    <span>Total</span>
+                    <div className="text-right flex items-center gap-2">
+                      {appliedCoupon && (
+                        <span className="text-xs text-white/40 line-through">₹{subTotal.toFixed(2)}</span>
+                      )}
+                      <span>₹{finalTotal.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handlePayment}
+                  disabled={isProcessing}
+                  className="w-full py-3 bg-white text-black hover:bg-neutral-200 transition-all duration-300 text-[11px] uppercase tracking-[0.2em] font-bold shadow-[0_0_20px_rgba(255,255,255,0.1)] disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isProcessing ? "Processing..." : `Pay ₹${finalTotal.toFixed(2)}`}
+                  {!isProcessing && <ShieldCheck className="w-3 h-3" />}
+                </button>
               
             </div>
           </div>

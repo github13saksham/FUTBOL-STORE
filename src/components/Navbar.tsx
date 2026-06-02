@@ -241,15 +241,9 @@ export default function Navbar() {
               transition={{ type: "tween", duration: 0.3 }}
               className="fixed inset-y-0 left-0 z-[101] w-[80%] max-w-[320px] bg-white shadow-2xl xl:hidden overflow-y-auto flex flex-col"
             >
-              {/* Promo Banner */}
-              <div className="bg-[#FFCCCB] p-5 flex flex-col items-start justify-center border-b border-red-100">
-                <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full mb-2">₹500 OFF</span>
-                <span className="font-bold text-lg text-red-900 tracking-tight leading-none mb-1">FLAT ₹500 OFF</span>
-                <span className="text-[10px] text-red-800 uppercase font-semibold">ON YOUR 1ST ORDER. SIGN UP/LOGIN</span>
-              </div>
-              
+
               {/* Categories */}
-              <div className="py-2">
+              <div className="py-2 pt-6">
                 <Link href="/clubs" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                   <span className="font-bold text-gray-800 text-[15px]">Clubs</span>
                   <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -529,8 +523,9 @@ export default function Navbar() {
                   <div className="text-center py-20 space-y-4 my-auto">
                     <ShoppingBag className="w-12 h-12 text-luxury-dark mx-auto" />
                     <p className="text-xs uppercase tracking-widest text-luxury-dark font-semibold">Your bag is empty</p>
-                    <p className="text-[11px] text-luxury-dark font-light font-sans max-w-[240px] mx-auto leading-relaxed">
-                      Add premium jerseys to place them in your cart.
+                    <p className="text-[11px] text-luxury-dark font-bold font-sans max-w-[240px] mx-auto leading-relaxed">
+                     Oops! Your dream jersey is waiting for you.
+Browse our collection and bring home your next matchday essential.
                     </p>
                   </div>
                 ) : (
@@ -588,7 +583,7 @@ export default function Navbar() {
                     <span className="text-lg font-serif font-bold text-luxury-dark">₹{getCartTotal().toFixed(2)}</span>
                   </div>
                   <p className="text-[10px] text-luxury-dark font-sans font-light leading-snug">
-                    Complimentary shipping charges applied. Secure checkout encrypted with TLS protocol.
+                    Shipping charges will be calculated at checkout.
                   </p>
                   <Link
                     href="/checkout"

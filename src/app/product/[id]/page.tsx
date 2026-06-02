@@ -228,27 +228,33 @@ export default function ProductPage() {
               <div className="grid grid-cols-5 gap-2">
                 {["S", "M", "L", "XL", "2XL"].map((size) => {
                   const isOutOfStock = product.inventory?.[size] === 0;
+                  const stockCount = product.inventory?.[size];
                   return (
-                  <button
-                    key={size}
-                    disabled={isOutOfStock}
-                    onClick={() => setSelectedSize(size)}
-                    className={`h-9 flex items-center justify-center rounded font-bold font-mono text-xs transition-all duration-300 border relative overflow-hidden ${
-                      isOutOfStock
-                        ? "border-white/10 text-white/30 cursor-not-allowed bg-transparent"
-                        : selectedSize === size
-                        ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.3)]"
-                        : "bg-transparent text-white border-white/30 hover:border-white"
-                    }`}
-                  >
-                    {size}
-                    {isOutOfStock && (
-                      <span className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-full h-[1px] bg-red-500 rotate-45 transform origin-center"></div>
+                    <div key={size} className="flex flex-col items-center gap-1">
+                      <button
+                        disabled={isOutOfStock}
+                        onClick={() => setSelectedSize(size)}
+                        className={`w-full h-9 flex items-center justify-center rounded font-bold font-mono text-xs transition-all duration-300 border relative overflow-hidden ${
+                          isOutOfStock
+                            ? "border-white/10 text-white/30 cursor-not-allowed bg-transparent"
+                            : selectedSize === size
+                            ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+                            : "bg-transparent text-white border-white/30 hover:border-white"
+                        }`}
+                      >
+                        {size}
+                        {isOutOfStock && (
+                          <span className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-full h-[1px] bg-red-500 rotate-45 transform origin-center"></div>
+                          </span>
+                        )}
+                      </button>
+                      <span className="text-[9px] uppercase tracking-wider text-white/50 text-center leading-tight">
+                        {stockCount !== undefined ? (stockCount > 0 ? `${stockCount} left` : 'Sold out') : 'In Stock'}
                       </span>
-                    )}
-                  </button>
-                )})}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -294,7 +300,7 @@ export default function ProductPage() {
                           <input
                             type="text"
                             maxLength={12}
-                            placeholder="SAKSHAM"
+                            placeholder="Enter Name"
                             value={customName}
                             onChange={(e) => setCustomName(e.target.value.toUpperCase())}
                             className="w-full px-3 py-1.5 border border-white/10 rounded text-xs bg-black/50 uppercase font-semibold text-white placeholder-white/20 focus:outline-none focus:border-white"

@@ -12,6 +12,16 @@ export interface Address {
   isDefault: boolean;
 }
 
+export interface Coupon {
+  id?: string;
+  code: string;
+  discountType: 'flat' | 'percentage';
+  discountValue: number;
+  expiryDate?: string;
+  isActive: boolean;
+  minOrderValue?: number;
+}
+
 export interface UserProfile {
   phone?: string;
   addresses?: Address[];
@@ -60,7 +70,7 @@ export interface IDatabaseService {
   /**
    * Create a new order after successful checkout.
    */
-  createOrder(userId: string, orderData: any): Promise<void>;
+  createOrder(userId: string, orderData: any): Promise<string>;
 
   /**
    * Fetch order history for a specific user.
@@ -68,8 +78,22 @@ export interface IDatabaseService {
   getUserOrders(userId: string): Promise<any[]>;
 
   /**
+   * Fetch a specific order by ID.
+   */
+  getOrderById(orderId: string): Promise<any | null>;
+
+  /**
    * User Profile methods for storing extra user metadata like phone and addresses.
    */
   getUserProfile(userId: string): Promise<UserProfile | null>;
   updateUserProfile(userId: string, profile: Partial<UserProfile>): Promise<void>;
+
+  /**
+   * Coupon methods
+   */
+  getCoupons(): Promise<Coupon[]>;
+  getCouponByCode(code: string): Promise<Coupon | null>;
+  addCoupon(coupon: Coupon): Promise<void>;
+  updateCoupon(id: string, updates: Partial<Coupon>): Promise<void>;
+  deleteCoupon(id: string): Promise<void>;
 }

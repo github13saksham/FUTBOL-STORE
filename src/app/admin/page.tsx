@@ -3,13 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { FirebaseDatabaseService } from '@/backend/firebase/db.service';
 import { Product } from '@/data/mockData';
-import { Package, TrendingUp, TrendingDown, ShoppingBag, AlertCircle, Bell, ArrowUpRight, Plus, UploadCloud, LayoutTemplate } from 'lucide-react';
+import { Package, TrendingUp, TrendingDown, ShoppingBag, AlertCircle, Bell, ArrowUpRight, Plus, UploadCloud, LayoutTemplate, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [recentOrders, setRecentOrders] = useState<any[]>([]); // Mock for now until API is ready
   const [loading, setLoading] = useState(true);
+  const [deletedNotifications, setDeletedNotifications] = useState<string[]>([]);
   const dbService = new FirebaseDatabaseService();
 
   useEffect(() => {
@@ -72,6 +73,8 @@ export default function AdminDashboardPage() {
       color: 'bg-red-500'
     }))
   ];
+
+  const activeNotifications = notifications.filter(n => !deletedNotifications.includes(n.id));
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-8 pb-12">
@@ -266,14 +269,21 @@ export default function AdminDashboardPage() {
             </div>
             <div className="p-0">
               <ul className="divide-y divide-gray-50">
-                {notifications.length > 0 ? (
-                  notifications.map((notif) => (
-                    <li key={notif.id} className="p-4 flex gap-3 hover:bg-gray-50 transition-colors">
+                {activeNotifications.length > 0 ? (
+                  activeNotifications.map((notif) => (
+                    <li key={notif.id} className="p-4 flex gap-3 hover:bg-gray-50 transition-colors group relative">
                       <div className={`w-2 h-2 mt-1.5 rounded-full ${notif.color} flex-shrink-0`}></div>
-                      <div>
+                      <div className="flex-1">
                         <p className="text-sm text-gray-700"><span className="font-medium text-black">{notif.title}</span> {notif.message}</p>
                         <p className="text-xs text-gray-400 mt-1">{notif.time}</p>
                       </div>
+                      <button 
+                        onClick={() => setDeletedNotifications(prev => [...prev, notif.id])}
+                        className="opacity-0 group-hover:opacity-100 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                        title="Delete Notification"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </li>
                   ))
                 ) : (

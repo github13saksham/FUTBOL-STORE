@@ -177,7 +177,7 @@ export class FirebaseDatabaseService implements IDatabaseService {
     }
   }
 
-  async createOrder(userId: string, orderData: any): Promise<void> {
+  async createOrder(userId: string, orderData: any): Promise<string> {
     const orderId = await this.getNextOrderId();
     const docRef = doc(db, "orders", orderId);
     
@@ -187,6 +187,8 @@ export class FirebaseDatabaseService implements IDatabaseService {
       userId,
       createdAt: new Date().toISOString()
     });
+    
+    return orderId;
   }
 
   async getUserOrders(userId: string): Promise<any[]> {
@@ -201,6 +203,20 @@ export class FirebaseDatabaseService implements IDatabaseService {
     } catch (error) {
       console.error("Error fetching orders:", error);
       return [];
+    }
+  }
+
+  async getOrderById(orderId: string): Promise<any | null> {
+    try {
+      const docRef = doc(db, "orders", orderId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return docSnap.data();
+      }
+      return null;
+    } catch (error) {
+      console.error(`Error fetching order ${orderId}:`, error);
+      return null;
     }
   }
 
@@ -245,6 +261,26 @@ export class FirebaseDatabaseService implements IDatabaseService {
     }
   }
 
+  async updateOrder(orderId: string, updates: any): Promise<void> {
+    try {
+      const docRef = doc(db, "orders", orderId);
+      await updateDoc(docRef, { ...updates, updatedAt: new Date().toISOString() });
+    } catch (error) {
+      console.error("Error updating order:", error);
+      throw error;
+    }
+  }
+
+  async deleteOrder(orderId: string): Promise<void> {
+    try {
+      const docRef = doc(db, "orders", orderId);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      throw error;
+    }
+  }
+
   // --- User Profiles ---
   async getUserProfile(userId: string): Promise<UserProfile | null> {
     try {
@@ -266,6 +302,70 @@ export class FirebaseDatabaseService implements IDatabaseService {
       await setDoc(docRef, profile, { merge: true });
     } catch (error) {
       console.error("Error updating user profile:", error);
+      throw error;
+    }
+  }
+
+  // --- Coupons ---
+  async getCoupons(): Promise<any[]> {
+    try {
+      const q = query(collection(db, "coupons"));
+      const querySnapshot = await getDocs(q);
+      const coupons: any[] = [];
+      querySnapshot.forEach((doc) => {
+        coupons.push({ id: doc.id, ...doc.data() });
+      });
+      return coupons;
+    } catch (error) {
+      console.error("Error fetching coupons:", error);
+      return [];
+    }
+  }
+
+  async getCouponByCode(code: string): Promise<any | null> {
+    try {
+      const q = query(collection(db, "coupons"), where("code", "==", code.toUpperCase()));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const doc = querySnapshot.docs[0];
+        return { id: doc.id, ...doc.data() };
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching coupon by code:", error);
+      return null;
+    }
+  }
+
+  async addCoupon(coupon: any): Promise<void> {
+    try {
+      const docRef = doc(collection(db, "coupons"));
+      await setDoc(docRef, { ...coupon, code: coupon.code.toUpperCase(), id: docRef.id });
+    } catch (error) {
+      console.error("Error adding coupon:", error);
+      throw error;
+    }
+  }
+
+  async updateCoupon(id: string, updates: any): Promise<void> {
+    try {
+      const docRef = doc(db, "coupons", id);
+      if (updates.code) {
+        updates.code = updates.code.toUpperCase();
+      }
+      await updateDoc(docRef, updates);
+    } catch (error) {
+      console.error("Error updating coupon:", error);
+      throw error;
+    }
+  }
+
+  async deleteCoupon(id: string): Promise<void> {
+    try {
+      const docRef = doc(db, "coupons", id);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.error("Error deleting coupon:", error);
       throw error;
     }
   }
