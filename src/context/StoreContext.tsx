@@ -123,7 +123,16 @@ export default function StoreProvider({ children, initialProducts = [], initialC
   useEffect(() => {
     if (isInitialized && user) {
       localStorage.setItem(`futbol_cart_${user.uid}`, JSON.stringify(cart));
-      dbService.updateUserProfile(user.uid, { cart }).catch(e => console.error("Sync cart error", e));
+      
+      // Firestore does not support undefined values, so we strip them out
+      const sanitizedCart = cart.map(item => {
+        const cleanItem = { ...item };
+        if (cleanItem.customName === undefined) delete cleanItem.customName;
+        if (cleanItem.customNumber === undefined) delete cleanItem.customNumber;
+        return cleanItem;
+      });
+
+      dbService.updateUserProfile(user.uid, { cart: sanitizedCart }).catch(e => console.error("Sync cart error", e));
     }
   }, [cart, isInitialized, user]);
 
