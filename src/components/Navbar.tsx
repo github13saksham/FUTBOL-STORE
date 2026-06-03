@@ -71,13 +71,15 @@ export default function Navbar() {
     return null;
   }
 
-  // Derived state for search
+  const escapedQuery = searchQuery.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const queryRegex = new RegExp(`\\b${escapedQuery}`, 'i');
+
   const searchResults = searchQuery.trim() === "" 
     ? [] 
     : products.filter(p => 
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        (p.club && p.club.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        p.category.toLowerCase().includes(searchQuery.toLowerCase())
+        queryRegex.test(p.name) || 
+        (p.club && queryRegex.test(p.club)) ||
+        queryRegex.test(p.category)
       );
 
   return (
@@ -295,7 +297,7 @@ export default function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-luxury-dark/95 backdrop-blur-lg flex flex-col justify-start items-center p-6 md:px-12 pt-24 pb-0"
+            className="fixed inset-0 z-[100] h-screen w-screen overflow-hidden bg-luxury-dark/95 backdrop-blur-lg flex flex-col justify-start items-center p-6 md:px-12 pt-24 pb-0"
           >
             <button
               onClick={() => setSearchOpen(false)}
@@ -305,7 +307,7 @@ export default function Navbar() {
               <X className="w-8 h-8 stroke-[1.5px]" />
             </button>
 
-            <div className="w-full max-w-5xl flex-grow flex flex-col space-y-8 mt-8 min-h-0">
+            <div className="w-full max-w-5xl flex-grow flex flex-col space-y-8 mt-8 min-h-0 overflow-hidden">
               <span className="text-xs uppercase tracking-[0.3em] text-luxury-ivory font-bold block text-center flex-shrink-0">Search Store</span>
 
               <div className="flex items-center border-b-2 border-white/35 py-4 w-full flex-shrink-0">
@@ -321,7 +323,7 @@ export default function Navbar() {
               </div>
 
               {searchQuery.trim() === "" ? null : (
-                <div className="w-full flex-grow overflow-y-auto mt-4 pb-24 min-h-0 pr-4 custom-scrollbar">
+                <div data-lenis-prevent className="w-full flex-grow overflow-y-auto mt-4 pb-24 min-h-0 pr-4 no-scrollbar overscroll-contain">
                   {searchResults.length === 0 ? (
                     <div className="text-center py-12 space-y-4">
                       <Search className="w-12 h-12 text-white/40 mx-auto" />
@@ -331,7 +333,7 @@ export default function Navbar() {
                       </p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
                       {searchResults.map((product) => (
                         <motion.div
                           key={product.id}
@@ -340,18 +342,18 @@ export default function Navbar() {
                             boxShadow: "0 25px 50px -12px rgba(159, 126, 105, 0.15)"
                           }}
                           transition={{ duration: 0.4 }}
-                          className="rounded-2xl p-4 border border-white/10 bg-luxury-dark hover:bg-black flex flex-col justify-between transition-colors duration-500 shadow-sm relative overflow-hidden text-left"
+                          className="bg-luxury-dark rounded-2xl border border-white/10 flex flex-col justify-between transition-colors duration-500 shadow-sm relative overflow-hidden group/card text-left"
                         >
-                          <div className="relative w-full h-[240px] rounded-lg overflow-hidden bg-neutral-100 group">
+                          <div className="relative w-full aspect-square bg-neutral-100 group">
                             <Link href={`/product/${product.id}`} onClick={() => setSearchOpen(false)}>
                               <Image
                                 src={product.image}
                                 alt={product.name}
                                 fill
                                 style={{ objectFit: "cover" }}
-                                className="transition-transform duration-[1000ms] ease-out scale-105 group-hover:scale-110"
+                                className="transition-transform duration-[1000ms] ease-out scale-100 group-hover:scale-105"
                               />
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 hidden md:block" />
                             </Link>
 
                             <button
@@ -361,7 +363,7 @@ export default function Navbar() {
                                 setQuickAddProduct(product);
                                 setSearchOpen(false);
                               }}
-                              className="absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-2.5 bg-luxury-dark text-luxury-ivory hover:bg-luxury-taupe hover:text-luxury-dark text-[10px] tracking-widest uppercase font-semibold rounded-full shadow-lg opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 backdrop-blur-md z-10"
+                              className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-2.5 bg-luxury-dark text-luxury-ivory hover:bg-luxury-taupe hover:text-luxury-dark text-[10px] tracking-widest uppercase font-semibold rounded-full shadow-lg opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 backdrop-blur-md z-10"
                             >
                               Quick Add
                             </button>
@@ -372,27 +374,28 @@ export default function Navbar() {
                                 e.stopPropagation();
                                 toggleWishlist(product.id);
                               }}
-                              className="absolute top-4 right-4 p-2.5 bg-luxury-ivory/80 backdrop-blur-md rounded-full text-luxury-dark hover:text-luxury-dark transition-colors duration-300 shadow-sm z-10"
+                              className="absolute top-3 right-3 md:top-4 md:right-4 p-2 md:p-2.5 bg-luxury-ivory/80 backdrop-blur-md rounded-full text-luxury-dark hover:text-luxury-dark transition-colors duration-300 shadow-sm z-10"
                               aria-label="Add to Wishlist"
                             >
                               <Heart className={`w-4 h-4 transition-colors duration-300 ${wishlist.includes(product.id) ? "fill-red-500 text-red-500" : "hover:text-red-500"}`} />
                             </button>
                           </div>
 
-                          <div className="pt-4 space-y-2 flex-grow flex flex-col justify-between">
+                          <div className="p-4 md:p-5 md:pt-4 space-y-2 flex-grow flex flex-col justify-between">
                             <div>
-                              <div className="flex justify-between items-center text-[9px] uppercase tracking-widest font-semibold text-white/80">
-                                <span>{product.category}</span>
+                              <div className="flex justify-between items-start mt-1">
+                                <Link href={`/product/${product.id}`} onClick={() => setSearchOpen(false)} className="block flex-1 min-w-0">
+                                  <h3 className="text-[14px] md:text-base font-serif text-white font-medium leading-tight tracking-wide hover:text-luxury-ivory transition-colors duration-300 truncate md:whitespace-normal">
+                                    {product.name}
+                                  </h3>
+                                </Link>
                               </div>
-                              <Link href={`/product/${product.id}`} onClick={() => setSearchOpen(false)}>
-                                <h3 className="text-sm font-serif text-white font-medium mt-1 leading-tight tracking-wide hover:text-luxury-ivory transition-colors duration-300">
-                                  {product.name}
-                                </h3>
-                              </Link>
                             </div>
 
-                            <div className="flex justify-between items-end pb-1 border-b border-white/20 pt-3">
-                              <span className="font-serif text-base text-white">{product.priceStr}</span>
+                            <div className="flex justify-between items-end pb-1 border-b border-white/20 pt-1 md:pt-0">
+                              <span className="font-serif text-base md:text-lg text-white font-medium">
+                                {product.priceStr}
+                              </span>
                               <Link
                                 href={`/product/${product.id}`}
                                 onClick={() => setSearchOpen(false)}

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FirebaseDatabaseService } from '@/backend/firebase/db.service';
-import { Save, Loader2, Upload, LayoutGrid, LayoutTemplate, Link as LinkIcon, Image as ImageIcon, Search, Video, Monitor, Smartphone, Flag, Shield } from 'lucide-react';
+import { Save, Loader2, Upload, LayoutGrid, LayoutTemplate, Link as LinkIcon, Image as ImageIcon, Search, Video, Monitor, Smartphone, Flag, Shield, Plus, Trash2 } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/backend/firebase/config';
 import { motion } from 'framer-motion';
@@ -292,6 +292,22 @@ export default function HomepageManagerPage() {
     });
   };
 
+  const handleAddClub = () => {
+    setSettings(prev => ({
+      ...prev,
+      clubs: [...prev.clubs, { id: `club-${Date.now()}`, query: "", name: "", image: "" }]
+    }));
+  };
+
+  const handleRemoveClub = (index: number) => {
+    if (!confirm("Are you sure you want to remove this club card?")) return;
+    setSettings(prev => {
+      const newClubs = [...prev.clubs];
+      newClubs.splice(index, 1);
+      return { ...prev, clubs: newClubs };
+    });
+  };
+
   const handleNationalTeamChange = (index: number, field: string, value: string) => {
     setSettings(prev => {
       const newTeams = [...prev.nationalTeams];
@@ -476,8 +492,8 @@ export default function HomepageManagerPage() {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
                 <div>
-                  <h2 className="text-base font-bold text-black border-b border-gray-100 pb-3 mb-2">Shop By Clubs (4 Cards)</h2>
-                  <p className="text-sm text-gray-500 mb-6">These are the 4 club cards displayed in the dark luxury section on the homepage.</p>
+                  <h2 className="text-base font-bold text-black border-b border-gray-100 pb-3 mb-2">Shop By Clubs ({settings.clubs.length} Cards)</h2>
+                  <p className="text-sm text-gray-500 mb-6">These are the club cards displayed in the dark luxury section on the homepage.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -485,6 +501,9 @@ export default function HomepageManagerPage() {
                     <div key={index} className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-4">
                       <div className="flex justify-between items-center">
                         <span className="text-xs font-bold bg-black text-white px-2 py-1 rounded">Card {index + 1}</span>
+                        <button onClick={() => handleRemoveClub(index)} className="text-red-500 hover:text-red-700 p-1 rounded-md transition-colors" title="Remove Club">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-gray-700 mb-1">Club Name</label>
@@ -508,6 +527,13 @@ export default function HomepageManagerPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+                <div 
+                  onClick={handleAddClub}
+                  className="mt-6 flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 hover:bg-gray-100 hover:border-gray-400 cursor-pointer transition-all text-gray-600 hover:text-black group"
+                >
+                  <Plus className="w-6 h-6 mb-2 text-gray-400 group-hover:text-black transition-colors" />
+                  <span className="text-sm font-bold">Add Another Club</span>
                 </div>
                 <SaveButton />
               </div>

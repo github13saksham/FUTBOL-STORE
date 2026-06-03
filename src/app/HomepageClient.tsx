@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 
 export default function HomepageClient({ initialSettings }: { initialSettings: any }) {
   const bestSellersRef = useRef<HTMLDivElement>(null);
+  const clubsRef = useRef<HTMLDivElement>(null);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [hoveredClubId, setHoveredClubId] = useState<string | null>(null);
   const router = useRouter();
@@ -464,34 +465,45 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
           </div>
 
           {/* Premium layout Grid */}
-          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 bg-transparent overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory no-scrollbar">
-            {(homepageSettings?.clubs || [
-              { id: "club-ars", query: "ARSENAL", name: "ARSENAL FC", image: "/images/25-26_club-jerseys/Arsenal_25-26_Home_Player_Version.jpeg" },
-              { id: "club-fcb", query: "BARCELONA", name: "FC BARCELONA", image: "/images/25-26_club-jerseys/FCB_25-26_HPV.jpeg" },
-              { id: "club-mci", query: "MANCHESTER CITY", name: "MANCHESTER CITY", image: "/images/25-26_club-jerseys/MC25-26_HPV.jpeg" },
-              { id: "club-rm", query: "MADRID", name: "REAL MADRID CF", image: "/images/25-26_club-jerseys/real_madrid25-26_HPV.jpeg" },
-            ]).map((card: any) => {
-              const href = `/clubs?club=${encodeURIComponent(card.query)}`;
-              return (
-              <Link key={card.name} href={href} className="w-[55%] sm:w-[45%] md:w-auto shrink-0 snap-start block">
-                <div className="relative aspect-[4/5] md:aspect-auto md:h-[320px] md:max-w-[300px] mx-auto w-full rounded-2xl overflow-hidden shadow-sm md:shadow-lg border border-luxury-sand/10 group bg-[#282828] transition-all duration-300 md:hover:-translate-y-2 md:hover:shadow-[0_0_30px_rgba(205,164,145,0.15)]">
-                  <Image
-                    src={card.image}
-                    alt={card.name}
-                    fill
-                    className="object-cover object-[top_center] opacity-90"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 md:from-black/90 via-black/20 to-transparent pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 right-0 p-3 md:p-5 flex flex-col justify-end">
-                    <h3 className="text-[13px] md:text-lg font-serif text-white tracking-wide truncate">{card.name}</h3>
-                    <div className="flex mt-1 md:mt-2 text-[8px] md:text-[10px] uppercase tracking-widest text-white/80 items-center gap-1 md:gap-2 group-hover:text-white transition-colors duration-300">
-                      Explore <ChevronRight className="w-2 h-2 md:w-3 md:h-3 group-hover:translate-x-1 transition-transform duration-300" />
+          <motion.div 
+            ref={clubsRef}
+            className="relative w-full overflow-hidden pb-4 md:pb-8 cursor-grab active:cursor-grabbing"
+          >
+            <motion.div 
+              drag="x"
+              dragConstraints={clubsRef}
+              dragElastic={0.1}
+              className="flex gap-4 md:gap-8 w-max"
+            >
+              {(homepageSettings?.clubs || [
+                { id: "club-ars", query: "ARSENAL", name: "ARSENAL FC", image: "/images/25-26_club-jerseys/Arsenal_25-26_Home_Player_Version.jpeg" },
+                { id: "club-fcb", query: "BARCELONA", name: "FC BARCELONA", image: "/images/25-26_club-jerseys/FCB_25-26_HPV.jpeg" },
+                { id: "club-mci", query: "MANCHESTER CITY", name: "MANCHESTER CITY", image: "/images/25-26_club-jerseys/MC25-26_HPV.jpeg" },
+                { id: "club-rm", query: "MADRID", name: "REAL MADRID CF", image: "/images/25-26_club-jerseys/real_madrid25-26_HPV.jpeg" },
+              ]).map((card: any) => {
+                const href = `/clubs?club=${encodeURIComponent(card.query)}`;
+                return (
+                <Link key={card.name} href={href} className="w-[200px] sm:w-[240px] md:w-[280px] lg:w-[320px] shrink-0 block drag-none" draggable={false}>
+                  <div className="relative aspect-[4/5] mx-auto w-full rounded-2xl overflow-hidden shadow-sm md:shadow-lg border border-luxury-sand/10 group bg-[#282828] transition-all duration-300 md:hover:-translate-y-2 md:hover:shadow-[0_0_30px_rgba(205,164,145,0.15)] pointer-events-auto">
+                    <Image
+                      src={card.image}
+                      alt={card.name}
+                      fill
+                      draggable={false}
+                      className="object-cover object-[top_center] opacity-90 pointer-events-none"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 md:from-black/90 via-black/20 to-transparent pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 right-0 p-3 md:p-5 flex flex-col justify-end pointer-events-none">
+                      <h3 className="text-[13px] md:text-lg font-serif text-white tracking-wide truncate">{card.name}</h3>
+                      <div className="flex mt-1 md:mt-2 text-[8px] md:text-[10px] uppercase tracking-widest text-white/80 items-center gap-1 md:gap-2 group-hover:text-white transition-colors duration-300">
+                        Explore <ChevronRight className="w-2 h-2 md:w-3 md:h-3 group-hover:translate-x-1 transition-transform duration-300" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            )})}
-          </div>
+                </Link>
+              )})}
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
