@@ -302,7 +302,7 @@ export default function CheckoutPage() {
       }).then((t) => t.json());
 
       if (!data.id) {
-        alert("Server error. Please try again.");
+        alert(data.error || "Server error. Please try again.");
         setIsProcessing(false);
         return;
       }

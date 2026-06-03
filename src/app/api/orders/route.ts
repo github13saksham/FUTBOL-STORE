@@ -33,10 +33,10 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(order);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating order:', error);
     return NextResponse.json(
-      { error: 'Failed to create order' },
+      { error: error?.error?.description || error?.message || 'Failed to create order' },
       { status: 500 }
     );
   }
