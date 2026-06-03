@@ -107,7 +107,6 @@ export default function CheckoutPage() {
       setStateCode("");
       setPincode("");
       setPincodeServiceable(null);
-      setShippingCharge(null);
       setPincodeMessage("");
       return;
     }
@@ -598,7 +597,6 @@ export default function CheckoutPage() {
                       onChange={(e) => {
                         setPincode(e.target.value);
                         setPincodeServiceable(null);
-                        setShippingCharge(null);
                         setPincodeMessage("");
                       }}
                       className={`w-full px-3 py-2 border bg-[#141414] text-white text-xs focus:outline-none transition-colors pr-16 ${errors.pincode ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
