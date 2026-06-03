@@ -411,9 +411,9 @@ service firebase.storage {
                   <div className="bg-[#121212] rounded-3xl p-8 md:p-12 border border-white/10 shadow-sm">
                     <div className="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between">
                       <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 rounded-full bg-luxury-dark text-white flex items-center justify-center text-2xl font-serif shadow-inner overflow-hidden relative group">
+                        <div className="w-20 h-20 rounded-full bg-luxury-dark text-white flex items-center justify-center text-2xl font-serif shadow-inner overflow-hidden relative group shrink-0">
                           {user.photoURL ? (
-                            <Image src={user.photoURL} alt="Profile" fill className="object-cover" />
+                            <Image src={user.photoURL} alt="Profile" fill sizes="80px" className="object-cover object-center" />
                           ) : (
                             user.displayName ? user.displayName.charAt(0).toUpperCase() : <User className="w-8 h-8" />
                           )}

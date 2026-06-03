@@ -95,7 +95,7 @@ export class FirebaseAuthService implements IAuthService {
     const firebaseUser = auth.currentUser;
     if (firebaseUser) {
       const updates: any = { displayName: name };
-      if (photoURL) {
+      if (photoURL !== undefined) {
         updates.photoURL = photoURL;
       }
       await updateProfile(firebaseUser, updates);
