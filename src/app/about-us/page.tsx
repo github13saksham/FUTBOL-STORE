@@ -5,8 +5,10 @@ import {
   ShieldCheck, Trophy, Printer, Shirt, Truck, HeartHandshake, ArrowRight 
 } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function AboutUsPage() {
+  const router = useRouter();
   const focuses = [
     {
       icon: ShieldCheck,
@@ -86,7 +88,7 @@ From iconic club kits to the latest international collections, we aim to provide
             </p>
             <div className="pt-4">
               <button 
-                onClick={() => window.location.href = '/clubs'}
+                onClick={() => router.push('/clubs')}
                 className="group flex items-center gap-3 px-8 py-3.5 bg-luxury-dark text-luxury-ivory hover:bg-luxury-taupe hover:text-luxury-dark rounded-full text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-md"
               >
                 Acquire Your Jersey

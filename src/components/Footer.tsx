@@ -6,6 +6,7 @@ import {
   Mail, Instagram, Send, X, Shield, FileText, RefreshCw, Truck, User, HelpCircle
 } from "lucide-react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { useStore } from "@/context/StoreContext";
 import { POLICIES_DATA } from "@/data/mockData";
 
@@ -95,11 +96,11 @@ export default function Footer() {
           <div className="space-y-3">
             <h4 className="text-[10px] uppercase tracking-widest text-luxury-ivory font-bold">COLLECTIONS</h4>
             <ul className="text-xs text-luxury-ivory space-y-2 font-sans font-light">
-              <li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">Home</li>
-              <li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">Clubs</li>
-              <li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">National Teams</li>
-              <li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">WC Jerseys</li>
-              <li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">About Us</li>
+              <Link href="/"><li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">Home</li></Link>
+              <Link href="/clubs"><li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">Clubs</li></Link>
+              <Link href="/national-teams"><li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">National Teams</li></Link>
+              <Link href="/national-teams"><li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">WC Jerseys</li></Link>
+              <Link href="/about-us"><li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">About Us</li></Link>
             </ul>
           </div>
 

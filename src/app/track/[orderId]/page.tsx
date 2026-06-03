@@ -172,6 +172,18 @@ export default function TrackShipmentPage() {
             <ArrowLeft className="w-4 h-4" /> Back
           </button>
 
+          {order.status === "New Order" && (
+            <div className="bg-green-500/10 border border-green-500/30 rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
+              <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                <CheckCircle2 className="w-6 h-6 text-green-400" />
+              </div>
+              <div>
+                <h2 className="text-xl font-serif text-green-400 mb-1">Payment Successful! Order Placed.</h2>
+                <p className="text-xs font-sans text-green-400/80">Thank you for shopping with The Fútbol Store. Your order details and tracking timeline are below.</p>
+              </div>
+            </div>
+          )}
+
           <h1 className="text-3xl md:text-4xl font-serif text-white mb-2">Order Details & Tracking</h1>
           <p className="text-xs font-sans text-white/50 uppercase tracking-widest mb-10">
             Order #{order.id} {order.awb && `| AWB: ${order.awb}`}

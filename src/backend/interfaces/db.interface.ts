@@ -15,11 +15,13 @@ export interface Address {
 export interface Coupon {
   id?: string;
   code: string;
-  discountType: 'flat' | 'percentage';
+  discountType: 'flat' | 'percentage' | 'free_shipping' | 'buy_x_get_y' | 'cart_value' | 'quantity' | 'qty_free_shipping' | 'product_specific';
   discountValue: number;
+  minQuantity?: number;
+  minOrderValue?: number;
+  description?: string;
   expiryDate?: string;
   isActive: boolean;
-  minOrderValue?: number;
 }
 
 export interface UserProfile {

@@ -9,6 +9,7 @@ import { dbService } from "@/backend";
 import { ArrowLeft, ShieldCheck, CreditCard, Lock, Tag, XCircle } from "lucide-react";
 import { State, City } from "country-state-city";
 import { Coupon } from "@/backend/interfaces/db.interface";
+import { calculateShipping, validateCoupon, calculateFinalTotal, evaluateCouponBenefit } from "@/utils/cartUtils";
 
 const initializeRazorpay = () => {
   return new Promise((resolve) => {
@@ -58,10 +59,13 @@ export default function CheckoutPage() {
   const [availableCoupons, setAvailableCoupons] = useState<Coupon[]>([]);
   const [showCoupons, setShowCoupons] = useState(false);
 
+
   useEffect(() => {
     dbService.getCoupons().then(coupons => {
       setAvailableCoupons(coupons.filter(c => c.isActive));
     }).catch(err => console.error("Error fetching available coupons:", err));
+
+
 
     if (user) {
       dbService.getUserProfile(user.uid).then((profile) => {
@@ -143,19 +147,30 @@ export default function CheckoutPage() {
   }, 0);
   const subTotal = cartTotal + personalizationTotal;
 
-  // Calculate Discount
-  let discountAmount = 0;
-  if (appliedCoupon) {
-    if (appliedCoupon.discountType === 'percentage') {
-      discountAmount = (subTotal * appliedCoupon.discountValue) / 100;
-    } else if (appliedCoupon.discountType === 'flat') {
-      discountAmount = appliedCoupon.discountValue;
+  // --- Dynamic Shipping Evaluation ---
+  useEffect(() => {
+    if (state && city) {
+      const totalJerseys = cart.reduce((acc, item) => acc + item.quantity, 0);
+      const shipping = calculateShipping(state, totalJerseys);
+      setShippingCharge(shipping);
+    } else {
+      setShippingCharge(null);
     }
-    // Prevent negative total
-    if (discountAmount > subTotal) discountAmount = subTotal;
-  }
-  
-  const finalTotal = subTotal - discountAmount + (shippingCharge || 0);
+  }, [state, city, cart]);
+  // Reactive Coupon Validation
+  useEffect(() => {
+    if (appliedCoupon) {
+      const validation = validateCoupon(appliedCoupon, subTotal, cart);
+      if (!validation.valid) {
+        setAppliedCoupon(null);
+        setCouponError(validation.error || "Coupon removed because it's no longer valid for your cart.");
+      }
+    }
+  }, [subTotal, cart, appliedCoupon]);
+
+  // Calculate Totals using advanced Coupon benefit logic
+  const discountAmount = appliedCoupon ? evaluateCouponBenefit(appliedCoupon, subTotal, cart, shippingCharge) : 0;
+  const finalTotal = calculateFinalTotal(subTotal, shippingCharge, discountAmount);
 
   const handleApplyCoupon = async (overrideCode?: string) => {
     setCouponError("");
@@ -178,8 +193,15 @@ export default function CheckoutPage() {
       } else if (coupon.expiryDate && new Date(coupon.expiryDate).getTime() < new Date().getTime()) {
         setCouponError("This coupon has expired");
       } else {
-        setAppliedCoupon(coupon);
-        setCouponCodeInput("");
+        const validation = validateCoupon(coupon, subTotal, cart);
+        if (!validation.valid) {
+          setCouponError(validation.error || `This coupon is not valid for your current cart.`);
+          setAppliedCoupon(null);
+          return;
+        } else {
+          setAppliedCoupon(coupon);
+          setCouponCodeInput("");
+        }
       }
     } catch (err) {
       console.error(err);
@@ -223,25 +245,16 @@ export default function CheckoutPage() {
       
       if (data.delivery_codes && data.delivery_codes.length > 0) {
         setPincodeServiceable(true);
-        let calculatedCost = 0;
-        
-        if (totalJerseys < 3) {
-          calculatedCost = data.shipping_cost ? Number(data.shipping_cost) : 100;
-        }
-        
-        setShippingCharge(calculatedCost);
-        setPincodeMessage(`Delivery available! (Shipping: ${calculatedCost === 0 ? 'FREE' : '₹' + calculatedCost})`);
+        setPincodeMessage("Delivery available!");
         return true;
       } else {
         setPincodeServiceable(false);
-        setShippingCharge(null);
         setPincodeMessage("Delivery not available at this pincode.");
         return false;
       }
     } catch (err) {
       console.error(err);
       setPincodeServiceable(null);
-      setShippingCharge(null);
       setPincodeMessage("Error checking pincode");
       return false;
     } finally {
@@ -250,7 +263,15 @@ export default function CheckoutPage() {
   };
 
   const handlePayment = async () => {
-    if (!validateForm()) return;
+    if (shippingCharge === null) {
+      alert("Please select a valid State and City to calculate shipping before proceeding.");
+      return;
+    }
+
+    if (!validateForm()) {
+      alert("Please fill in all required fields correctly.");
+      return;
+    }
 
     if (pincodeServiceable === null) {
       const serviceable = await checkPincode(pincode);
@@ -321,7 +342,7 @@ export default function CheckoutPage() {
                   subTotal: subTotal,
                   shippingCharges: shippingCharge || 0,
                   discountAmount: discountAmount,
-                  appliedCoupon: appliedCoupon ? appliedCoupon.code : null,
+                  couponApplied: appliedCoupon ? appliedCoupon.code : null,
                   amount: finalAmount,
                   customerName: customerName,
                   product: productName,
@@ -341,13 +362,10 @@ export default function CheckoutPage() {
                   history: [{ status: "New Order", date: new Date().toISOString(), completed: true }]
                 };
 
-                // Firebase will crash if any property is undefined. 
-                // JSON parse/stringify drops all undefined keys safely.
                 const safePayload = JSON.parse(JSON.stringify(rawPayload));
 
                 const createdOrderId = await dbService.createOrder(userId, safePayload);
 
-                // Auto-save address to user profile if logged in and not already saved
                 if (user) {
                   try {
                     const profile = await dbService.getUserProfile(user.uid);
@@ -798,19 +816,19 @@ export default function CheckoutPage() {
                       <span>-₹{discountAmount.toFixed(2)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-[11px] text-white/70 font-sans">
+                  <div className="flex justify-between items-center text-[11px] text-white/70 font-sans">
                     <span>Shipping Charges</span>
                     {shippingCharge !== null ? (
                       <span>{shippingCharge === 0 ? <span className="text-green-400 font-bold text-[10px] tracking-widest">FREE SHIPPING</span> : `₹${shippingCharge.toFixed(2)}`}</span>
                     ) : (
-                      <span className="text-white/50 uppercase tracking-widest font-semibold text-[8px]">Calculated after checking PIN</span>
+                      <span className="text-white/50 uppercase tracking-widest font-semibold text-[9px]">Select State & City</span>
                     )}
                   </div>
                   <div className="flex justify-between items-end text-base font-serif font-bold text-white pt-3 border-t border-white/10">
                     <span>Total</span>
                     <div className="text-right flex items-center gap-2">
                       {appliedCoupon && (
-                        <span className="text-xs text-white/40 line-through">₹{subTotal.toFixed(2)}</span>
+                        <span className="text-xs text-white/40 line-through">₹{(subTotal + (shippingCharge || 0)).toFixed(2)}</span>
                       )}
                       <span>₹{finalTotal.toFixed(2)}</span>
                     </div>
@@ -819,7 +837,7 @@ export default function CheckoutPage() {
 
                 <button
                   onClick={handlePayment}
-                  disabled={isProcessing}
+                  disabled={isProcessing || shippingCharge === null}
                   className="w-full py-3 bg-white text-black hover:bg-neutral-200 transition-all duration-300 text-[11px] uppercase tracking-[0.2em] font-bold shadow-[0_0_20px_rgba(255,255,255,0.1)] disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isProcessing ? "Processing..." : `Pay ₹${finalTotal.toFixed(2)}`}

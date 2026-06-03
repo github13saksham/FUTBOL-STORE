@@ -13,11 +13,13 @@ import { useStore } from "@/context/StoreContext";
 import { FAQS } from "@/data/mockData";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/backend/firebase/config";
+import { useRouter } from "next/navigation";
 
 export default function HomepageClient({ initialSettings }: { initialSettings: any }) {
   const bestSellersRef = useRef<HTMLDivElement>(null);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [hoveredClubId, setHoveredClubId] = useState<string | null>(null);
+  const router = useRouter();
   
   const { 
     products,
@@ -109,10 +111,10 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
             {/* Background Media */}
             {homepageSettings?.hero?.mediaType === 'video' ? (
               <>
-                <video autoPlay loop muted playsInline className="hidden md:block absolute inset-0 w-full h-full object-cover object-top z-0">
+                <video autoPlay loop muted playsInline preload="auto" className="hidden md:block absolute inset-0 w-full h-full object-cover object-top z-0">
                   <source src={homepageSettings.hero.desktopMediaUrl || "/images/Hero_Section_vid.MP4"} type="video/mp4" />
                 </video>
-                <video autoPlay loop muted playsInline className="block md:hidden absolute inset-0 w-full h-full object-cover object-top z-0">
+                <video autoPlay loop muted playsInline preload="auto" className="block md:hidden absolute inset-0 w-full h-full object-cover object-top z-0">
                   <source src={homepageSettings.hero.mobileMediaUrl || homepageSettings.hero.desktopMediaUrl || "/images/Hero_Section_vid.MP4"} type="video/mp4" />
                 </video>
               </>
@@ -123,6 +125,7 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
                     src={homepageSettings?.hero?.desktopMediaUrl || ""} 
                     alt="Hero Desktop" 
                     fill 
+                    priority
                     className="object-cover object-top"
                   />
                 </div>
@@ -131,6 +134,7 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
                     src={homepageSettings?.hero?.mobileMediaUrl || homepageSettings?.hero?.desktopMediaUrl || ""} 
                     alt="Hero Mobile" 
                     fill 
+                    priority
                     className="object-cover object-top"
                   />
                 </div>
@@ -217,7 +221,7 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 pt-4">
               <button 
                 onClick={() => {
-                  window.location.href = "/national-teams";
+                  router.push("/national-teams");
                 }}
                 className="text-xs uppercase tracking-widest font-semibold text-black hover:text-black flex items-center gap-2 transition-colors duration-300"
               >
@@ -392,7 +396,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                       if (product.realProduct) {
                         setQuickAddProduct(product.realProduct);
                       } else {
-                        window.location.href = `/product/${product.realId}`;
+                        router.push(`/product/${product.realId}`);
                       }
                     }}
                     className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-2.5 bg-luxury-dark text-white hover:bg-luxury-taupe hover:text-black text-[10px] tracking-widest uppercase font-semibold rounded-full shadow-lg opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 backdrop-blur-md z-10"
@@ -493,7 +497,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
 
       {/* 6. Find Your National Team Jersey (Interactive 3D Carousel Component) */}
       <section className="bg-[#FFEEE2] relative overflow-hidden border-t border-luxury-taupe/15">
-        <NationalTeams3D />
+        <NationalTeams3D teams={homepageSettings?.nationalTeams} />
       </section>
 
 

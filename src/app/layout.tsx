@@ -23,8 +23,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let initialProducts = [];
-  let initialClubs = [];
+  let initialProducts: any[] = [];
+  let initialClubs: any[] = [];
   try {
     const [products, clubs] = await Promise.all([
       fetchProductsRest(),
