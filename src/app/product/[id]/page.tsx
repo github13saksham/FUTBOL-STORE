@@ -228,7 +228,7 @@ export default function ProductPage() {
               <div className="grid grid-cols-5 gap-2">
                 {["S", "M", "L", "XL", "2XL"].map((size) => {
                   const isOutOfStock = product.inventory?.[size] === 0;
-                  const stockCount = product.inventory?.[size];
+                  
                   return (
                     <div key={size} className="flex flex-col items-center gap-1">
                       <button
@@ -249,9 +249,7 @@ export default function ProductPage() {
                           </span>
                         )}
                       </button>
-                      <span className="text-[9px] uppercase tracking-wider text-white/50 text-center leading-tight">
-                        {stockCount !== undefined ? (stockCount > 0 ? `${stockCount} left` : 'Sold out') : 'In Stock'}
-                      </span>
+                    
                     </div>
                   );
                 })}

@@ -25,6 +25,8 @@ export interface Coupon {
 export interface UserProfile {
   phone?: string;
   addresses?: Address[];
+  cart?: any[];
+  wishlist?: string[];
 }
 
 export interface IDatabaseService {

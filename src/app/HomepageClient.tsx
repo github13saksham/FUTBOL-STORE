@@ -83,10 +83,10 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
               animation: marquee 35s linear infinite;
             }
           `}</style>
-          <div className="flex whitespace-nowrap py-2.5 md:py-3 w-[200vw]">
-            <div className="animate-marquee flex w-full">
+          <div className="flex whitespace-nowrap py-2.5 md:py-3 w-full">
+            <div className="animate-marquee flex w-max">
               {[...Array(4)].map((_, i) => (
-                <span key={i} className="flex items-center justify-center w-[50vw] shrink-0 text-[10px] md:text-xs tracking-[0.2em] uppercase font-semibold">
+                <span key={i} className="flex items-center justify-center px-8 md:px-16 shrink-0 text-[10px] md:text-xs tracking-[0.2em] uppercase font-semibold">
                   <span className="text-luxury-taupe mr-3">✦</span>
                   {homepageSettings?.banner?.text || 'Get Flat ₹100 OFF on all orders above ₹999.'}
                   <span className="text-luxury-taupe ml-3">✦</span>

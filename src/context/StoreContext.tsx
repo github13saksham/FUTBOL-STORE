@@ -83,34 +83,54 @@ export default function StoreProvider({ children, initialProducts = [], initialC
   useEffect(() => {
     if (authLoading) return;
 
-    try {
-      if (user) {
-        const storedCart = localStorage.getItem(`futbol_cart_${user.uid}`);
-        if (storedCart) setCart(JSON.parse(storedCart));
-        else setCart([]);
+    async function loadUserData() {
+      try {
+        if (user) {
+          // 1. Initial load from local storage for fast response
+          const storedCart = localStorage.getItem(`futbol_cart_${user.uid}`);
+          if (storedCart) setCart(JSON.parse(storedCart));
+          else setCart([]);
 
-        const storedWishlist = localStorage.getItem(`futbol_wishlist_${user.uid}`);
-        if (storedWishlist) setWishlist(JSON.parse(storedWishlist));
-        else setWishlist([]);
-      } else {
-        setCart([]);
-        setWishlist([]);
+          const storedWishlist = localStorage.getItem(`futbol_wishlist_${user.uid}`);
+          if (storedWishlist) setWishlist(JSON.parse(storedWishlist));
+          else setWishlist([]);
+
+          // 2. Fetch from DB to sync across devices
+          const profile = await dbService.getUserProfile(user.uid);
+          if (profile) {
+             if (profile.cart) {
+               setCart(profile.cart);
+               localStorage.setItem(`futbol_cart_${user.uid}`, JSON.stringify(profile.cart));
+             }
+             if (profile.wishlist) {
+               setWishlist(profile.wishlist);
+               localStorage.setItem(`futbol_wishlist_${user.uid}`, JSON.stringify(profile.wishlist));
+             }
+          }
+        } else {
+          setCart([]);
+          setWishlist([]);
+        }
+      } catch (e) {
+        console.error("Failed to load store data", e);
       }
-    } catch (e) {
-      console.error("Failed to load store data", e);
+      setIsInitialized(true);
     }
-    setIsInitialized(true);
+    
+    loadUserData();
   }, [user, authLoading]);
 
   useEffect(() => {
     if (isInitialized && user) {
       localStorage.setItem(`futbol_cart_${user.uid}`, JSON.stringify(cart));
+      dbService.updateUserProfile(user.uid, { cart }).catch(e => console.error("Sync cart error", e));
     }
   }, [cart, isInitialized, user]);
 
   useEffect(() => {
     if (isInitialized && user) {
       localStorage.setItem(`futbol_wishlist_${user.uid}`, JSON.stringify(wishlist));
+      dbService.updateUserProfile(user.uid, { wishlist }).catch(e => console.error("Sync wishlist error", e));
     }
   }, [wishlist, isInitialized, user]);
 
