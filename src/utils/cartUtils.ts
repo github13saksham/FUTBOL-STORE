@@ -3,8 +3,8 @@ import deliveryData from '../../delivery_rate.json';
 export const calculateShipping = (stateName: string, quantity: number): number | null => {
   if (!stateName) return null;
   
-  // Hardcoded Rule: 3 or more jerseys get FREE SHIPPING
-  if (quantity >= 3) return 0;
+  // Hardcoded Rule: 4 or more jerseys get FREE SHIPPING
+  if (quantity >= 4) return 0;
   
   const rates = (deliveryData as any).shippingRates[stateName];
   if (!rates) {
@@ -13,11 +13,15 @@ export const calculateShipping = (stateName: string, quantity: number): number |
   
   const rate500g = rates["500g"];
   const rate1000g = rates["1000g"];
+  const rate1500g = rates["1500g"];
   
   if (quantity <= 0) return 0;
+  if (quantity === 1) return rate500g;
+  if (quantity === 2) return rate1000g;
+  if (quantity === 3) return rate1500g;
   
-  // Formula: stateRate500 + (quantity - 1) * (stateRate1000 - stateRate500)
-  return rate500g + (quantity - 1) * (rate1000g - rate500g);
+  // Fallback if no rate rule matched (though quantity >= 4 handles above 3)
+  return rate1500g + (quantity - 3) * (rate1000g - rate500g);
 };
 
 export const validateCoupon = (coupon: any, subTotal: number, cart: any[]): { valid: boolean; error?: string } => {

@@ -18,6 +18,7 @@ export default function Navbar() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const {
     products,
@@ -184,9 +185,15 @@ export default function Navbar() {
             </button>
 
             <Link href={user ? "/account" : "/login"} className="hover:text-luxury-ivory p-1 transition-colors duration-300 hidden md:block" aria-label="User Account">
-              {user?.photoURL ? (
+              {user?.photoURL && !imgError ? (
                 <div className="w-6 h-6 rounded-full overflow-hidden relative border border-luxury-sand/30 hover:border-luxury-ivory transition-colors">
-                  <Image src={user.photoURL} alt="Profile" fill className="object-cover" />
+                  <Image 
+                    src={user.photoURL} 
+                    alt="Profile" 
+                    fill 
+                    className="object-cover" 
+                    onError={() => setImgError(true)}
+                  />
                 </div>
               ) : (
                 <User className="w-5 h-5 stroke-[1.5px]" />
@@ -583,6 +590,13 @@ Browse our collection and bring home your next matchday essential.
                     <span className="text-lg font-serif font-bold text-luxury-dark">₹{getCartTotal().toFixed(2)}</span>
                   </div>
                   <p className="text-[10px] text-luxury-dark font-sans font-light leading-snug">
+                    {cart.reduce((s, i) => s + i.quantity, 0) >= 4 ? (
+                      <span className="text-green-600 font-semibold tracking-wide block mb-1">Eligible for FREE SHIPPING!</span>
+                    ) : (
+                      <span className="text-luxury-taupe font-semibold tracking-wide block mb-1">
+                        Add {4 - cart.reduce((s, i) => s + i.quantity, 0)} more jersey(s) for FREE SHIPPING.
+                      </span>
+                    )}
                     Shipping charges will be calculated at checkout.
                   </p>
                   <Link

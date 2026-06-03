@@ -559,12 +559,12 @@ export default function CheckoutPage() {
               />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <select
-                  value={stateCode}
+                  value={state}
                   onChange={(e) => {
-                    const selectedStateCode = e.target.value;
-                    setStateCode(selectedStateCode);
-                    const stateObj = indianStates.find(s => s.isoCode === selectedStateCode);
-                    setState(stateObj ? stateObj.name : "");
+                    const selectedStateName = e.target.value;
+                    setState(selectedStateName);
+                    const stateObj = indianStates.find(s => s.name === selectedStateName);
+                    setStateCode(stateObj ? stateObj.isoCode : "");
                     setCity("");
                   }}
                   style={{ colorScheme: 'dark' }}
@@ -572,7 +572,7 @@ export default function CheckoutPage() {
                 >
                   <option value="" disabled>Select State</option>
                   {indianStates.map((s) => (
-                    <option key={s.isoCode} value={s.isoCode}>{s.name}</option>
+                    <option key={s.isoCode} value={s.name}>{s.name}</option>
                   ))}
                 </select>
 
