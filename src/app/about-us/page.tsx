@@ -18,7 +18,7 @@ export default function AboutUsPage() {
     {
       icon: Trophy,
       title: "Latest Club & National Team Collections",
-      desc: "From limited-time arrivals to the latest 2026 collections and retro historical alignments, we hold the absolute vault of historic footballing campaigns."
+      desc: "From limited-time arrivals to the latest 2026 collections and retro historical alignments, we hold the absolute vault of historic Footballing campaigns."
     },
     {
       icon: Shirt,
@@ -82,9 +82,13 @@ export default function AboutUsPage() {
           <div className="lg:col-span-6  space-y-6">
             
             <p className="text-m md:text-base text-luxury-dark text-justify leading-relaxed font-sans font-bold">
-              Built by a football fan, for football fans.
-Founded in September 2024 by Krish, THE FÚTBOL STORE started with a simple passion for football and the dream of creating a place where fans could proudly wear the colors of the teams they love. For us, football is more than just a game — it’s emotion, memories, loyalty, and unforgettable moments that connect millions of fans around the world.
-From iconic club kits to the latest international collections, we aim to provide premium-quality football jerseys that help supporters feel closer to the game they live for. Whether you support or your national team, every jersey represents passion and identity. From iconic home kits to the latest 2026 collections, our goal is to deliver high-quality jerseys that let fans represent their favorite teams with pride and style. Whether you support iconic clubs, rising giants, your favorite players, or your national team, we aim to make every jersey feel special for every football lover.
+              Built by a Football fan, for Football fans.
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-luxury-charcoal/80 mb-6 font-sans">
+              Founded in September 2024 by Krish, THE FÚTBOL STORE started with a simple passion for Football and the dream of creating a place where fans could proudly wear the colors of the teams they love. For us, Football is more than just a game — it’s emotion, memories, loyalty, and unforgettable moments that connect millions of fans around the world.
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-luxury-charcoal/80 font-sans">
+              From iconic club kits to the latest international collections, we aim to provide premium-quality Football jerseys that help supporters feel closer to the game they live for. Whether you support or your national team, every jersey represents passion and identity. From iconic home kits to the latest 2026 collections, our goal is to deliver high-quality jerseys that let fans represent their favorite teams with pride and style. Whether you support iconic clubs, rising giants, your favorite players, or your national team, we aim to make every jersey feel special for every Football lover.
             </p>
             <div className="pt-4">
               <button 
@@ -125,7 +129,7 @@ From iconic club kits to the latest international collections, we aim to provide
               Our Core <span className="italic font-medium text-luxury-sand">Focuses</span>
             </h2>
             <p className="text-[10px] md:text-sm text-luxury-ivory/60 font-sans leading-relaxed font-light">
-              At THE FÚTBOL STORE, we focus on every micro-detail of football fashion, ensuring that your apparel matches the historical intensity of your loyalty.
+              At THE FÚTBOL STORE, we focus on every micro-detail of Football fashion, ensuring that your apparel matches the historical intensity of your loyalty.
             </p>
           </div>
 

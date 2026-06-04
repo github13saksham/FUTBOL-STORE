@@ -162,8 +162,8 @@ export class FirebaseDatabaseService implements IDatabaseService {
       const newCount = await runTransaction(db, async (transaction) => {
         const sfDoc = await transaction.get(counterRef);
         if (!sfDoc.exists()) {
-          transaction.set(counterRef, { count: 1 });
-          return 1;
+          transaction.set(counterRef, { count: 0 });
+          return 0;
         }
         const newCount = sfDoc.data().count + 1;
         transaction.update(counterRef, { count: newCount });
