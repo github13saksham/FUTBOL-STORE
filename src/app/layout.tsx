@@ -11,6 +11,9 @@ import { fetchProductsRest, fetchClubsRest } from "@/backend/firebase/rest";
 export const metadata: Metadata = {
   title: "THE FÚTBOL STORE | Premium Football Fashion & Luxury Jerseys",
   description: "Experience premium football fashion with a fusion of luxury design and authentic football culture. Authentic clubs, retro, and national team jerseys.",
+  icons: {
+    icon: "/futbol store logo .JPEG",
+  },
   openGraph: {
     title: "THE FÚTBOL STORE | Premium Football Fashion",
     description: "Luxury minimalist designs meeting football matchday heritage. Shop premium player editions, retro jerseys, and national teams.",

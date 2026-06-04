@@ -40,6 +40,7 @@ export default function CheckoutPage() {
   const [phone, setPhone] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isProcessing, setIsProcessing] = useState(false);
+  const [saveAddress, setSaveAddress] = useState(false);
 
   // Delhivery Pincode State
   const [isCheckingPincode, setIsCheckingPincode] = useState(false);
@@ -139,12 +140,9 @@ export default function CheckoutPage() {
   }, [cart]);
 
   const cartTotal = getCartTotal();
-  // We calculate +199 for items with personalization in the map loop, so getCartTotal() should ideally include it. 
-  // If getCartTotal doesn't, we add it here manually.
-  const personalizationTotal = cart.reduce((acc, item) => {
-    return acc + ((item.customName || item.customNumber) ? 199 * item.quantity : 0);
-  }, 0);
-  const subTotal = cartTotal + personalizationTotal;
+  // getCartTotal() already includes the personalization fee from StoreContext, 
+  // so subTotal is simply the cartTotal.
+  const subTotal = cartTotal;
 
   // --- Dynamic Shipping Evaluation ---
   useEffect(() => {
@@ -365,7 +363,29 @@ export default function CheckoutPage() {
 
                 const createdOrderId = await dbService.createOrder(userId, safePayload);
 
-                if (user) {
+                // Send confirmation email asynchronously (do not await)
+                fetch("/api/emails/order", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    orderId: createdOrderId,
+                    customerName: customerName,
+                    email: email,
+                    items: cart,
+                    totalAmount: finalAmount,
+                    shippingAddress: {
+                      firstName,
+                      lastName,
+                      address,
+                      city,
+                      state,
+                      pincode,
+                      phone
+                    }
+                  })
+                }).catch(err => console.error("Failed to trigger email API", err));
+
+                if (user && saveAddress) {
                   try {
                     const profile = await dbService.getUserProfile(user.uid);
                     let addresses = profile?.addresses || [];
@@ -420,6 +440,11 @@ export default function CheckoutPage() {
         theme: {
           color: "#000000",
         },
+        modal: {
+          ondismiss: function () {
+            setIsProcessing(false);
+          }
+        }
       };
 
       const paymentObject = new (window as any).Razorpay(options);
@@ -616,6 +641,22 @@ export default function CheckoutPage() {
                   )}
                 </div>
               </div>
+              {user ? (
+                <div className="flex items-center space-x-3 mt-5 p-3 border border-white/10 rounded-lg bg-white/5">
+                  <input 
+                    type="checkbox" 
+                    id="saveAddress" 
+                    checked={saveAddress} 
+                    onChange={(e) => setSaveAddress(e.target.checked)}
+                    className="w-4 h-4 accent-white cursor-pointer rounded"
+                  />
+                  <label htmlFor="saveAddress" className="cursor-pointer select-none text-xs text-white/80 font-medium">Save this as a delivery address for future orders</label>
+                </div>
+              ) : (
+                <div className="mt-5 p-3 border border-white/10 rounded-lg bg-white/5">
+                  <p className="text-xs text-white/50 italic">Log in or create an account to save delivery addresses for future orders.</p>
+                </div>
+              )}
             </section>
             
             <section className="space-y-4 pt-4 border-t border-white/10">
