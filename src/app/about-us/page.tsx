@@ -81,9 +81,7 @@ export default function AboutUsPage() {
           {/* Left Column: Asymmetrical Typography & Manifest */}
           <div className="lg:col-span-6  space-y-6">
             
-            <p className="text-m md:text-base text-luxury-dark text-justify leading-relaxed font-sans font-bold">
-              Built by a Football fan, for Football fans.
-            </p>
+            
             <p className="text-sm md:text-base leading-relaxed text-luxury-charcoal/80 mb-6 font-sans">
               Founded in September 2024 by Krish, THE FÚTBOL STORE started with a simple passion for Football and the dream of creating a place where fans could proudly wear the colors of the teams they love. For us, Football is more than just a game — it’s emotion, memories, loyalty, and unforgettable moments that connect millions of fans around the world.
             </p>
