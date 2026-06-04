@@ -327,6 +327,9 @@ export default function AccountPage() {
             <span className="flex items-center gap-3"><Heart className="w-4 h-4" /> Wishlist</span>
             <ChevronRight className="w-3.5 h-3.5 opacity-50" />
           </button>
+          <button onClick={async () => { await logout(); router.push('/login'); }} className="w-full text-left px-5 py-4 hover:bg-red-500/20 text-red-400 hover:text-red-300 text-[11px] uppercase tracking-widest font-bold flex justify-between items-center transition-all">
+            <span className="flex items-center gap-3"><LogOut className="w-4 h-4" /> Secure Logout</span>
+          </button>
         </div>
       </div>
 
