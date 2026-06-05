@@ -68,7 +68,9 @@ export default function StoreProvider({ children, initialProducts = [], initialC
           ]);
           const fetchedProducts = await productsRes.json();
           const fetchedClubs = await clubsRes.json();
-          setProducts(fetchedProducts);
+          // Filter out inactive products for the frontend store
+          const activeProducts = fetchedProducts.filter((p: Product) => p.visibility?.active !== false);
+          setProducts(activeProducts);
           setClubs(fetchedClubs);
         } catch (e) {
           console.error("Failed to load global data", e);

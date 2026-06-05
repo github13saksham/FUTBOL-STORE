@@ -390,12 +390,38 @@ export default function CheckoutPage() {
                     const profile = await dbService.getUserProfile(user.uid);
                     let addresses = profile?.addresses || [];
                     
-                    const exists = addresses.some((a: any) => 
-                      a.street.toLowerCase().includes(address.toLowerCase()) && 
-                      a.zipCode === pincode
-                    );
+                    // Unset previous defaults
+                    addresses = addresses.map((a: any) => ({ ...a, isDefault: false }));
                     
-                    if (!exists) {
+                    if (selectedAddressId !== 'new') {
+                      const addrIndex = addresses.findIndex((a: any) => a.id === selectedAddressId);
+                      if (addrIndex !== -1) {
+                        addresses[addrIndex] = {
+                          ...addresses[addrIndex],
+                          name: `${firstName} ${lastName}`,
+                          street: address,
+                          city: city,
+                          state: state,
+                          zipCode: pincode,
+                          phone: phone,
+                          isDefault: true
+                        };
+                      } else {
+                        // Fallback if not found
+                        addresses.push({
+                          id: selectedAddressId,
+                          label: "Home",
+                          name: `${firstName} ${lastName}`,
+                          street: address,
+                          city: city,
+                          state: state,
+                          zipCode: pincode,
+                          country: "India",
+                          phone: phone,
+                          isDefault: true
+                        });
+                      }
+                    } else {
                       const newAddress = {
                         id: Math.random().toString(36).substring(2, 10),
                         label: addresses.length === 0 ? "Home" : "Other",
@@ -406,11 +432,12 @@ export default function CheckoutPage() {
                         zipCode: pincode,
                         country: "India",
                         phone: phone,
-                        isDefault: addresses.length === 0
+                        isDefault: true
                       };
                       addresses.push(newAddress);
-                      await dbService.updateUserProfile(user.uid, { addresses });
                     }
+                    
+                    await dbService.updateUserProfile(user.uid, { addresses });
                   } catch (err) {
                     console.error("Failed to auto-save address", err);
                   }

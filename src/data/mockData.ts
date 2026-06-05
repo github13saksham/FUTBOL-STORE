@@ -10,7 +10,15 @@ export interface Product {
   desc: string;
   inventory?: Record<string, number>;
   inStock?: boolean;
+  createdAt?: string;
+  visibility?: {
+    active: boolean;
+    featured: boolean;
+    bestSeller: boolean;
+    newArrival: boolean;
+  };
 }
+
 
 export interface Club {
   id: string;

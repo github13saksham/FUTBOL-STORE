@@ -19,7 +19,13 @@ export class FirebaseDatabaseService implements IDatabaseService {
         products.push(doc.data() as Product);
       });
 
-      return products;
+      products.reverse();
+      return products.sort((a, b) => {
+        if (!a.createdAt && !b.createdAt) return 0;
+        if (!a.createdAt) return 1;
+        if (!b.createdAt) return -1;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
     } catch (error) {
       console.error("Error fetching products from Firestore:", error);
       return [];

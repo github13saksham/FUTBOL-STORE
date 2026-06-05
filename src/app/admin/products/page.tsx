@@ -80,9 +80,9 @@ export default function AdminProductsPage() {
   });
 
   // Sort by Uploaded
-  if (sortOrder === 'newest') {
-    // Assuming newer products are at the end of the original list or have newer IDs
-    // If no timestamp, we just reverse the natural array order for 'newest' (assuming added to end)
+  if (sortOrder === 'oldest') {
+    // Products are sorted newest-first by default from the DB.
+    // Reverse to show oldest first.
     filteredProducts.reverse();
   }
 

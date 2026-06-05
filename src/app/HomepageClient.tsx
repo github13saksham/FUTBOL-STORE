@@ -389,6 +389,25 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                   </Link>
 
+                  {/* Tags Container */}
+                  <div className="absolute top-3 left-3 md:top-4 md:left-4 flex flex-col gap-1 z-20 pointer-events-none">
+                    {(product.realProduct?.visibility?.newArrival || product.visibility?.newArrival) && (
+                      <div className="bg-white text-black text-[8px] md:text-[9px] uppercase tracking-widest font-bold px-2 py-1 rounded shadow-sm w-max">
+                        New Arrival
+                      </div>
+                    )}
+                    {(product.realProduct?.visibility?.bestSeller || product.visibility?.bestSeller) && (
+                      <div className="bg-luxury-taupe text-white text-[8px] md:text-[9px] uppercase tracking-widest font-bold px-2 py-1 rounded shadow-sm w-max">
+                        Best Seller
+                      </div>
+                    )}
+                    {(product.realProduct?.visibility?.featured || product.visibility?.featured) && (
+                      <div className="bg-black text-white text-[8px] md:text-[9px] uppercase tracking-widest font-bold px-2 py-1 rounded shadow-sm border border-white/20 w-max">
+                        Featured
+                      </div>
+                    )}
+                  </div>
+
                   {/* Quick Add Button on Hover */}
                   <button 
                     onClick={(e) => {

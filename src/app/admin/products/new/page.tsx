@@ -149,7 +149,7 @@ function SingleProductForm() {
         const randomCode = Math.random().toString(36).substring(2, 6);
         const newId = `${slug}-${randomCode}`;
         
-        await dbService.addProduct({ ...dataToSave, id: newId });
+        await dbService.addProduct({ ...dataToSave, id: newId, createdAt: new Date().toISOString() });
       }
       router.push('/admin/products');
     } catch (err: any) {

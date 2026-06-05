@@ -2,6 +2,7 @@ import { Product, Club } from "../../data/mockData";
 
 export interface Address {
   id: string;
+  label?: string;
   name: string;
   street: string;
   city: string;

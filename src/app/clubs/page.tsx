@@ -175,6 +175,25 @@ export default function ClubsPage() {
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 hidden md:block" />
                       </Link>
 
+                      {/* Tags Container */}
+                      <div className="absolute top-3 left-3 flex flex-col gap-1 z-20 pointer-events-none">
+                        {product.visibility?.newArrival && (
+                          <div className="bg-white text-black text-[8px] md:text-[9px] uppercase tracking-widest font-bold px-2 py-1 rounded shadow-sm w-max">
+                            New Arrival
+                          </div>
+                        )}
+                        {product.visibility?.bestSeller && (
+                          <div className="bg-luxury-taupe text-white text-[8px] md:text-[9px] uppercase tracking-widest font-bold px-2 py-1 rounded shadow-sm w-max">
+                            Best Seller
+                          </div>
+                        )}
+                        {product.visibility?.featured && (
+                          <div className="bg-black text-white text-[8px] md:text-[9px] uppercase tracking-widest font-bold px-2 py-1 rounded shadow-sm border border-white/20 w-max">
+                            Featured
+                          </div>
+                        )}
+                      </div>
+
                       {/* Quick Add Button (Desktop Only) */}
                       <button
                         onClick={(e) => {
