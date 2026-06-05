@@ -725,31 +725,31 @@ Browse our collection and bring home your next matchday essential.
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-2xl bg-luxury-dark p-8 rounded-3xl border border-luxury-sand/10 shadow-2xl relative"
+              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-luxury-dark p-5 md:p-8 rounded-2xl md:rounded-3xl border border-luxury-sand/10 shadow-2xl relative"
             >
               <button
                 onClick={() => setSizeGuideOpen(false)}
-                className="absolute top-6 right-6 text-luxury-ivory hover:text-luxury-ivory/80 p-1 transition-colors duration-300"
+                className="absolute top-4 right-4 md:top-6 md:right-6 text-luxury-ivory hover:text-luxury-ivory/80 p-1 transition-colors duration-300 z-10 bg-luxury-dark/50 rounded-full backdrop-blur-md"
                 aria-label="Close"
               >
                 <X className="w-5 h-5 stroke-[1.5px]" />
               </button>
 
-              <div className="space-y-6">
+              <div className="space-y-5 md:space-y-6">
                 <div>
-                  <span className="text-[10px] uppercase tracking-widest text-luxury-ivory/80 font-bold block">📏 Size Chart</span>
-                  <h3 className="text-3xl font-serif text-luxury-ivory mt-1">Jersey Specifications</h3>
+                  <span className="text-[9px] md:text-[10px] uppercase tracking-widest text-luxury-ivory/80 font-bold block">📏 Size Chart</span>
+                  <h3 className="text-2xl md:text-3xl font-serif text-luxury-ivory mt-1">Jersey Specifications</h3>
                 </div>
 
                 <div className="space-y-4">
-                  <div className="bg-white/5 border border-luxury-sand/10 p-3 rounded-lg flex items-center justify-between text-xs text-luxury-ivory/80 font-medium">
-                    <span>NOTE: Player version has a slimmer, athletic fit compared to the standard Fan version.</span>
-                    <span className="bg-[#1a1a1a] px-3 py-1 rounded-full border border-luxury-sand/10 text-luxury-ivory">Size in inches & cm</span>
+                  <div className="bg-white/5 border border-luxury-sand/10 p-3 rounded-lg flex flex-col md:flex-row gap-3 items-start md:items-center justify-between text-[11px] md:text-xs text-luxury-ivory/80 font-medium">
+                    <span className="leading-relaxed">NOTE: Player version has a slimmer, athletic fit compared to the standard Fan version.</span>
+                    <span className="bg-[#1a1a1a] px-3 py-1 rounded-full border border-luxury-sand/10 text-luxury-ivory whitespace-nowrap">Size in inches & cm</span>
                   </div>
 
                   {/* Sizing Table */}
-                  <div className="overflow-x-auto border border-luxury-sand/10 rounded-xl bg-white/5 backdrop-blur-sm">
-                    <table className="w-full text-center border-collapse text-xs">
+                  <div className="overflow-x-auto border border-luxury-sand/10 rounded-xl bg-white/5 backdrop-blur-sm scrollbar-thin scrollbar-thumb-luxury-sand/20 scrollbar-track-transparent pb-1">
+                    <table className="w-full min-w-[650px] text-center border-collapse text-[10px] md:text-xs whitespace-nowrap">
                       <thead>
                         <tr className="border-b border-luxury-sand/10 bg-luxury-dark/40 text-luxury-ivory uppercase tracking-wider font-bold">
                           <th className="p-3 border-r border-luxury-sand/10 align-middle" rowSpan={2}>Size</th>

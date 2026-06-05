@@ -95,12 +95,12 @@ export default function Footer() {
           {/* Links Column 1 */}
           <div className="space-y-3">
             <h4 className="text-[10px] uppercase tracking-widest text-luxury-ivory font-bold">COLLECTIONS</h4>
-            <ul className="text-xs text-luxury-ivory space-y-2  font-sans font-light ">
-              <Link href="/"><li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">Home</li></Link>
-              <Link href="/clubs"><li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">Clubs</li></Link>
-              <Link href="/national-teams"><li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">National Teams</li></Link>
-              <Link href="/national-teams"><li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">WC Jerseys</li></Link>
-              <Link href="/about-us"><li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">About Us</li></Link>
+            <ul className="text-xs text-luxury-ivory space-y-2 font-sans font-light">
+              <li><Link href="/" className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer block">Home</Link></li>
+              <li><Link href="/clubs" className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer block">Clubs</Link></li>
+              <li><Link href="/national-teams" className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer block">National Teams</Link></li>
+              <li><Link href="/national-teams" className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer block">WC Jerseys</Link></li>
+              <li><Link href="/about-us" className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer block">About Us</Link></li>
             </ul>
           </div>
 
