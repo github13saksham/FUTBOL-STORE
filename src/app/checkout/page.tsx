@@ -241,6 +241,24 @@ export default function CheckoutPage() {
       const data = await res.json();
       
       if (data.delivery_codes && data.delivery_codes.length > 0) {
+        const pinData = data.delivery_codes[0].postal_code;
+        
+        // Auto-detect and fill area based on Pincode
+        if (pinData.state_code) {
+          const stateObj = indianStates.find(s => s.isoCode === pinData.state_code);
+          if (stateObj) {
+            setState(stateObj.name);
+            setStateCode(stateObj.isoCode);
+            
+            const apiCity = pinData.district || pinData.city || "";
+            if (apiCity) {
+              // Capitalize first letter to match dropdown conventions if possible
+              const formattedCity = apiCity.charAt(0).toUpperCase() + apiCity.slice(1).toLowerCase();
+              setCity(formattedCity);
+            }
+          }
+        }
+
         setPincodeServiceable(true);
         setPincodeMessage("Delivery available!");
         return true;
@@ -618,8 +636,9 @@ export default function CheckoutPage() {
                     setStateCode(stateObj ? stateObj.isoCode : "");
                     setCity("");
                   }}
+                  disabled={pincodeServiceable === true}
                   style={{ colorScheme: 'dark' }}
-                  className={`w-full px-3 py-2 border bg-[#141414] text-white text-xs focus:outline-none transition-colors ${errors.state ? 'border-red-500' : 'border-white/10 focus:border-white'}`}
+                  className={`w-full px-3 py-2 border bg-[#141414] text-white text-xs focus:outline-none transition-colors ${errors.state ? 'border-red-500' : 'border-white/10 focus:border-white'} ${pincodeServiceable === true ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <option value="" disabled>Select State</option>
                   {indianStates.map((s) => (
@@ -630,14 +649,18 @@ export default function CheckoutPage() {
                 <select
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  disabled={!stateCode}
+                  disabled={!stateCode || pincodeServiceable === true}
                   style={{ colorScheme: 'dark' }}
-                  className={`w-full px-3 py-2 border bg-[#141414] text-white text-xs focus:outline-none transition-colors ${errors.city ? 'border-red-500' : 'border-white/10 focus:border-white'} ${!stateCode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`w-full px-3 py-2 border bg-[#141414] text-white text-xs focus:outline-none transition-colors ${errors.city ? 'border-red-500' : 'border-white/10 focus:border-white'} ${(!stateCode || pincodeServiceable === true) ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <option value="" disabled>{stateCode ? "Select City" : "Select State First"}</option>
                   {citiesOfState.map((c) => (
                     <option key={c.name} value={c.name}>{c.name}</option>
                   ))}
+                  {/* Fallback option if auto-filled city is not in the list exactly as matched */}
+                  {city && !citiesOfState.find(c => c.name === city) && (
+                    <option value={city}>{city}</option>
+                  )}
                 </select>
                 
                 <div className="relative flex-col flex gap-1">
@@ -668,6 +691,9 @@ export default function CheckoutPage() {
                   )}
                 </div>
               </div>
+              <p className="text-[10px] text-white/50 italic pt-1">
+                Enter your PIN code and click "CHECK" to automatically locate and lock your State and City.
+              </p>
               {user ? (
                 <div className="flex items-center space-x-3 mt-5 p-3 border border-white/10 rounded-lg bg-white/5">
                   <input 
