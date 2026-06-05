@@ -758,7 +758,7 @@ Browse our collection and bring home your next matchday essential.
                           <th className="p-3 border-r border-luxury-sand/10 border-b border-luxury-sand/10" colSpan={2}>Chest (inches)</th>
                           <th className="p-3 border-b border-luxury-sand/10" colSpan={2}>Chest (in cm)</th>
                         </tr>
-                        <tr className="border-b border-luxury-sand/10 bg-luxury-dark/20 text-luxury-ivory/70 tracking-widest text-[10px] uppercase font-semibold">
+                        <tr className="border-b border-luxury-sand/10 bg-luxury-dark/20 text-luxury-ivory tracking-widest text-[10px] uppercase font-semibold">
                           <th className="p-2 border-r border-luxury-sand/10">Fan</th>
                           <th className="p-2 border-r border-luxury-sand/10">Player</th>
                           <th className="p-2 border-r border-luxury-sand/10">Fan</th>
@@ -769,72 +769,68 @@ Browse our collection and bring home your next matchday essential.
                           <th className="p-2">Player</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/10 text-luxury-ivory/90 font-mono">
+                      <tbody className="divide-y divide-white/10 text-luxury-ivory font-mono">
                         <tr className="hover:bg-white/5 transition-colors">
                           <td className="p-3 font-bold border-r border-luxury-sand/10 font-sans">S</td>
                           <td className="p-3 border-r border-luxury-sand/10">67-69</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">67-69</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory">67-69</td>
                           <td className="p-3 border-r border-luxury-sand/10">170-175</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">170-175</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory">170-175</td>
                           <td className="p-3 border-r border-luxury-sand/10">38-40</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">36-38</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory">36-38</td>
                           <td className="p-3 border-r border-luxury-sand/10">96-101</td>
-                          <td className="p-3 text-luxury-ivory/60">91-96</td>
+                          <td className="p-3 text-luxury-ivory">91-96</td>
                         </tr>
                         <tr className="hover:bg-white/5 transition-colors">
                           <td className="p-3 font-bold border-r border-luxury-sand/10 font-sans">M</td>
                           <td className="p-3 border-r border-luxury-sand/10">69-71</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">69-71</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory">69-71</td>
                           <td className="p-3 border-r border-luxury-sand/10">175-180</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">175-180</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory">175-180</td>
                           <td className="p-3 border-r border-luxury-sand/10">40-42</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">38-40</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory">38-40</td>
                           <td className="p-3 border-r border-luxury-sand/10">101-106</td>
-                          <td className="p-3 text-luxury-ivory/60">96-101</td>
+                          <td className="p-3 text-luxury-ivory">96-101</td>
                         </tr>
                         <tr className="hover:bg-white/5 transition-colors">
                           <td className="p-3 font-bold border-r border-luxury-sand/10 font-sans">L</td>
                           <td className="p-3 border-r border-luxury-sand/10">71-73</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">71-73</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory">71-73</td>
                           <td className="p-3 border-r border-luxury-sand/10">180-185</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">180-185</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory">180-185</td>
                           <td className="p-3 border-r border-luxury-sand/10">42-44</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">40-42</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory">40-42</td>
                           <td className="p-3 border-r border-luxury-sand/10">106-111</td>
-                          <td className="p-3 text-luxury-ivory/60">101-106</td>
+                          <td className="p-3 text-luxury-ivory">101-106</td>
                         </tr>
                         <tr className="hover:bg-white/5 transition-colors">
                           <td className="p-3 font-bold border-r border-luxury-sand/10 font-sans">XL</td>
                           <td className="p-3 border-r border-luxury-sand/10">73-75</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">73-75</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory">73-75</td>
                           <td className="p-3 border-r border-luxury-sand/10">185-190</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">185-190</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory">185-190</td>
                           <td className="p-3 border-r border-luxury-sand/10">44-46</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">42-44</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory">42-44</td>
                           <td className="p-3 border-r border-luxury-sand/10">111-116</td>
-                          <td className="p-3 text-luxury-ivory/60">106-111</td>
+                          <td className="p-3 text-luxury-ivory">106-111</td>
                         </tr>
                         <tr className="hover:bg-white/5 transition-colors">
                           <td className="p-3 font-bold border-r border-luxury-sand/10 font-sans">XXL</td>
                           <td className="p-3 border-r border-luxury-sand/10">75-77</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">75-77</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory">75-77</td>
                           <td className="p-3 border-r border-luxury-sand/10">190-195</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">190-195</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory">190-195</td>
                           <td className="p-3 border-r border-luxury-sand/10">46-48</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">44-46</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory">44-46</td>
                           <td className="p-3 border-r border-luxury-sand/10">116-121</td>
-                          <td className="p-3 text-luxury-ivory/60">111-116</td>
+                          <td className="p-3 text-luxury-ivory">111-116</td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center pt-4 border-t border-luxury-sand/10">
-                  <div className="flex items-center gap-2 text-[10px] text-luxury-ivory/50">
-                    <Check className="w-4 h-4 text-luxury-ivory" />
-                    <span>Free replacements for sizing issues</span>
-                  </div>
+                <div className="flex justify-end items-center pt-4 border-t border-luxury-sand/10">
                   <button
                     onClick={() => setSizeGuideOpen(false)}
                     className="px-6 py-2.5 bg-white hover:bg-neutral-200 text-[#0B0B0C] text-[10px] tracking-widest uppercase font-bold rounded-full transition-all duration-300"
