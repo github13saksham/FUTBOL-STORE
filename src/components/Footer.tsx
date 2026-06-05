@@ -95,7 +95,7 @@ export default function Footer() {
           {/* Links Column 1 */}
           <div className="space-y-3">
             <h4 className="text-[10px] uppercase tracking-widest text-luxury-ivory font-bold">COLLECTIONS</h4>
-            <ul className="text-xs text-luxury-ivory space-y-2 font-sans font-light">
+            <ul className="text-xs text-luxury-ivory space-y-2  font-sans font-light ">
               <Link href="/"><li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">Home</li></Link>
               <Link href="/clubs"><li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">Clubs</li></Link>
               <Link href="/national-teams"><li className="hover:text-luxury-ivory transition-colors duration-300 cursor-pointer">National Teams</li></Link>

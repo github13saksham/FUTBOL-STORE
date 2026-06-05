@@ -540,7 +540,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                   Open Size Guide
                 </button>
                 <a 
-                  href="https://wa.me/1234567890" 
+                  href="https://chat.whatsapp.com/KWrRHklSqb47tIhSJ0EOl5" 
                   target="_blank" 
                   rel="noreferrer"
                   className="px-6 py-3 border border-luxury-sand/30 hover:border-white text-white hover:text-white rounded-full text-[10px] tracking-widest uppercase font-semibold text-center transition-all duration-300"

@@ -743,7 +743,7 @@ Browse our collection and bring home your next matchday essential.
 
                 <div className="space-y-4">
                   <div className="bg-white/5 border border-luxury-sand/10 p-3 rounded-lg flex items-center justify-between text-xs text-luxury-ivory/80 font-medium">
-                    <span>NOTE: Fan & Set both have same size chart</span>
+                    <span>NOTE: Player version has a slimmer, athletic fit compared to the standard Fan version.</span>
                     <span className="bg-[#1a1a1a] px-3 py-1 rounded-full border border-luxury-sand/10 text-luxury-ivory">Size in inches & cm</span>
                   </div>
 
@@ -754,10 +754,13 @@ Browse our collection and bring home your next matchday essential.
                         <tr className="border-b border-luxury-sand/10 bg-luxury-dark/40 text-luxury-ivory uppercase tracking-wider font-bold">
                           <th className="p-3 border-r border-luxury-sand/10 align-middle" rowSpan={2}>Size</th>
                           <th className="p-3 border-r border-luxury-sand/10 border-b border-luxury-sand/10" colSpan={2}>Height (inches)</th>
+                          <th className="p-3 border-r border-luxury-sand/10 border-b border-luxury-sand/10" colSpan={2}>Height (in cm)</th>
                           <th className="p-3 border-r border-luxury-sand/10 border-b border-luxury-sand/10" colSpan={2}>Chest (inches)</th>
                           <th className="p-3 border-b border-luxury-sand/10" colSpan={2}>Chest (in cm)</th>
                         </tr>
                         <tr className="border-b border-luxury-sand/10 bg-luxury-dark/20 text-luxury-ivory/70 tracking-widest text-[10px] uppercase font-semibold">
+                          <th className="p-2 border-r border-luxury-sand/10">Fan</th>
+                          <th className="p-2 border-r border-luxury-sand/10">Player</th>
                           <th className="p-2 border-r border-luxury-sand/10">Fan</th>
                           <th className="p-2 border-r border-luxury-sand/10">Player</th>
                           <th className="p-2 border-r border-luxury-sand/10">Fan</th>
@@ -769,48 +772,58 @@ Browse our collection and bring home your next matchday essential.
                       <tbody className="divide-y divide-white/10 text-luxury-ivory/90 font-mono">
                         <tr className="hover:bg-white/5 transition-colors">
                           <td className="p-3 font-bold border-r border-luxury-sand/10 font-sans">S</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">25</td>
-                          <td className="p-3 border-r border-luxury-sand/10">27</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">19</td>
-                          <td className="p-3 border-r border-luxury-sand/10">17</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">38</td>
-                          <td className="p-3">36</td>
+                          <td className="p-3 border-r border-luxury-sand/10">67-69</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">67-69</td>
+                          <td className="p-3 border-r border-luxury-sand/10">170-175</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">170-175</td>
+                          <td className="p-3 border-r border-luxury-sand/10">38-40</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">36-38</td>
+                          <td className="p-3 border-r border-luxury-sand/10">96-101</td>
+                          <td className="p-3 text-luxury-ivory/60">91-96</td>
                         </tr>
                         <tr className="hover:bg-white/5 transition-colors">
                           <td className="p-3 font-bold border-r border-luxury-sand/10 font-sans">M</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">27</td>
-                          <td className="p-3 border-r border-luxury-sand/10">28</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">20</td>
-                          <td className="p-3 border-r border-luxury-sand/10">21</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">40</td>
-                          <td className="p-3">38</td>
+                          <td className="p-3 border-r border-luxury-sand/10">69-71</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">69-71</td>
+                          <td className="p-3 border-r border-luxury-sand/10">175-180</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">175-180</td>
+                          <td className="p-3 border-r border-luxury-sand/10">40-42</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">38-40</td>
+                          <td className="p-3 border-r border-luxury-sand/10">101-106</td>
+                          <td className="p-3 text-luxury-ivory/60">96-101</td>
                         </tr>
                         <tr className="hover:bg-white/5 transition-colors">
                           <td className="p-3 font-bold border-r border-luxury-sand/10 font-sans">L</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">28</td>
-                          <td className="p-3 border-r border-luxury-sand/10">28</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">21</td>
-                          <td className="p-3 border-r border-luxury-sand/10">21</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">42</td>
-                          <td className="p-3">40</td>
+                          <td className="p-3 border-r border-luxury-sand/10">71-73</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">71-73</td>
+                          <td className="p-3 border-r border-luxury-sand/10">180-185</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">180-185</td>
+                          <td className="p-3 border-r border-luxury-sand/10">42-44</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">40-42</td>
+                          <td className="p-3 border-r border-luxury-sand/10">106-111</td>
+                          <td className="p-3 text-luxury-ivory/60">101-106</td>
                         </tr>
                         <tr className="hover:bg-white/5 transition-colors">
                           <td className="p-3 font-bold border-r border-luxury-sand/10 font-sans">XL</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">29</td>
-                          <td className="p-3 border-r border-luxury-sand/10">29</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">21</td>
-                          <td className="p-3 border-r border-luxury-sand/10">21</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">44</td>
-                          <td className="p-3">42</td>
+                          <td className="p-3 border-r border-luxury-sand/10">73-75</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">73-75</td>
+                          <td className="p-3 border-r border-luxury-sand/10">185-190</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">185-190</td>
+                          <td className="p-3 border-r border-luxury-sand/10">44-46</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">42-44</td>
+                          <td className="p-3 border-r border-luxury-sand/10">111-116</td>
+                          <td className="p-3 text-luxury-ivory/60">106-111</td>
                         </tr>
                         <tr className="hover:bg-white/5 transition-colors">
                           <td className="p-3 font-bold border-r border-luxury-sand/10 font-sans">XXL</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">30</td>
-                          <td className="p-3 border-r border-luxury-sand/10">29</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">22</td>
-                          <td className="p-3 border-r border-luxury-sand/10">21</td>
-                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">46</td>
-                          <td className="p-3">44</td>
+                          <td className="p-3 border-r border-luxury-sand/10">75-77</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">75-77</td>
+                          <td className="p-3 border-r border-luxury-sand/10">190-195</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">190-195</td>
+                          <td className="p-3 border-r border-luxury-sand/10">46-48</td>
+                          <td className="p-3 border-r border-luxury-sand/10 text-luxury-ivory/60">44-46</td>
+                          <td className="p-3 border-r border-luxury-sand/10">116-121</td>
+                          <td className="p-3 text-luxury-ivory/60">111-116</td>
                         </tr>
                       </tbody>
                     </table>
