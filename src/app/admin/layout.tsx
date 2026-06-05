@@ -1,18 +1,32 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Package, ArrowLeft, Menu, X, ShoppingBag, LayoutTemplate, LogOut, Ticket, Database } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FirebaseDatabaseService } from '@/backend/firebase/db.service';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [newOrderCount, setNewOrderCount] = useState(0);
+
+  useEffect(() => {
+    if (pathname === '/admin/login') return;
+    
+    const dbService = new FirebaseDatabaseService();
+    const unsubscribe = dbService.listenToAllOrders((orders) => {
+      const count = orders.filter((o: any) => o.status === 'New Order').length;
+      setNewOrderCount(count);
+    });
+    
+    return () => unsubscribe();
+  }, [pathname]);
 
   const navItems = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    { name: 'Orders', href: '/admin/orders', icon: ShoppingBag, badge: 3 }, // Mock badge for new orders
+    { name: 'Orders', href: '/admin/orders', icon: ShoppingBag, badge: newOrderCount > 0 ? newOrderCount : undefined },
     { name: 'Products', href: '/admin/products', icon: Package, alert: true }, // Mock alert for low stock
     { name: 'Coupons', href: '/admin/coupons', icon: Ticket },
     { name: 'Homepage Manager', href: '/admin/homepage', icon: LayoutTemplate },
