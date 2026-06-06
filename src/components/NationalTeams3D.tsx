@@ -325,7 +325,7 @@ export default function NationalTeams3D({ teams: propTeams }: NationalTeams3DPro
                   {/* Interactive floating logo in 3D card */}
                   <div className="relative w-full h-28 flex items-center justify-center z-10 mt-4 group">
                     {/* Shadow overlay */}
-                    <div className="absolute bottom-0 w-24 h-3 bg-luxury-dark/30 rounded-full blur-md group-hover:scale-110 transition-transform duration-500" />
+                    <div className="absolute bottom-0 w-24 h-3 bg-luxury-dark/30 rounded-full blur-md md:group-hover:scale-110 transition-transform duration-500" />
                     
                     <Link href={resolvedLink} className="z-20 cursor-pointer" onClick={(e) => {
                       e.stopPropagation();
@@ -357,7 +357,7 @@ export default function NationalTeams3D({ teams: propTeams }: NationalTeams3DPro
                   </div>
                   
                   {/* Floating Action Button */}
-                  <div className="absolute -bottom-16 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 group-hover:bottom-0 transition-all duration-300 z-30 flex justify-center">
+                  <div className="absolute -bottom-16 left-0 right-0 p-4 opacity-0 md:group-hover:opacity-100 md:group-hover:bottom-0 transition-all duration-300 z-30 flex justify-center">
                     <Link href={resolvedLink} className="flex items-center gap-2 bg-white text-luxury-dark px-6 py-2 rounded-full text-xs font-bold shadow-xl hover:scale-105 transition-transform" onClick={(e) => e.stopPropagation()}>
                       View Edition <ChevronRight className="w-3 h-3" />
                     </Link>

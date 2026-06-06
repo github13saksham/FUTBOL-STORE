@@ -386,7 +386,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                     />
                     
                     {/* Overlay with subtle shadow */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                    <div className="absolute inset-0 bg-black/0 md:group-hover:bg-black/5 transition-colors duration-300 hidden md:block" />
                   </Link>
 
                   {/* Tags Container */}
@@ -419,7 +419,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                         router.push(`/product/${product.realId}`);
                       }
                     }}
-                    className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-2.5 bg-luxury-dark text-white hover:bg-luxury-taupe hover:text-black text-[10px] tracking-widest uppercase font-semibold rounded-full shadow-lg opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 backdrop-blur-md z-10"
+                    className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-2.5 bg-luxury-dark text-white hover:bg-luxury-taupe hover:text-black text-[10px] tracking-widest uppercase font-semibold rounded-full shadow-lg opacity-0 md:group-hover:opacity-100 translate-y-3 md:group-hover:translate-y-0 transition-all duration-300 backdrop-blur-md z-10"
                   >
                     Quick Add
                   </button>

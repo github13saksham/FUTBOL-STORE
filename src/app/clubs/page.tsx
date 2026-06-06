@@ -187,7 +187,7 @@ export default function ClubsPage() {
                         />
                         
                         {/* Add overlays */}
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 hidden md:block" />
+                        <div className="absolute inset-0 bg-black/0 md:group-hover:bg-black/5 transition-colors duration-300 hidden md:block" />
                       </Link>
 
                       {/* Tags Container */}
@@ -216,7 +216,7 @@ export default function ClubsPage() {
                           e.stopPropagation();
                           setQuickAddProduct(product);
                         }}
-                        className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-2.5 bg-luxury-dark text-luxury-ivory hover:bg-luxury-taupe hover:text-luxury-dark text-[10px] tracking-widest uppercase font-semibold rounded-full shadow-lg opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 backdrop-blur-md z-10"
+                        className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-2.5 bg-luxury-dark text-luxury-ivory hover:bg-luxury-taupe hover:text-luxury-dark text-[10px] tracking-widest uppercase font-semibold rounded-full shadow-lg opacity-0 md:group-hover:opacity-100 translate-y-3 md:group-hover:translate-y-0 transition-all duration-300 backdrop-blur-md z-10"
                       >
                         Quick Add
                       </button>
