@@ -375,4 +375,67 @@ export class FirebaseDatabaseService implements IDatabaseService {
       throw error;
     }
   }
+  // --- Reviews ---
+  async getReviewsByProduct(productId: string): Promise<any[]> {
+    try {
+      const q = query(collection(db, "reviews"), where("productId", "==", productId));
+      const querySnapshot = await getDocs(q);
+      const reviews: any[] = [];
+      querySnapshot.forEach((doc) => {
+        reviews.push({ id: doc.id, ...doc.data() });
+      });
+      // Filter for approved and sort by date
+      return reviews
+        .filter(r => r.status === 'approved')
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      return [];
+    }
+  }
+
+  async getAllReviews(): Promise<any[]> {
+    try {
+      const q = query(collection(db, "reviews"));
+      const querySnapshot = await getDocs(q);
+      const reviews: any[] = [];
+      querySnapshot.forEach((doc) => {
+        reviews.push({ id: doc.id, ...doc.data() });
+      });
+      return reviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } catch (error) {
+      console.error("Error fetching all reviews:", error);
+      return [];
+    }
+  }
+
+  async addReview(review: any): Promise<void> {
+    try {
+      const docRef = doc(collection(db, "reviews"));
+      await setDoc(docRef, { ...review, id: docRef.id, createdAt: new Date().toISOString() });
+    } catch (error) {
+      console.error("Error adding review:", error);
+      throw error;
+    }
+  }
+
+  async updateReviewStatus(id: string, status: string): Promise<void> {
+    try {
+      const docRef = doc(db, "reviews", id);
+      await updateDoc(docRef, { status });
+    } catch (error) {
+      console.error("Error updating review status:", error);
+      throw error;
+    }
+  }
+
+  async deleteReview(id: string): Promise<void> {
+    try {
+      const docRef = doc(db, "reviews", id);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      throw error;
+    }
+  }
 }

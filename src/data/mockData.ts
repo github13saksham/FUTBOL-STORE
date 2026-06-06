@@ -10,6 +10,7 @@ export interface Product {
   desc: string;
   inventory?: Record<string, number>;
   inStock?: boolean;
+  rating?: number;
   createdAt?: string;
   visibility?: {
     active: boolean;

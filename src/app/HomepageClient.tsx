@@ -4,7 +4,7 @@ import { useState, useRef, useMemo, useEffect } from "react";
 import { LazyMotion, domMax, m, AnimatePresence } from "framer-motion";
 import { 
   ArrowRight, Heart, ChevronRight, HelpCircle, Truck, RefreshCw, 
-  Shield, Check, Instagram, Send, Mail, User, FileText, Loader2
+  Shield, Check, Instagram, Send, Mail, User, FileText, Loader2, Star
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -431,7 +431,15 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                 {/* Text specifications */}
                 <div className="p-4 md:p-5 md:pt-4 space-y-2 flex-grow flex flex-col justify-between">
                   <div>
-                    <Link href={`/product/${product.realId}`} className="block mt-2">
+                  <div className="flex justify-between items-center mb-1 mt-0.5">
+                    <span className="text-[9px] uppercase tracking-widest font-semibold text-white/80 md:text-white block">
+                      {product.category || product.realProduct?.category || "PLAYER VERSION"}
+                    </span>
+                    <div className="flex items-center text-[#cda491]">
+                      {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-2.5 h-2.5 ${Math.round(product.rating || product.realProduct?.rating || 5) >= star ? 'fill-current' : 'opacity-30'}`} />)}
+                    </div>
+                  </div>
+                    <Link href={`/product/${product.realId}`} className="block mt-1">
                       <h3 className="font-serif text-[13px] md:text-[15px] font-medium leading-tight text-white hover:text-luxury-taupe transition-colors md:whitespace-normal" style={{ transform: "translateZ(20px)" }}>
                         {product.realProduct?.name || product.name}
                       </h3>

@@ -901,12 +901,6 @@ export default function CheckoutPage() {
                     <span>Subtotal</span>
                     <span>₹{subTotal.toFixed(2)}</span>
                   </div>
-                  {appliedCoupon && (
-                    <div className="flex justify-between text-[11px] text-green-400 font-sans">
-                      <span>Discount ({appliedCoupon.code})</span>
-                      <span>-₹{discountAmount.toFixed(2)}</span>
-                    </div>
-                  )}
                   <div className="flex justify-between items-center text-[11px] text-white/70 font-sans">
                     <span>Shipping Charges</span>
                     {shippingCharge !== null ? (
@@ -915,6 +909,12 @@ export default function CheckoutPage() {
                       <span className="text-white/50 uppercase tracking-widest font-semibold text-[9px]">Select State & City</span>
                     )}
                   </div>
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-[11px] text-green-400 font-sans">
+                      <span>Discount ({appliedCoupon.code})</span>
+                      <span>-₹{discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between items-end text-base font-serif font-bold text-white pt-3 border-t border-white/10">
                     <span>Total</span>
                     <div className="text-right flex items-center gap-2">

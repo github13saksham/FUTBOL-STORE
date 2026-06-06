@@ -17,7 +17,8 @@ export default function Footer() {
   const pathname = usePathname();
   const isAccountPage = pathname?.startsWith("/account");
   const isAdminPage = pathname?.startsWith("/admin");
-  const shouldHideFooter = isAccountPage || isAdminPage;
+  const isLoginPage = pathname === "/login";
+  const shouldHideFooter = isAccountPage || isAdminPage || isLoginPage;
 
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 

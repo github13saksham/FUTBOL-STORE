@@ -72,20 +72,32 @@ export default function LoginPage() {
   if (authLoading) return null;
 
   return (
-    <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center p-4 pt-28 pb-12 relative overflow-hidden">
+    <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center p-4 pt-32 md:pt-40 pb-12 relative overflow-hidden">
       {/* Background ambient accents */}
       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.05),transparent_50%)] pointer-events-none" />
       
       <div className="w-full max-w-5xl mx-auto z-10 flex flex-col md:flex-row shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] rounded-3xl overflow-hidden bg-white border border-black/5">
         
         {/* Left Side - Logo Panel */}
-        <div className="hidden md:flex md:w-1/2 relative bg-white items-center justify-center p-12 overflow-hidden border-r border-black/5">
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.01)_0%,rgba(0,0,0,0.03)_100%)]" />
+        <div className="hidden md:flex md:w-1/2 relative items-center justify-center p-12 overflow-hidden border-r border-black/5 bg-black">
+          {/* Background Image */}
+          <div className="absolute inset-0 z-0">
+            <Image 
+              src="/images/login-bg-2.png" 
+              alt="Premium Jersey Background" 
+              fill
+              className="object-cover object-center opacity-90"
+              priority
+            />
+          </div>
+          {/* Premium Frosted Overlay */}
+          <div className="absolute inset-0 z-0 bg-white/60 backdrop-blur-md" />
+          
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="relative z-10 w-full max-w-[320px] aspect-square flex items-center justify-center"
+            className="relative z-10 w-full max-w-[320px] aspect-square flex items-center justify-center drop-shadow-2xl"
           >
             <Image 
               src="/logo.png" 
@@ -134,16 +146,7 @@ export default function LoginPage() {
                   Continue with Google
                 </button>
 
-                <button
-                  onClick={handleAppleAuth}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-3 bg-black text-white py-3.5 rounded-lg hover:bg-black/80 transition-all duration-300 font-sans text-sm font-medium shadow-sm disabled:opacity-50"
-                >
-                  <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24">
-                    <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.19 2.31-.88 3.5-.84 1.5.05 2.78.8 3.59 2.07-3.11 1.9-2.6 5.46.36 6.61-.75 1.83-1.78 3.65-2.53 4.33zm-2.73-14.73c.6-1.53-.16-3.32-1.81-4.05-.59 1.69.41 3.46 1.81 4.05z" />
-                  </svg>
-                  Continue with Apple
-                </button>
+
 
                 <div className="flex items-center my-6">
                   <div className="flex-grow border-t border-black/10"></div>

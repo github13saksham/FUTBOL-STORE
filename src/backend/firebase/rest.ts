@@ -76,3 +76,28 @@ export async function fetchHomepageSettingsRest() {
     return null;
   }
 }
+
+export async function fetchReviewsRest(productId: string) {
+  try {
+    const res = await fetch(`${BASE_URL}/reviews?pageSize=100`, { 
+      next: { tags: [`reviews-${productId}`] },
+      cache: 'no-store' // We want live reviews for now, or force-cache if performance is strictly needed
+    });
+    if (!res.ok) throw new Error("REST API failed for reviews");
+    const data = await res.json();
+    if (!data.documents) return [];
+    
+    let reviews = data.documents.map((doc: any) => parseFirestoreDocument(doc));
+    
+    // Client-side filtering because REST API structured queries are complex to write manually
+    reviews = reviews.filter((r: any) => r.productId === productId && r.status === 'approved');
+    
+    // Sort by date desc
+    reviews.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    
+    return reviews;
+  } catch (e) {
+    console.error("Error in fetchReviewsRest:", e);
+    return [];
+  }
+}

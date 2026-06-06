@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,10 +8,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart, ShoppingBag, Ruler, Check, ChevronRight,
   ArrowRight, ShieldCheck, Truck, RefreshCw, Sparkles, ArrowLeft,
-  Minus, Plus, Shield, CreditCard, ChevronDown
+  Minus, Plus, Shield, CreditCard, ChevronDown, Star
 } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { Product, BEST_SELLERS, CLUB_PRODUCTS } from "@/data/mockData";
+import { FirebaseDatabaseService } from "@/backend/firebase/db.service";
+
+const dbService = new FirebaseDatabaseService();
 
 export default function ProductPage() {
   const params = useParams();
@@ -68,6 +71,67 @@ export default function ProductPage() {
 
   // Accordion state
   const [activeTab, setActiveTab] = useState<string | null>("specs");
+
+  // Reviews state
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(true);
+  const [isWritingReview, setIsWritingReview] = useState(false);
+  const [newReview, setNewReview] = useState({ name: "", title: "", content: "", rating: 5 });
+
+  const averageRating = useMemo(() => {
+    if (reviews.length === 0) return "5.0";
+    const sum = reviews.reduce((acc, curr) => acc + (curr.rating || 5), 0);
+    return (sum / reviews.length).toFixed(1);
+  }, [reviews]);
+
+  useEffect(() => {
+    if (product) {
+      loadReviews();
+    }
+  }, [product]);
+
+  const loadReviews = async () => {
+    setIsLoadingReviews(true);
+    try {
+      const fetchedReviews = await dbService.getReviewsByProduct(product!.id);
+      setReviews(fetchedReviews);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoadingReviews(false);
+    }
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReview.name || !newReview.title || !newReview.content || !product) return;
+    
+    const initials = newReview.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || "FL";
+    
+    const reviewData = {
+      productId: product.id,
+      name: newReview.name,
+      initials,
+      date: "Just now",
+      title: newReview.title,
+      content: newReview.content,
+      rating: newReview.rating,
+      status: 'approved' // Automatically approve for now, admins can hide later
+    };
+    
+    try {
+      await dbService.addReview(reviewData);
+      
+      // Optimistically add to state
+      setReviews([{ ...reviewData, id: Date.now().toString(), createdAt: new Date().toISOString() }, ...reviews]);
+      
+      setIsWritingReview(false);
+      setNewReview({ name: "", title: "", content: "", rating: 5 });
+    } catch (error) {
+      console.error(error);
+      alert("Failed to submit review.");
+    }
+  };
 
   // Filter recommendations (excluding current product) and ensure diversity
   const recommendations = useMemo(() => {
@@ -205,7 +269,17 @@ export default function ProductPage() {
               <h1 className="text-2xl md:text-3xl font-serif font-medium text-white tracking-wide uppercase leading-tight">
                 {product.name}
               </h1>
-              <span className="text-xl font-serif font-semibold text-white block">
+              
+              <div className="flex items-center gap-2 mb-2 mt-2">
+                <div className="flex text-[#cda491]">
+                  {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-3.5 h-3.5 ${parseFloat(averageRating) >= star - 0.5 ? 'fill-current' : 'opacity-30'}`} />)}
+                </div>
+                <a href="#reviews" className="text-[10px] text-white/50 hover:text-white transition-colors uppercase tracking-widest font-bold">
+                  {averageRating}/5 ({reviews.length} Reviews)
+                </a>
+              </div>
+
+              <span className="text-xl font-serif font-semibold text-white block mt-3">
                 ₹{product.price.toFixed(0)}
               </span>
             </div>
@@ -455,6 +529,130 @@ export default function ProductPage() {
 
           </div>
         </div>
+
+        {/* D. Premium Customer Reviews Section */}
+        <div id="reviews" className="border-t border-white/10 pt-12 mt-4 space-y-8 scroll-mt-24">
+          <div className="border border-white/10 bg-white/5 backdrop-blur-sm rounded-xl p-6 md:p-8 space-y-8 relative overflow-hidden">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 relative z-10">
+              <div>
+                <h3 className="text-xl md:text-2xl font-serif text-white mb-2 tracking-wide">Voices From The Stands</h3>
+                <div className="flex items-center gap-3">
+                  <div className="flex text-[#cda491]">
+                    {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-4 h-4 ${parseFloat(averageRating) >= star - 0.5 ? 'fill-current' : 'opacity-30'}`} />)}
+                  </div>
+                  <span className="text-[11px] uppercase tracking-widest text-white/50 font-bold">{averageRating}/5 ({reviews.length} Reviews)</span>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsWritingReview(!isWritingReview)}
+                className="text-[10px] uppercase tracking-widest font-bold text-white hover:text-[#cda491] transition-colors border-b border-white/30 hover:border-[#cda491] pb-1"
+              >
+                {isWritingReview ? "Cancel Review" : "Write a Review"}
+              </button>
+            </div>
+            
+            <AnimatePresence>
+              {isWritingReview && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden relative z-10"
+                >
+                  <form onSubmit={handleReviewSubmit} className="bg-black/40 border border-white/10 p-6 rounded-xl space-y-4 mb-8">
+                    <h4 className="text-sm font-serif text-white tracking-widest uppercase mb-4">Share Your Experience</h4>
+                    
+                    <div className="flex gap-2 text-[#cda491] mb-4">
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button 
+                          key={star} 
+                          type="button" 
+                          onClick={() => setNewReview({...newReview, rating: star})}
+                          className="focus:outline-none transition-transform hover:scale-110"
+                        >
+                          <Star className={`w-6 h-6 ${newReview.rating >= star ? 'fill-current' : 'opacity-30'}`} />
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <input 
+                        type="text" 
+                        placeholder="Your Name" 
+                        required
+                        value={newReview.name}
+                        onChange={(e) => setNewReview({...newReview, name: e.target.value})}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/50"
+                      />
+                      <input 
+                        type="text" 
+                        placeholder="Review Title" 
+                        required
+                        value={newReview.title}
+                        onChange={(e) => setNewReview({...newReview, title: e.target.value})}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/50"
+                      />
+                    </div>
+                    
+                    <textarea 
+                      placeholder="Write your review here..." 
+                      required
+                      rows={4}
+                      value={newReview.content}
+                      onChange={(e) => setNewReview({...newReview, content: e.target.value})}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/50 resize-none"
+                    ></textarea>
+
+                    <div className="flex justify-end">
+                      <button 
+                        type="submit"
+                        className="px-8 py-3 bg-white text-black font-bold uppercase tracking-widest text-[10px] rounded hover:bg-[#cda491] hover:text-white transition-colors duration-300"
+                      >
+                        Submit Review
+                      </button>
+                    </div>
+                  </form>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Review Cards Carousel */}
+            <div className="flex gap-4 md:gap-5 overflow-x-auto pb-4 snap-x snap-mandatory no-scrollbar relative z-10 -mx-6 px-6 md:mx-0 md:px-0">
+              {isLoadingReviews ? (
+                <div className="text-white/50 text-xs italic py-4">Loading reviews...</div>
+              ) : reviews.length === 0 ? (
+                <div className="text-white/50 text-xs italic py-4">No reviews yet. Be the first to share your experience!</div>
+              ) : reviews.map((review) => (
+                <div key={review.id} className="w-[85%] md:w-[280px] shrink-0 snap-start bg-black/20 border border-white/5 p-4 rounded-lg space-y-3 hover:border-white/20 transition-colors duration-300 flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="flex text-[#cda491]">
+                          {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-3 h-3 ${review.rating >= star ? 'fill-current' : 'opacity-30'}`} />)}
+                        </div>
+                        <span className="text-[9px] font-bold text-white/60">{review.rating || 5}/5</span>
+                      </div>
+                      <span className="text-[8px] uppercase tracking-wider text-white/40 font-mono">{review.date || new Date(review.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <h4 className="text-[12px] font-bold text-white leading-tight mb-1.5">{review.title}</h4>
+                    <p className="text-[11px] text-white/70 leading-snug font-light font-sans break-words line-clamp-3">
+                      "{review.content}"
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 pt-3 mt-auto border-t border-white/5">
+                    <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[9px] font-bold text-white shrink-0">{review.initials}</div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[10px] font-bold text-white/80 truncate">{review.name}</span>
+                      <span className="text-[8px] font-medium text-emerald-400 flex items-center gap-1 shrink-0"><Check className="w-2.5 h-2.5" /> Verified</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
 
         {/* C. Exclusive Pairings recommended collection */}
         <div className="border-t border-white/10 pt-12 space-y-6">

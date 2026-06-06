@@ -24,6 +24,7 @@ function SingleProductForm() {
     club: '',
     color: '',
     category: 'Player Version', // Re-mapped to Version
+    rating: 5,
     price: 0,
     priceStr: '₹0',
     comparePrice: 0,
@@ -54,6 +55,7 @@ function SingleProductForm() {
         setFormData({
           ...product,
           inventory: product.inventory || { S: 0, M: 0, L: 0, XL: 0 },
+          rating: (product as any).rating || 5,
           lowStockThreshold: (product as any).lowStockThreshold || 5,
           comparePrice: (product as any).comparePrice || 0,
           visibility: (product as any).visibility || {
@@ -84,7 +86,7 @@ function SingleProductForm() {
         price: priceNum,
         priceStr: `₹${priceNum.toLocaleString('en-IN')}`
       }));
-    } else if (name === 'comparePrice' || name === 'lowStockThreshold') {
+    } else if (name === 'comparePrice' || name === 'lowStockThreshold' || name === 'rating') {
       setFormData((prev: any) => ({ ...prev, [name]: Number(value) }));
     } else {
       setFormData((prev: any) => ({ ...prev, [name]: value }));
@@ -245,6 +247,22 @@ function SingleProductForm() {
                     <option value="Player Version">Player Version</option>
                     <option value="Fan Version">Fan Version</option>
                   </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Rating (1-5)</label>
+                  <input 
+                    type="number" 
+                    name="rating" 
+                    min="1"
+                    max="5"
+                    step="0.5"
+                    value={formData.rating || 5} 
+                    onChange={handleChange}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
+                  />
                 </div>
               </div>
 

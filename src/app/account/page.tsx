@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Package, MapPin, Heart, LogOut, ChevronRight, Edit2, Plus, ShieldAlert } from "lucide-react";
+import { User, Package, MapPin, Heart, LogOut, ChevronRight, Edit2, Plus, ShieldAlert, Star } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useStore } from "@/context/StoreContext";
@@ -778,9 +778,14 @@ service firebase.storage {
 
                             <div className="p-2 pt-3 md:p-4 flex flex-col justify-between flex-grow">
                               <div>
-                                <span className="text-[9px] uppercase tracking-widest font-semibold text-white/80 md:text-white block mb-1">
-                                  {product.category}
-                                </span>
+                                <div className="flex justify-between items-center mb-1">
+                                  <span className="text-[9px] uppercase tracking-widest font-semibold text-white/80 md:text-white block">
+                                    {product.category || "PLAYER VERSION"}
+                                  </span>
+                                  <div className="flex items-center text-[#cda491]">
+                                    {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-2.5 h-2.5 ${Math.round(product.rating || 5) >= star ? 'fill-current' : 'opacity-30'}`} />)}
+                                  </div>
+                                </div>
                                 <Link href={`/product/${product.id}`}>
                                   <h3 className="text-[14px] md:text-sm font-serif text-white font-medium leading-tight hover:text-luxury-ivory md:hover:text-white transition-colors line-clamp-2">
                                     {product.name}
