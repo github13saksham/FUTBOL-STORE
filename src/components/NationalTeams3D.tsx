@@ -286,7 +286,7 @@ export default function NationalTeams3D({ teams: propTeams }: NationalTeams3DPro
                   }}
                 >
                   <motion.div
-                    onClick={() => {
+                    onTap={() => {
                       if (activeIndex !== index) {
                         rotateTo(index);
                       } else {

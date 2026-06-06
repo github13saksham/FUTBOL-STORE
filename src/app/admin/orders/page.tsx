@@ -423,6 +423,7 @@ export default function AdminOrdersPage() {
                         <option value="TFS">TFS</option>
                         <option value="Venu Sports">Venu Sports</option>
                         <option value="AY Enterprises">AY Enterprises</option>
+                        <option value="Sports Plaza">Sports Plaza</option>
                       </select>
                       <button 
                         onClick={() => generateShipment(selectedOrder)}

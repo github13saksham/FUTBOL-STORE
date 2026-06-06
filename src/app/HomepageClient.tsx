@@ -8,7 +8,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import NationalTeams3D from "@/components/NationalTeams3D";
+import dynamic from "next/dynamic";
+const NationalTeams3D = dynamic(() => import("@/components/NationalTeams3D"), { ssr: false });
 import { useStore } from "@/context/StoreContext";
 import { FAQS } from "@/data/mockData";
 import { doc, onSnapshot } from "firebase/firestore";
@@ -381,7 +382,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                       alt={product.name}
                       fill
                       className="object-contain md:object-cover transition-transform duration-[1000ms] ease-out scale-105 "
-                      priority
+                      loading="lazy"
                     />
                     
                     {/* Overlay with subtle shadow */}

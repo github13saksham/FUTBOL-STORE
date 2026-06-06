@@ -5,10 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Heart, ChevronRight, Sparkles, ShieldAlert, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useStore } from "@/context/StoreContext";
 import { Club, Product } from "@/data/mockData";
 
 export default function ClubsPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
   const [selectedClubQuery, setSelectedClubQuery] = useState<string | null>(null);
   const [versionFilter, setVersionFilter] = useState<string>("player");
@@ -18,19 +22,20 @@ export default function ClubsPage() {
   const { products, clubs, wishlist, toggleWishlist, setQuickAddProduct } = useStore();
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const clubId = params.get("id");
-      const clubQuery = params.get("club");
-      
-      if (clubId && clubs.some(c => c.id === clubId)) {
-        setSelectedClubId(clubId);
-      }
-      if (clubQuery) {
-        setSelectedClubQuery(clubQuery);
-      }
+    const clubId = searchParams.get("id");
+    const clubQuery = searchParams.get("club");
+    const version = searchParams.get("version");
+    
+    if (clubId && clubs.some(c => c.id === clubId)) {
+      setSelectedClubId(clubId);
     }
-  }, [clubs]);
+    if (clubQuery) {
+      setSelectedClubQuery(clubQuery);
+    }
+    if (version) {
+      setVersionFilter(version);
+    }
+  }, [clubs, searchParams]);
 
   const clubProducts = products.filter(p => p.club && p.club.toLowerCase() !== "national team");
 
@@ -108,6 +113,11 @@ export default function ClubsPage() {
                     onClick={() => {
                       setVersionFilter("player");
                       setIsDropdownOpen(false);
+                      if (typeof window !== "undefined") {
+                        const params = new URLSearchParams(window.location.search);
+                        params.set("version", "player");
+                        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+                      }
                     }}
                     className={`block w-full text-left px-4 py-2 md:px-6 md:py-3 text-[10px] md:text-xs uppercase tracking-widest font-semibold transition-colors duration-200 ${versionFilter === "player" ? "bg-luxury-dark text-luxury-ivory" : "text-luxury-dark hover:bg-luxury-taupe/10"}`}
                   >
@@ -117,6 +127,11 @@ export default function ClubsPage() {
                     onClick={() => {
                       setVersionFilter("fan");
                       setIsDropdownOpen(false);
+                      if (typeof window !== "undefined") {
+                        const params = new URLSearchParams(window.location.search);
+                        params.set("version", "fan");
+                        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+                      }
                     }}
                     className={`block w-full text-left px-4 py-2 md:px-6 md:py-3 text-[10px] md:text-xs uppercase tracking-widest font-semibold transition-colors duration-200 ${versionFilter === "fan" ? "bg-luxury-dark text-luxury-ivory" : "text-luxury-dark hover:bg-luxury-taupe/10"}`}
                   >

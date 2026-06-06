@@ -38,10 +38,11 @@ export async function POST(request: Request) {
             seller_add: "Futbol Store HQ",
             seller_name: "Futbol Store",
             quantity: "1",
-            shipment_width: "25",
-            shipment_height: "5",
-            shipment_weight: "500", // 500g
-            shipment_length: "25"
+            width: "25",
+            height: "5",
+            weight: "500", // 500g
+            length: "25",
+            return_awb: false
           }
         ],
         pickup_location: {

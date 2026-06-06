@@ -5,10 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Heart, ChevronRight, Sparkles, ChevronDown, ShieldAlert } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 import { useStore } from "@/context/StoreContext";
 
 export default function NationalTeamsPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { products, wishlist, toggleWishlist, setQuickAddProduct } = useStore();
   const [versionFilter, setVersionFilter] = useState<string>("player");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -17,14 +21,15 @@ export default function NationalTeamsPage() {
   const ITEMS_PER_PAGE = 12;
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const team = params.get("team");
-      if (team) {
-        setSelectedTeam(team);
-      }
+    const team = searchParams.get("team");
+    const version = searchParams.get("version");
+    if (team) {
+      setSelectedTeam(team);
     }
-  }, []);
+    if (version) {
+      setVersionFilter(version);
+    }
+  }, [searchParams]);
 
   const nationalTeamProducts = products.filter(p => p.club && p.club.toLowerCase() === "national team");
 
@@ -93,6 +98,11 @@ export default function NationalTeamsPage() {
                     onClick={() => {
                       setVersionFilter("player");
                       setIsDropdownOpen(false);
+                      if (typeof window !== "undefined") {
+                        const params = new URLSearchParams(window.location.search);
+                        params.set("version", "player");
+                        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+                      }
                     }}
                     className={`block w-full text-left px-4 py-2 md:px-6 md:py-3 text-[10px] md:text-xs uppercase tracking-widest font-semibold transition-colors duration-200 ${versionFilter === "player" ? "bg-luxury-dark text-luxury-ivory" : "text-luxury-dark hover:bg-luxury-taupe/10"}`}
                   >
@@ -102,6 +112,11 @@ export default function NationalTeamsPage() {
                     onClick={() => {
                       setVersionFilter("fan");
                       setIsDropdownOpen(false);
+                      if (typeof window !== "undefined") {
+                        const params = new URLSearchParams(window.location.search);
+                        params.set("version", "fan");
+                        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+                      }
                     }}
                     className={`block w-full text-left px-4 py-2 md:px-6 md:py-3 text-[10px] md:text-xs uppercase tracking-widest font-semibold transition-colors duration-200 ${versionFilter === "fan" ? "bg-luxury-dark text-luxury-ivory" : "text-luxury-dark hover:bg-luxury-taupe/10"}`}
                   >
