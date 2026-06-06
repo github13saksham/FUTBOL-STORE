@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useMemo, useEffect } from "react";
-import { LazyMotion, domAnimation, m, AnimatePresence } from "framer-motion";
+import { LazyMotion, domMax, m, AnimatePresence } from "framer-motion";
 import { 
   ArrowRight, Heart, ChevronRight, HelpCircle, Truck, RefreshCw, 
   Shield, Check, Instagram, Send, Mail, User, FileText, Loader2
@@ -76,7 +76,7 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
   }, [homepageSettings, products]);
 
   return (
-    <LazyMotion features={domAnimation}>
+    <LazyMotion features={domMax}>
     <div className="min-h-screen selection:bg-luxury-taupe selection:text-white text-black bg-[#FFEEE2]">
       
       {/* Promo Banner */}
