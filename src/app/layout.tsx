@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import StoreProvider from "@/context/StoreContext";
@@ -9,22 +8,8 @@ import { AuthProvider } from "@/context/AuthContext";
 import AuthGuard from "@/components/AuthGuard";
 import { fetchProductsRest, fetchClubsRest } from "@/backend/firebase/rest";
 
-const cormorantGaramond = Cormorant_Garamond({ 
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-serif",
-  display: "swap",
-});
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-sans",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: "THE FÚTBOL STORE | Premium Football Fashion & Luxury Jerseys",
   description: "Experience premium football fashion with a fusion of luxury design and authentic football culture. Authentic clubs, retro, and national team jerseys.",
   icons: {
@@ -57,11 +42,10 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`antialiased ${cormorantGaramond.variable} ${plusJakartaSans.variable}`}>
+      <body className="antialiased">
         <AuthProvider>
           <StoreProvider initialProducts={initialProducts} initialClubs={initialClubs}>
             <AuthGuard>
-              <div className="grain-overlay" />
               <SmoothScroll>
                 <Navbar />
                 {children}

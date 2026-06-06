@@ -695,16 +695,15 @@ export default function CheckoutPage() {
                 Enter your PIN code and click "CHECK" to automatically locate and lock your State and City.
               </p>
               {user ? (
-                <div className="flex items-center space-x-3 mt-5 p-3 border border-white/10 rounded-lg bg-white/5">
+                <label className="flex items-start sm:items-center space-x-3 mt-5 p-3 border border-white/10 rounded-lg bg-white/5 cursor-pointer">
                   <input 
                     type="checkbox" 
-                    id="saveAddress" 
                     checked={saveAddress} 
                     onChange={(e) => setSaveAddress(e.target.checked)}
-                    className="w-4 h-4 accent-white cursor-pointer rounded"
+                    className="w-4 h-4 mt-0.5 sm:mt-0 accent-white cursor-pointer rounded shrink-0"
                   />
-                  <label htmlFor="saveAddress" className="cursor-pointer select-none text-xs text-white/80 font-medium">Save this as a delivery address for future orders</label>
-                </div>
+                  <span className="select-none text-xs text-white/80 font-medium">Save this as a delivery address for future orders</span>
+                </label>
               ) : (
                 <div className="mt-5 p-3 border border-white/10 rounded-lg bg-white/5">
                   <p className="text-xs text-white/50 italic">Log in or create an account to save delivery addresses for future orders.</p>

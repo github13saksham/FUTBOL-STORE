@@ -2,7 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
 :root {
+  --font-serif: 'Cormorant Garamond', 'Playfair Display', serif;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+
   --color-luxury-taupe: #9F7E69;
   --color-luxury-sand: #D2BBA0;
   --color-luxury-cream: #F2EFC7;
@@ -145,4 +150,34 @@ input::-webkit-calendar-picker-indicator {
 .no-scrollbar {
   -ms-overflow-style: none !important;
   scrollbar-width: none !important;
+}
+
+/* Marquee animation for promo banner */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 35s linear infinite;
+}
+
+/* Hero fade-in animations (replaces Framer Motion for above-the-fold) */
+@keyframes heroFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-hero-fade-in {
+  animation: heroFadeIn 1.2s ease-out 0.7s both;
+}
+
+.animate-hero-fade-in-delayed {
+  animation: heroFadeIn 1s ease-out 0.6s both;
 }

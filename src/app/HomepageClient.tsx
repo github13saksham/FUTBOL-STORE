@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useMemo, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, domAnimation, m, AnimatePresence } from "framer-motion";
 import { 
   ArrowRight, Heart, ChevronRight, HelpCircle, Truck, RefreshCw, 
   Shield, Check, Instagram, Send, Mail, User, FileText, Loader2
@@ -12,8 +12,6 @@ import dynamic from "next/dynamic";
 const NationalTeams3D = dynamic(() => import("@/components/NationalTeams3D"), { ssr: false });
 import { useStore } from "@/context/StoreContext";
 import { FAQS } from "@/data/mockData";
-import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "@/backend/firebase/config";
 import { useRouter } from "next/navigation";
 
 export default function HomepageClient({ initialSettings }: { initialSettings: any }) {
@@ -35,16 +33,21 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
   const [homepageSettings, setHomepageSettings] = useState<any>(initialSettings);
 
   useEffect(() => {
-    const docRef = doc(db, 'settings', 'homepage');
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setHomepageSettings(docSnap.data());
-      }
-    }, (error) => {
-      console.error("Error listening to homepage settings:", error);
+    let unsubscribe: (() => void) | undefined;
+    import("firebase/firestore").then(({ doc, onSnapshot }) => {
+      import("@/backend/firebase/config").then(({ db }) => {
+        const docRef = doc(db, 'settings', 'homepage');
+        unsubscribe = onSnapshot(docRef, (docSnap: any) => {
+          if (docSnap.exists()) {
+            setHomepageSettings(docSnap.data());
+          }
+        }, (error: any) => {
+          console.error("Error listening to homepage settings:", error);
+        });
+      });
     });
     
-    return () => unsubscribe();
+    return () => unsubscribe?.();
   }, []);
 
   const bestSellers = useMemo(() => {
@@ -73,20 +76,13 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
   }, [homepageSettings, products]);
 
   return (
+    <LazyMotion features={domAnimation}>
     <div className="min-h-screen selection:bg-luxury-taupe selection:text-white text-black bg-[#FFEEE2]">
       
       {/* Promo Banner */}
       {(homepageSettings?.banner?.enabled ?? true) && (
         <div className="w-full bg-black text-white overflow-hidden z-40 border-b border-white/10 mt-[100px] md:mt-[120px]">
-          <style>{`
-            @keyframes marquee {
-              0% { transform: translateX(0%); }
-              100% { transform: translateX(-50%); }
-            }
-            .animate-marquee {
-              animation: marquee 35s linear infinite;
-            }
-          `}</style>
+
           <div className="flex whitespace-nowrap py-2.5 md:py-3 w-full">
             <div className="animate-marquee flex w-max">
               {[...Array(10)].map((_, i) => (
@@ -113,10 +109,10 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
             {/* Background Media */}
             {homepageSettings?.hero?.mediaType === 'video' ? (
               <>
-                <video autoPlay loop muted playsInline preload="auto" className="hidden md:block absolute inset-0 w-full h-full object-cover object-top z-0">
+                <video autoPlay loop muted playsInline preload="none" className="hidden md:block absolute inset-0 w-full h-full object-cover object-top z-0">
                   <source src={homepageSettings.hero.desktopMediaUrl || "/images/Hero_Section_vid.MP4"} type="video/mp4" />
                 </video>
-                <video autoPlay loop muted playsInline preload="auto" className="block md:hidden absolute inset-0 w-full h-full object-cover object-top z-0">
+                <video autoPlay loop muted playsInline preload="none" className="block md:hidden absolute inset-0 w-full h-full object-cover object-top z-0">
                   <source src={homepageSettings.hero.mobileMediaUrl || homepageSettings.hero.desktopMediaUrl || "/images/Hero_Section_vid.MP4"} type="video/mp4" />
                 </video>
               </>
@@ -159,20 +155,14 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
               {/* Text Block */}
               <div className="flex flex-col items-center mt-40 space-y-10">
                 
-                <motion.h1 
-                  initial={{ opacity: 0, y: 60 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1.2, delay: 0.7, ease: "easeOut" }}
-                  className="text-4xl sm:text-6xl md:text-8xl lg:text-[90px] font-serif text-white leading-[1.1] sm:leading-[0.9] italic tracking-tight font-light sm:whitespace-nowrap text-center px-4 drop-shadow-lg"
+                <h1 
+                  className="text-4xl sm:text-6xl md:text-8xl lg:text-[90px] font-serif text-white leading-[1.1] sm:leading-[0.9] italic tracking-tight font-light sm:whitespace-nowrap text-center px-4 drop-shadow-lg animate-hero-fade-in"
                 >
                   "{homepageSettings?.hero?.title || 'Inspired By Greatness'}"
-                </motion.h1>
+                </h1>
 
-                <motion.div 
-                  initial={{ opacity: 0, y: 40 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1, delay: 0.6, ease: "easeOut" }}
-                  className="flex flex-row gap-3 sm:gap-4 w-full sm:w-auto pt-6 sm:pt-4 justify-center px-4 sm:px-0"
+                <div 
+                  className="flex flex-row gap-3 sm:gap-4 w-full sm:w-auto pt-6 sm:pt-4 justify-center px-4 sm:px-0 animate-hero-fade-in-delayed"
                 >
                   <Link 
                     href={homepageSettings?.hero?.ctaLink || '/shop'}
@@ -191,7 +181,7 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
                   >
                     Explore Clubs
                   </button>
-                </motion.div>
+                </div>
               </div>
 
             </div>
@@ -273,7 +263,7 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
 
           <div className="grid md:grid-cols-2 gap-12 relative">
             {/* Card 1: Player Version (Elite, Performance, Matchday) */}
-            <motion.div 
+            <m.div 
               whileHover={{ y: -6 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
               className="group relative h-[480px] w-full max-w-[400px] rounded-3xl overflow-hidden border border-luxury-sand/15 bg-neutral-900/60 shadow-[0_0_40px_rgba(205,164,145,0.12)] hover:shadow-[0_0_50px_rgba(205,164,145,0.25)] transition-shadow duration-500 flex flex-col items-center justify-start mx-auto"
@@ -300,10 +290,10 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
 Built for elite performance, the Player Version Jersey features a slim athletic fit, lightweight breathable fabric, and heat-pressed details for an authentic on-pitch feel just like the jerseys worn by professionals.
                 </p>
               </div>
-            </motion.div>
+            </m.div>
 
             {/* Card 2: Fan Version (Lifestyle, Streetwear) */}
-            <motion.div 
+            <m.div 
               whileHover={{ y: -6 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
               className="group relative h-[480px] w-full max-w-[400px] rounded-3xl overflow-hidden border border-luxury-sand/15 bg-neutral-900/60 shadow-[0_0_40px_rgba(205,164,145,0.12)] hover:shadow-[0_0_50px_rgba(205,164,145,0.25)] transition-shadow duration-500 flex flex-col items-center justify-start mx-auto"
@@ -329,7 +319,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                 Designed for everyday comfort, the Fan Version Jersey offers a relaxed fit with high-quality stitched details and breathable fabric perfect for matchdays and casual wear.
                 </p>
               </div>
-            </motion.div>
+            </m.div>
           </div>
         </div>
       </section>
@@ -349,18 +339,18 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
         </div>
 
         {/* Horizontal Drag/Scroll Slider */}
-        <motion.div 
+        <m.div 
           ref={bestSellersRef}
           className="relative w-full overflow-hidden pb-12 cursor-grab active:cursor-grabbing"
         >
-          <motion.div 
+          <m.div 
             drag="x"
             dragConstraints={bestSellersRef}
             dragElastic={0.1}
             className="flex gap-8 w-max"
           >
             {bestSellers.map((product: any) => (
-              <motion.div 
+              <m.div 
                 key={product.id}
                 whileHover={{ 
                   
@@ -460,10 +450,10 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                     </Link>
                   </div>
                 </div>
-              </motion.div>
+              </m.div>
             ))}
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       </section>
 
       {/* 5. Shop By Clubs Grid Section */}
@@ -484,11 +474,11 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
           </div>
 
           {/* Premium layout Grid */}
-          <motion.div 
+          <m.div 
             ref={clubsRef}
             className="relative w-full overflow-hidden pb-4 md:pb-8 cursor-grab active:cursor-grabbing"
           >
-            <motion.div 
+            <m.div 
               drag="x"
               dragConstraints={clubsRef}
               dragElastic={0.1}
@@ -521,8 +511,8 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                   </div>
                 </Link>
               )})}
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         </div>
       </section>
 
@@ -585,7 +575,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                   </button>
                   <AnimatePresence initial={false}>
                     {activeFaq === index && (
-                      <motion.div
+                      <m.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 0.8 }}
                         exit={{ height: 0, opacity: 0 }}
@@ -595,7 +585,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                         <p className="text-xs font-sans font-light text-white pt-2 leading-relaxed">
                           {faq.a}
                         </p>
-                      </motion.div>
+                      </m.div>
                     )}
                   </AnimatePresence>
                 </div>
@@ -606,5 +596,6 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
         </div>
       </section>
     </div>
+    </LazyMotion>
   );
 }

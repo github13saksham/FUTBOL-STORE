@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, domAnimation, m, AnimatePresence } from "framer-motion";
 import {
   Mail, Instagram, Send, X, Shield, FileText, RefreshCw, Truck, User, HelpCircle
 } from "lucide-react";
@@ -190,16 +190,17 @@ export default function Footer() {
       )}
 
       {/* C. Policy Premium Modal Overlay */}
+      <LazyMotion features={domAnimation}>
       <AnimatePresence>
         {activePolicy && (
-          <motion.div 
+          <m.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setActivePolicy(null)}
             className="fixed inset-0 z-[110] bg-black/85 backdrop-blur-md flex justify-center items-center p-4 md:p-6"
           >
-            <motion.div 
+            <m.div 
               initial={{ scale: 0.95, y: 20, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.95, y: 20, opacity: 0 }}
@@ -223,7 +224,7 @@ export default function Footer() {
                 data-lenis-prevent
               >
                 {POLICIES_DATA[activePolicy as keyof typeof POLICIES_DATA] && (
-                  <motion.div 
+                  <m.div 
                     key={activePolicy}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -266,7 +267,7 @@ export default function Footer() {
                               </button>
                               <AnimatePresence initial={false}>
                                 {activeFaq === sIdx && (
-                                  <motion.div
+                                  <m.div
                                     initial={{ height: 0, opacity: 0 }}
                                     animate={{ height: "auto", opacity: 0.8 }}
                                     exit={{ height: 0, opacity: 0 }}
@@ -276,7 +277,7 @@ export default function Footer() {
                                     <p className="text-xs font-sans font-light text-luxury-ivory pt-2 leading-relaxed whitespace-pre-line">
                                       {section.content}
                                     </p>
-                                  </motion.div>
+                                  </m.div>
                                 )}
                               </AnimatePresence>
                             </div>
@@ -296,13 +297,14 @@ export default function Footer() {
                         ))
                       )}
                     </div>
-                  </motion.div>
+                  </m.div>
                 )}
               </div>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
+      </LazyMotion>
     </>
   );
 }

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, domAnimation, m, AnimatePresence } from "framer-motion";
 import {
   Search, Heart, ShoppingBag, User, Plus, Minus, X,
   ChevronRight, Check, Menu
@@ -229,13 +229,13 @@ export default function Navbar() {
       {/* ==================================================== */}
       {/* OVERLAY MODULES & DRAWERS (E-commerce Interactions) */}
       {/* ==================================================== */}
-
+      <LazyMotion features={domAnimation}>
       {/* A0. Mobile Menu Drawer (Myntra Style) */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
             {/* Backdrop */}
-            <motion.div
+            <m.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -243,7 +243,7 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
             />
             {/* Sliding Drawer */}
-            <motion.div
+            <m.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
@@ -285,7 +285,7 @@ export default function Navbar() {
                 <button onClick={() => { setMobileMenuOpen(false); setActivePolicy("shipping-policy"); }} className="w-full text-left flex items-center px-5 py-3 text-[14px] text-gray-600 hover:text-luxury-dark">Shipping Policy</button>
                 <button onClick={() => { setMobileMenuOpen(false); setActivePolicy("faqs"); }} className="w-full text-left flex items-center px-5 py-3 text-[14px] text-gray-600 hover:text-luxury-dark">FAQs</button>
               </div>
-            </motion.div>
+            </m.div>
           </>
         )}
       </AnimatePresence>
@@ -293,7 +293,7 @@ export default function Navbar() {
       {/* A. Search Fullscreen Overlay */}
       <AnimatePresence>
         {searchOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -335,7 +335,7 @@ export default function Navbar() {
                   ) : (
                     <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
                       {searchResults.map((product) => (
-                        <motion.div
+                        <m.div
                           key={product.id}
                           whileHover={{ 
                             y: -12, 
@@ -405,21 +405,21 @@ export default function Navbar() {
                               </Link>
                             </div>
                           </div>
-                        </motion.div>
+                        </m.div>
                       ))}
                     </div>
                   )}
                 </div>
               )}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
       {/* B. Wishlist Drawer */}
       <AnimatePresence>
          {wishlistOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -427,7 +427,7 @@ export default function Navbar() {
             className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex justify-end"
             data-lenis-prevent
           >
-            <motion.div
+            <m.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
@@ -491,15 +491,15 @@ export default function Navbar() {
               >
                 Continue Browsing
               </button>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
 
       {/* C. Slide-out Cart Drawer */}
       <AnimatePresence>
          {cartOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -507,7 +507,7 @@ export default function Navbar() {
             className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex justify-end"
             data-lenis-prevent
           >
-            <motion.div
+            <m.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
@@ -611,22 +611,22 @@ Browse our collection and bring home your next matchday essential.
                   </Link>
                 </div>
               )}
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
 
       {/* D. Quick Add Sizing Overlay Drawer */}
       <AnimatePresence>
         {quickAddProduct && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setQuickAddProduct(null)}
             className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
           >
-            <motion.div
+            <m.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
@@ -704,15 +704,15 @@ Browse our collection and bring home your next matchday essential.
                   </button>
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
 
       {/* E. Sizing Guide Modal */}
       <AnimatePresence>
          {sizeGuideOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -720,7 +720,7 @@ Browse our collection and bring home your next matchday essential.
             className="fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
             data-lenis-prevent
           >
-            <motion.div
+            <m.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
@@ -839,10 +839,11 @@ Browse our collection and bring home your next matchday essential.
                   </button>
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
+      </LazyMotion>
     </>
   );
 }
