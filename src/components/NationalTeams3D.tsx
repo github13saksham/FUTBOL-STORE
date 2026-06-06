@@ -287,11 +287,7 @@ export default function NationalTeams3D({ teams: propTeams }: NationalTeams3DPro
                 >
                   <motion.div
                     onTap={() => {
-                      if (activeIndex !== index) {
-                        rotateTo(index);
-                      } else {
-                        router.push(resolvedLink);
-                      }
+                      router.push(resolvedLink);
                     }}
                     className={`relative w-full h-full rounded-2xl p-6 flex flex-col justify-between overflow-hidden shadow-2xl transition-shadow duration-500 bg-gradient-to-b ${team.color} border border-white/20 cursor-pointer`}
                     whileHover={{ y: -8 }}

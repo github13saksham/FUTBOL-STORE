@@ -164,7 +164,7 @@ export default function ProductPage() {
           {/* A. Product Image Card Showcase (Left on Desktop, Top on Mobile) */}
           <div className="md:col-span-7 flex justify-center w-full">
             <motion.div
-              initial={{ opacity: 0, scale: 0.98 }}
+              initial={{ opacity: 1, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6 }}
               className="relative w-full aspect-square bg-[#141415] rounded-3xl overflow-hidden border border-white/5 shadow-[0_0_30px_rgba(0,0,0,0.5)] flex items-center justify-center p-8"
@@ -176,7 +176,6 @@ export default function ProductPage() {
                 style={{ objectFit: "contain" }}
                 className="p-8 object-center"
                 quality={100}
-                unoptimized
                 priority
               />
 
