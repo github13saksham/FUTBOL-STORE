@@ -13,6 +13,10 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [isGeneratingShipment, setIsGeneratingShipment] = useState(false);
   const [selectedPickupLocation, setSelectedPickupLocation] = useState('TFS');
+  const [packageWeight, setPackageWeight] = useState("500");
+  const [packageLength, setPackageLength] = useState("25");
+  const [packageBreadth, setPackageBreadth] = useState("25");
+  const [packageHeight, setPackageHeight] = useState("5");
   
   const dbService = new FirebaseDatabaseService();
 
@@ -73,7 +77,11 @@ export default function AdminOrdersPage() {
         body: JSON.stringify({ 
           orderId: order.id, 
           orderData: order,
-          pickupLocation: selectedPickupLocation 
+          pickupLocation: selectedPickupLocation,
+          weight: packageWeight,
+          length: packageLength,
+          breadth: packageBreadth,
+          height: packageHeight
         })
       });
       const data = await response.json();
@@ -405,6 +413,44 @@ export default function AdminOrdersPage() {
                   </div>
                 </div>
 
+                {!selectedOrder.delhiveryAwb && selectedOrder.status !== 'Rejected (Out of Stock)' && (
+                  <>
+                    <div className="w-full h-px bg-gray-100"></div>
+                    <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                      <h3 className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-3 flex items-center gap-1">
+                        <Package className="w-3 h-3" /> Draft Shipment Configuration
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                          <label className="text-[10px] font-semibold text-gray-500 block mb-1">Weight (grams)</label>
+                          <input type="number" value={packageWeight} onChange={e => setPackageWeight(e.target.value)} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-semibold text-gray-500 block mb-1">Length (cm)</label>
+                          <input type="number" value={packageLength} onChange={e => setPackageLength(e.target.value)} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-semibold text-gray-500 block mb-1">Breadth (cm)</label>
+                          <input type="number" value={packageBreadth} onChange={e => setPackageBreadth(e.target.value)} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-semibold text-gray-500 block mb-1">Height (cm)</label>
+                          <input type="number" value={packageHeight} onChange={e => setPackageHeight(e.target.value)} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-semibold text-gray-500 block mb-1">Pickup Location</label>
+                        <select value={selectedPickupLocation} onChange={e => setSelectedPickupLocation(e.target.value)} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500">
+                          <option value="TFS">TFS</option>
+                          <option value="Venu Sports">Venu Sports</option>
+                          <option value="AY Enterprises">AY Enterprises</option>
+                          <option value="Sports Plaza">Sports Plaza</option>
+                        </select>
+                      </div>
+                    </div>
+                  </>
+                )}
+
               </div>
 
               {/* Drawer Footer */}
@@ -414,25 +460,13 @@ export default function AdminOrdersPage() {
                     Copy Details
                   </button>
                   {!selectedOrder.delhiveryAwb ? (
-                    <div className="flex-1 flex gap-2">
-                      <select 
-                        value={selectedPickupLocation}
-                        onChange={(e) => setSelectedPickupLocation(e.target.value)}
-                        className="py-2.5 px-3 bg-white border border-gray-200 text-black text-xs font-bold rounded-lg focus:outline-none focus:border-black"
-                      >
-                        <option value="TFS">TFS</option>
-                        <option value="Venu Sports">Venu Sports</option>
-                        <option value="AY Enterprises">AY Enterprises</option>
-                        <option value="Sports Plaza">Sports Plaza</option>
-                      </select>
-                      <button 
-                        onClick={() => generateShipment(selectedOrder)}
-                        disabled={isGeneratingShipment || selectedOrder.status === 'Rejected (Out of Stock)'}
-                        className="flex-1 py-2.5 px-4 bg-black text-white text-xs font-bold rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50"
-                      >
-                        {isGeneratingShipment ? "Generating..." : "Generate Shipment"}
-                      </button>
-                    </div>
+                    <button 
+                      onClick={() => generateShipment(selectedOrder)}
+                      disabled={isGeneratingShipment || selectedOrder.status === 'Rejected (Out of Stock)'}
+                      className="flex-1 py-2.5 px-4 bg-black text-white text-xs font-bold rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50"
+                    >
+                      {isGeneratingShipment ? "Sending to Delhivery..." : "Send to Delhivery (Manifest)"}
+                    </button>
                   ) : (
                     <button 
                       onClick={() => window.open(`https://www.delhivery.com/tracking?id=${selectedOrder.delhiveryAwb}`, '_blank')}

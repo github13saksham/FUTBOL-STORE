@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { orderId, orderData, pickupLocation } = body;
+    const { orderId, orderData, pickupLocation, weight, length, breadth, height } = body;
 
     if (!orderId || !orderData) {
       return NextResponse.json({ error: "Missing orderId or orderData" }, { status: 400 });
@@ -38,14 +38,14 @@ export async function POST(request: Request) {
             seller_add: "Futbol Store HQ",
             seller_name: "Futbol Store",
             quantity: 1,
-            shipment_width: 25,
-            shipment_height: 5,
-            shipment_length: 25,
-            weight: 500, // Grams (numeric)
-            width: 25, // cm (numeric)
-            height: 5, // cm (numeric)
-            length: 25, // cm (numeric)
-            is_manifest: false // Forces the order into "AWB Pending" (Draft) instead of auto-manifesting to "Ready to Ship"
+            shipment_width: Number(breadth) || 25,
+            shipment_height: Number(height) || 5,
+            shipment_length: Number(length) || 25,
+            weight: weight ? weight.toString() : "500", 
+            breadth: breadth ? breadth.toString() : "25", 
+            height: height ? height.toString() : "5", 
+            length: length ? length.toString() : "25", 
+            is_manifest: false
           }
         ],
         pickup_location: {
