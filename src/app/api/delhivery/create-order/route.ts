@@ -37,12 +37,15 @@ export async function POST(request: Request) {
             total_amount: orderData.totalAmount?.toString() || "0",
             seller_add: "Futbol Store HQ",
             seller_name: "Futbol Store",
-            quantity: "1",
-            width: "25",
-            height: "5",
-            weight: "500", // 500g
-            length: "25",
-            return_awb: false
+            quantity: 1,
+            shipment_width: 25,
+            shipment_height: 5,
+            shipment_length: 25,
+            weight: 500, // Grams (numeric)
+            width: 25, // cm (numeric)
+            height: 5, // cm (numeric)
+            length: 25, // cm (numeric)
+            is_manifest: false // Forces the order into "AWB Pending" (Draft) instead of auto-manifesting to "Ready to Ship"
           }
         ],
         pickup_location: {
