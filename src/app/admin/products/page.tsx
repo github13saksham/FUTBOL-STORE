@@ -1,18 +1,24 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { FirebaseDatabaseService } from '@/backend/firebase/db.service';
 import { Product } from '@/data/mockData';
 import { Loader2, Plus, Edit2, Trash2, Search, Power, Package } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
-export default function AdminProductsPage() {
+function AdminProductsContent() {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'national' | 'club'>('club');
-  const [versionFilter, setVersionFilter] = useState<'player' | 'fan'>('player');
+  
+  const initialTab = (searchParams?.get('tab') as 'national' | 'club') || 'club';
+  const initialVersion = (searchParams?.get('version') as 'player' | 'fan') || 'player';
+
+  const [activeTab, setActiveTab] = useState<'national' | 'club'>(initialTab);
+  const [versionFilter, setVersionFilter] = useState<'player' | 'fan'>(initialVersion);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   const dbService = new FirebaseDatabaseService();
@@ -245,5 +251,13 @@ export default function AdminProductsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function AdminProductsPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center h-screen"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>}>
+      <AdminProductsContent />
+    </Suspense>
   );
 }

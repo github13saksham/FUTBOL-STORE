@@ -153,7 +153,10 @@ function SingleProductForm() {
         
         await dbService.addProduct({ ...dataToSave, id: newId, createdAt: new Date().toISOString() });
       }
-      router.push('/admin/products');
+      const isNational = dataToSave.club?.toLowerCase() === 'national team';
+      const tab = isNational ? 'national' : 'club';
+      const version = dataToSave.category === 'Fan Version' ? 'fan' : 'player';
+      router.push(`/admin/products?tab=${tab}&version=${version}`);
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Failed to save product.');
@@ -179,11 +182,16 @@ function SingleProductForm() {
     stockBadge = { label: 'Low Stock', color: 'bg-orange-50 text-orange-600 border-orange-100' };
   }
 
+  const isNational = formData.club?.toLowerCase() === 'national team';
+  const tab = isNational ? 'national' : 'club';
+  const version = formData.category === 'Fan Version' ? 'fan' : 'player';
+  const returnUrl = `/admin/products?tab=${tab}&version=${version}`;
+
   return (
     <div className="max-w-[1000px] mx-auto pb-12">
       <div className="flex items-center gap-4 mb-6">
         <Link 
-          href="/admin/products"
+          href={returnUrl}
           className="flex items-center justify-center w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-black hover:border-gray-300 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -438,7 +446,7 @@ function SingleProductForm() {
         {/* Action Bar */}
         <div className="fixed bottom-0 left-0 md:left-64 right-0 p-4 bg-white border-t border-gray-200 flex justify-end gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-40">
           <Link 
-            href="/admin/products"
+            href={returnUrl}
             className="px-6 py-2.5 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
           >
             Cancel

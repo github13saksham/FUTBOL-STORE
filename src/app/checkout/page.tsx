@@ -700,7 +700,7 @@ export default function CheckoutPage() {
                     type="checkbox" 
                     checked={saveAddress} 
                     onChange={(e) => setSaveAddress(e.target.checked)}
-                    className="w-4 h-4 mt-0.5 sm:mt-0 accent-white cursor-pointer rounded shrink-0"
+                    className="w-4 h-4 mt-0.5 sm:mt-0 accent-black bg-black cursor-pointer rounded shrink-0"
                   />
                   <span className="select-none text-xs text-white/80 font-medium">Save this as a delivery address for future orders</span>
                 </label>
