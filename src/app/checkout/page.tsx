@@ -323,6 +323,44 @@ export default function CheckoutPage() {
         return;
       }
 
+      // --- PRE-SAVE ORDER AS PENDING ---
+      const customerName = `${firstName} ${lastName}`;
+      const productName = cart.map((item: any) => item.name).join(", ");
+      const finalAmount = finalTotal;
+      const finalDate = new Date().toLocaleDateString();
+      const userId = user ? user.uid : "GUEST";
+      
+      const rawPayload = {
+        items: cart,
+        totalAmount: finalAmount,
+        subTotal: subTotal,
+        shippingCharges: shippingCharge || 0,
+        discountAmount: discountAmount,
+        couponApplied: appliedCoupon ? appliedCoupon.code : null,
+        amount: finalAmount,
+        customerName: customerName,
+        product: productName,
+        date: finalDate,
+        shippingAddress: {
+          firstName: firstName || "", 
+          lastName: lastName || "", 
+          email: email || "", 
+          phone: phone || "", 
+          address: address || "", 
+          city: city || "", 
+          state: state || "", 
+          pincode: pincode || ""
+        },
+        paymentId: "PENDING",
+        razorpayOrderId: data.id,
+        status: "Payment Pending",
+        history: [{ status: "Payment Pending", date: new Date().toISOString(), completed: true }]
+      };
+
+      const safePayload = JSON.parse(JSON.stringify(rawPayload));
+      const createdOrderId = await dbService.createOrder(userId, safePayload);
+      // ---------------------------------
+
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         name: "Futbol Store",
@@ -346,62 +384,43 @@ export default function CheckoutPage() {
             
             if (verifyRes.message === "Payment verified successfully") {
               try {
-                const customerName = `${firstName} ${lastName}`;
-                const productName = cart.map((item: any) => item.name).join(", ");
-                const finalAmount = finalTotal;
-                const finalDate = new Date().toLocaleDateString();
-                const userId = user ? user.uid : "GUEST";
-                const rawPayload = {
-                  items: cart,
-                  totalAmount: finalAmount,
-                  subTotal: subTotal,
-                  shippingCharges: shippingCharge || 0,
-                  discountAmount: discountAmount,
-                  couponApplied: appliedCoupon ? appliedCoupon.code : null,
-                  amount: finalAmount,
-                  customerName: customerName,
-                  product: productName,
-                  date: finalDate,
-                  shippingAddress: {
-                    firstName: firstName || "", 
-                    lastName: lastName || "", 
-                    email: email || "", 
-                    phone: phone || "", 
-                    address: address || "", 
-                    city: city || "", 
-                    state: state || "", 
-                    pincode: pincode || ""
-                  },
-                  paymentId: response.razorpay_payment_id || "UNKNOWN",
+                // UPDATE PENDING ORDER TO NEW ORDER
+                const updatedHistory = [
+                  ...safePayload.history,
+                  { status: "New Order", date: new Date().toISOString(), completed: true }
+                ];
+
+                await dbService.updateOrder(createdOrderId, {
                   status: "New Order",
-                  history: [{ status: "New Order", date: new Date().toISOString(), completed: true }]
-                };
+                  paymentId: response.razorpay_payment_id || "UNKNOWN",
+                  history: updatedHistory
+                });
 
-                const safePayload = JSON.parse(JSON.stringify(rawPayload));
-
-                const createdOrderId = await dbService.createOrder(userId, safePayload);
-
-                // Send confirmation email asynchronously (do not await)
-                fetch("/api/emails/order", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    orderId: createdOrderId,
-                    customerName: customerName,
-                    email: email,
-                    items: cart,
-                    totalAmount: finalAmount,
-                    shippingAddress: {
-                      firstName,
-                      lastName,
-                      address,
-                      city,
-                      state,
-                      pincode,
-                      phone
-                    }
-                  })
-                }).catch(err => console.error("Failed to trigger email API", err));
+                // Send confirmation email and await it to ensure it is not cancelled by navigation
+                try {
+                  await fetch("/api/emails/order", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      orderId: createdOrderId,
+                      customerName: customerName,
+                      email: email,
+                      items: cart,
+                      totalAmount: finalAmount,
+                      shippingAddress: {
+                        firstName,
+                        lastName,
+                        address,
+                        city,
+                        state,
+                        pincode,
+                        phone
+                      }
+                    })
+                  });
+                } catch (err) {
+                  console.error("Failed to trigger email API", err);
+                }
 
                 if (user && saveAddress) {
                   try {
@@ -494,7 +513,20 @@ export default function CheckoutPage() {
 
       const paymentObject = new (window as any).Razorpay(options);
       
-      paymentObject.on("payment.failed", function (response: any) {
+      paymentObject.on("payment.failed", async function (response: any) {
+        // Optionally update order status to Failed here
+        try {
+          await dbService.updateOrder(createdOrderId, {
+            status: "Payment Failed",
+            history: [
+              ...safePayload.history,
+              { status: "Payment Failed", date: new Date().toISOString(), completed: true }
+            ]
+          });
+        } catch (e) {
+          console.error("Error updating failed payment status", e);
+        }
+
         alert("Payment Failed. " + response.error.description);
         setIsProcessing(false);
       });
