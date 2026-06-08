@@ -1,4 +1,5 @@
-import { dbService } from './src/backend/db/dbService';
+import { dbService } from './src/backend';
+import { deleteField } from 'firebase/firestore';
 
 async function main() {
   console.log("Fetching products...");
@@ -9,7 +10,7 @@ async function main() {
   for (const p of products) {
     if (p.rating === 5 || p.rating) {
       console.log(`Clearing rating for ${p.id}`);
-      await dbService.updateProduct(p.id, { rating: null });
+      await dbService.updateProduct(p.id, { rating: deleteField() as any });
       count++;
     }
   }

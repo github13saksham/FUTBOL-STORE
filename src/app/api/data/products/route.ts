@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { dbService } from '@/backend';
+import { deleteField } from 'firebase/firestore';
 
 export const revalidate = false; // Cache indefinitely until manually revalidated
 
@@ -12,7 +13,7 @@ export async function GET() {
     products.forEach(async (p: any) => {
       if (p.rating === 5) {
         try {
-          await dbService.updateProduct(p.id, { rating: null }); // Set to null to effectively clear it
+          await dbService.updateProduct(p.id, { rating: deleteField() as any });
         } catch (e) {
           console.error("Migration error", e);
         }
