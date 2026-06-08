@@ -436,7 +436,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                       {product.category || product.realProduct?.category || "PLAYER VERSION"}
                     </span>
                     <div className="flex items-center text-[#cda491]">
-                      {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-2.5 h-2.5 ${Math.round(product.rating || product.realProduct?.rating || 5) >= star ? 'fill-current' : 'opacity-30'}`} />)}
+                      {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-2.5 h-2.5 ${Math.round(product.rating || product.realProduct?.rating || 0) >= star ? 'fill-current' : 'opacity-30'}`} />)}
                     </div>
                   </div>
                     <Link href={`/product/${product.realId}`} className="block mt-1">

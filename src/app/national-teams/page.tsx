@@ -220,7 +220,7 @@ export default function NationalTeamsPage() {
                         {product.category || "PLAYER VERSION"}
                       </span>
                       <div className="flex items-center text-[#cda491]">
-                        {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-2.5 h-2.5 ${Math.round(product.rating || 5) >= star ? 'fill-current' : 'opacity-30'}`} />)}
+                        {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-2.5 h-2.5 ${Math.round(product.rating || 0) >= star ? 'fill-current' : 'opacity-30'}`} />)}
                       </div>
                     </div>
                     <div className="flex justify-between items-start mt-1 md:mt-0">

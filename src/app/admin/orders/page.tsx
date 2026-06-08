@@ -32,14 +32,19 @@ export default function AdminOrdersPage() {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      await dbService.updateOrderStatus(orderId, newStatus);
+      const targetOrder = orders.find(o => o.id === orderId);
+      if (!targetOrder) return;
+      
+      const newHistory = [...(targetOrder.history || [])];
+      if (!newHistory.find(h => h.status === newStatus)) {
+        newHistory.push({ status: newStatus, completed: true, date: new Date().toISOString() });
+      }
+
+      await dbService.updateOrder(orderId, { status: newStatus, history: newHistory });
+
       // Optimistic update for UI:
       const updatedOrders = orders.map(o => {
         if (o.id === orderId) {
-          const newHistory = o.history.map((h: any) => {
-            if (h.status === newStatus) return { ...h, completed: true, date: new Date().toISOString() };
-            return h;
-          });
           return { ...o, status: newStatus, history: newHistory };
         }
         return o;
@@ -132,6 +137,7 @@ export default function AdminOrdersPage() {
       case 'Packed': return <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-gray-200 text-gray-700 rounded-md">Packed</span>;
       case 'Shipped': return <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-600 rounded-md">Shipped</span>;
       case 'Delivered': return <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-green-50 text-green-600 border border-green-200 rounded-md">Delivered</span>;
+      case 'Completed': return <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-green-600 text-white rounded-md">Completed</span>;
       case 'Rejected (Out of Stock)': return <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-600 border border-red-200 rounded-md">Rejected</span>;
       default: return <span>{status}</span>;
     }
@@ -177,6 +183,7 @@ export default function AdminOrdersPage() {
             <option value="Packed">Packed</option>
             <option value="Shipped">Shipped</option>
             <option value="Delivered">Delivered</option>
+            <option value="Completed">Completed</option>
             <option value="Rejected (Out of Stock)">Rejected (Out of Stock)</option>
           </select>
         </div>
@@ -273,27 +280,37 @@ export default function AdminOrdersPage() {
                   <div className="relative">
                     <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-gray-100"></div>
                     <ul className="space-y-2 relative">
-                      {selectedOrder.history.map((step: any, idx: number) => (
-                        <li key={step.status} className="flex gap-4 items-start">
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 z-10 ${
-                            step.completed ? 'bg-black text-white' : 'bg-gray-100 text-gray-300'
-                          }`}>
-                            {step.completed ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
-                          </div>
-                          <div>
-                            <p className={`text-sm font-medium ${step.completed ? 'text-black' : 'text-gray-400'}`}>{step.status}</p>
-                            {step.date && <p className="text-xs text-gray-500 mt-0.5">{new Date(step.date).toLocaleString()}</p>}
-                          </div>
-                          {idx === selectedOrder.history.findIndex((h:any) => !h.completed) - 1 && (
-                            <button 
-                              onClick={() => updateOrderStatus(selectedOrder.id, selectedOrder.history[idx+1].status)}
-                              className="ml-auto text-xs font-bold bg-gray-100 hover:bg-black hover:text-white px-3 py-1.5 rounded transition-colors"
-                            >
-                              Mark {selectedOrder.history[idx+1].status}
-                            </button>
-                          )}
-                        </li>
-                      ))}
+                      {["New Order", "Processing", "Packed", "Shipped", "Delivered", "Completed"].map((statusStr, idx, arr) => {
+                        const historyStep = selectedOrder.history?.find((h: any) => h.status === statusStr);
+                        const isCompleted = !!historyStep;
+                        const dateStr = historyStep?.date ? new Date(historyStep.date).toLocaleString() : null;
+                        
+                        const previousStatusStr = idx > 0 ? arr[idx-1] : null;
+                        const isPreviousCompleted = previousStatusStr ? !!selectedOrder.history?.find((h: any) => h.status === previousStatusStr) : true;
+                        const isNextStep = !isCompleted && isPreviousCompleted;
+
+                        return (
+                          <li key={statusStr} className="flex gap-4 items-start">
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 z-10 ${
+                              isCompleted ? 'bg-black text-white' : 'bg-gray-100 text-gray-300'
+                            }`}>
+                              {isCompleted ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
+                            </div>
+                            <div>
+                              <p className={`text-sm font-medium ${isCompleted ? 'text-black' : 'text-gray-400'}`}>{statusStr}</p>
+                              {dateStr && <p className="text-xs text-gray-500 mt-0.5">{dateStr}</p>}
+                            </div>
+                            {isNextStep && selectedOrder.status !== 'Rejected (Out of Stock)' && (
+                              <button 
+                                onClick={() => updateOrderStatus(selectedOrder.id, statusStr)}
+                                className="ml-auto text-xs font-bold bg-gray-100 hover:bg-black hover:text-white px-3 py-1.5 rounded transition-colors"
+                              >
+                                Mark {statusStr}
+                              </button>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 </div>

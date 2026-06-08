@@ -257,6 +257,19 @@ export class FirebaseDatabaseService implements IDatabaseService {
     });
   }
 
+  listenToOrder(orderId: string, callback: (order: any | null) => void): () => void {
+    const docRef = doc(db, "orders", orderId);
+    return onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        callback(docSnap.data());
+      } else {
+        callback(null);
+      }
+    }, (error) => {
+      console.error("Error listening to order:", error);
+    });
+  }
+
   async updateOrderStatus(orderId: string, status: string): Promise<void> {
     try {
       const docRef = doc(db, "orders", orderId);

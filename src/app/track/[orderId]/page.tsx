@@ -18,38 +18,39 @@ export default function TrackShipmentPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchTrackingInfo() {
-      if (!orderId) return;
-      try {
-        setLoading(true);
-        // 1. Fetch Order from Firebase
-        const orderData = await dbService.getOrderById(orderId as string);
-        if (!orderData) {
-          setError("Order not found.");
-          setLoading(false);
-          return;
-        }
-        setOrder(orderData);
-
-        // 2. Fetch Tracking from Delhivery if AWB exists
-        const awb = orderData.delhiveryAwb || orderData.awb;
-        if (awb) {
+    if (!orderId) return;
+    
+    let isMounted = true;
+    
+    const unsubscribe = dbService.listenToOrder(orderId as string, async (orderData) => {
+      if (!isMounted) return;
+      if (!orderData) {
+        setError("Order not found.");
+        setLoading(false);
+        return;
+      }
+      setOrder(orderData);
+      
+      // Fetch Tracking from Delhivery if AWB exists
+      const awb = orderData.delhiveryAwb || orderData.awb;
+      if (awb) {
+        try {
           const res = await fetch(`/api/delhivery/track?awb=${awb}`);
           const data = await res.json();
-          if (data && data.ShipmentData && data.ShipmentData.length > 0) {
+          if (data && data.ShipmentData && data.ShipmentData.length > 0 && isMounted) {
             setTrackingData(data.ShipmentData[0].Shipment);
-          } else {
-            console.log("No shipment data found from Delhivery API for AWB:", awb);
           }
+        } catch (err) {
+          console.error("Tracking API Error:", err);
         }
-      } catch (err) {
-        console.error("Tracking Error:", err);
-        setError("Failed to load tracking information.");
-      } finally {
-        setLoading(false);
       }
-    }
-    fetchTrackingInfo();
+      if (isMounted) setLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
   }, [orderId]);
 
   if (loading) {
@@ -104,28 +105,26 @@ export default function TrackShipmentPage() {
   const mainItem = order.items && order.items.length > 0 ? order.items[0] : null;
 
   // Determine current active step based on order and tracking data
-  // Steps: 0: Order Placed, 1: Shipped, 2: In Transit, 3: Delivered
+  // Steps: 0: Order Placed, 1: Shipped, 2: In Transit, 3: Delivered, 4: Completed
   let currentStep = 0;
   let currentStatusText = "Your order has been placed successfully.";
   let deliveryDate = "Estimated delivery varies.";
 
-  if (trackingData) {
-    const statusType = trackingData.Status?.StatusType?.toLowerCase() || "";
-    const statusStr = trackingData.Status?.Status?.toLowerCase() || "";
-    
-    if (statusType === "dl" || statusStr.includes("delivered")) {
-      currentStep = 3;
-      currentStatusText = "Your package has been delivered.";
-      deliveryDate = trackingData.Status?.StatusDateTime || "Recently";
-    } else if (statusStr.includes("transit") || statusType === "ud" || trackingData.Scans?.length > 1) {
-      currentStep = 2;
-      currentStatusText = "Your package is currently in transit.";
-      deliveryDate = trackingData.ExpectedDeliveryDate ? new Date(trackingData.ExpectedDeliveryDate).toLocaleDateString() : "Pending";
-    } else if (statusStr.includes("dispatched") || statusStr.includes("manifested") || statusStr.includes("picked up") || trackingData.Scans?.length > 0) {
-      currentStep = 1;
-      currentStatusText = "Your package has been shipped and is with the courier.";
-      deliveryDate = trackingData.ExpectedDeliveryDate ? new Date(trackingData.ExpectedDeliveryDate).toLocaleDateString() : "Pending";
-    }
+  if (order.status === "Completed") {
+    currentStep = 4;
+    currentStatusText = "Your order has been marked as completed.";
+  } else if (order.status === "Delivered" || (trackingData && (trackingData.Status?.StatusType?.toLowerCase() === "dl" || trackingData.Status?.Status?.toLowerCase().includes("delivered")))) {
+    currentStep = 3;
+    currentStatusText = "Your package has been delivered.";
+    deliveryDate = trackingData?.Status?.StatusDateTime || "Recently";
+  } else if (trackingData && (trackingData.Status?.Status?.toLowerCase().includes("transit") || trackingData.Status?.StatusType?.toLowerCase() === "ud" || trackingData.Scans?.length > 1)) {
+    currentStep = 2;
+    currentStatusText = "Your package is currently in transit.";
+    deliveryDate = trackingData.ExpectedDeliveryDate ? new Date(trackingData.ExpectedDeliveryDate).toLocaleDateString() : "Pending";
+  } else if (trackingData && (trackingData.Status?.Status?.toLowerCase().includes("dispatched") || trackingData.Status?.Status?.toLowerCase().includes("manifested") || trackingData.Status?.Status?.toLowerCase().includes("picked up") || trackingData.Scans?.length > 0)) {
+    currentStep = 1;
+    currentStatusText = "Your package has been shipped and is with the courier.";
+    deliveryDate = trackingData.ExpectedDeliveryDate ? new Date(trackingData.ExpectedDeliveryDate).toLocaleDateString() : "Pending";
   } else if (order.status !== "New Order" && (order.delhiveryAwb || order.awb)) {
     currentStep = 1;
     currentStatusText = "AWB Generated. Waiting for courier pickup.";
@@ -155,7 +154,13 @@ export default function TrackShipmentPage() {
       title: "Delivered",
       description: "Package delivered to your address.",
       icon: <PackageCheck className="w-4 h-4" />,
-      date: currentStep === 3 ? (trackingData?.Status?.StatusDateTime || "Delivered") : "",
+      date: currentStep >= 3 ? (trackingData?.Status?.StatusDateTime || "Delivered") : "",
+    },
+    {
+      title: "Completed",
+      description: "Order is marked as complete.",
+      icon: <CheckCircle2 className="w-4 h-4" />,
+      date: currentStep === 4 ? "Done" : "",
     }
   ];
 

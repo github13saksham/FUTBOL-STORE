@@ -76,11 +76,11 @@ export default function ProductPage() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [isLoadingReviews, setIsLoadingReviews] = useState(true);
   const [isWritingReview, setIsWritingReview] = useState(false);
-  const [newReview, setNewReview] = useState({ name: "", title: "", content: "", rating: 5 });
+  const [newReview, setNewReview] = useState({ name: "", title: "", content: "", rating: 0 });
 
   const averageRating = useMemo(() => {
-    if (reviews.length === 0) return "5.0";
-    const sum = reviews.reduce((acc, curr) => acc + (curr.rating || 5), 0);
+    if (reviews.length === 0) return "0.0";
+    const sum = reviews.reduce((acc, curr) => acc + (curr.rating || 0), 0);
     return (sum / reviews.length).toFixed(1);
   }, [reviews]);
 
@@ -104,7 +104,10 @@ export default function ProductPage() {
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newReview.name || !newReview.title || !newReview.content || !product) return;
+    if (!newReview.name || !newReview.title || !newReview.content || !product || newReview.rating === 0) {
+      alert("Please fill all fields and select a rating.");
+      return;
+    }
     
     const initials = newReview.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || "FL";
     
@@ -126,7 +129,7 @@ export default function ProductPage() {
       setReviews([{ ...reviewData, id: Date.now().toString(), createdAt: new Date().toISOString() }, ...reviews]);
       
       setIsWritingReview(false);
-      setNewReview({ name: "", title: "", content: "", rating: 5 });
+      setNewReview({ name: "", title: "", content: "", rating: 0 });
     } catch (error) {
       console.error(error);
       alert("Failed to submit review.");
@@ -272,7 +275,22 @@ export default function ProductPage() {
               
               <div className="flex items-center gap-2 mb-2 mt-2">
                 <div className="flex text-[#cda491]">
-                  {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-3.5 h-3.5 ${parseFloat(averageRating) >= star - 0.5 ? 'fill-current' : 'opacity-30'}`} />)}
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button 
+                      key={star}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setIsWritingReview(true);
+                        setNewReview(prev => ({...prev, rating: star}));
+                        document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="focus:outline-none transition-transform hover:scale-125"
+                      aria-label={`Rate ${star} stars`}
+                    >
+                      <Star className={`w-3.5 h-3.5 ${parseFloat(averageRating) >= star - 0.5 ? 'fill-current' : 'opacity-30'}`} />
+                    </button>
+                  ))}
                 </div>
                 <a href="#reviews" className="text-[10px] text-white/50 hover:text-white transition-colors uppercase tracking-widest font-bold">
                   {averageRating}/5 ({reviews.length} Reviews)
@@ -536,10 +554,24 @@ export default function ProductPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 relative z-10">
               <div>
-                <h3 className="text-xl md:text-2xl font-serif text-white mb-2 tracking-wide">Voices From The Stands</h3>
+                <h3 className="text-xl md:text-2xl font-serif text-white mb-2 tracking-wide">Customer Experiences</h3>
                 <div className="flex items-center gap-3">
                   <div className="flex text-[#cda491]">
-                    {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-4 h-4 ${parseFloat(averageRating) >= star - 0.5 ? 'fill-current' : 'opacity-30'}`} />)}
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <button 
+                        key={star}
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setIsWritingReview(true);
+                          setNewReview(prev => ({...prev, rating: star}));
+                        }}
+                        className="focus:outline-none transition-transform hover:scale-125"
+                        aria-label={`Rate ${star} stars`}
+                      >
+                        <Star className={`w-4 h-4 ${parseFloat(averageRating) >= star - 0.5 ? 'fill-current' : 'opacity-30'}`} />
+                      </button>
+                    ))}
                   </div>
                   <span className="text-[11px] uppercase tracking-widest text-white/50 font-bold">{averageRating}/5 ({reviews.length} Reviews)</span>
                 </div>

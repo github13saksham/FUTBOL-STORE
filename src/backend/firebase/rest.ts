@@ -39,7 +39,13 @@ export async function fetchProductsRest() {
     if (!res.ok) throw new Error("REST API failed");
     const data = await res.json();
     if (!data.documents) return [];
-    return data.documents.map((doc: any) => parseFirestoreDocument(doc));
+    return data.documents.map((doc: any) => {
+      const p = parseFirestoreDocument(doc);
+      if (p.rating === 5) {
+        delete p.rating;
+      }
+      return p;
+    });
   } catch (e) {
     console.error("Error in fetchProductsRest:", e);
     return [];

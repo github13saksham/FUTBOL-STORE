@@ -87,6 +87,8 @@ export interface IDatabaseService {
    */
   getOrderById(orderId: string): Promise<any | null>;
 
+  listenToOrder(orderId: string, callback: (order: any | null) => void): () => void;
+
   /**
    * User Profile methods for storing extra user metadata like phone and addresses.
    */
