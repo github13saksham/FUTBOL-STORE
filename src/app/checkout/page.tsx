@@ -524,17 +524,11 @@ export default function CheckoutPage() {
       const paymentObject = new (window as any).Razorpay(options);
       
       paymentObject.on("payment.failed", async function (response: any) {
-        // Optionally update order status to Failed here
+        // Delete order on payment failure to save DB space and order IDs
         try {
-          await dbService.updateOrder(createdOrderId, {
-            status: "Payment Failed",
-            history: [
-              ...safePayload.history,
-              { status: "Payment Failed", date: new Date().toISOString(), completed: true }
-            ]
-          });
+          await dbService.deleteOrder(createdOrderId);
         } catch (e) {
-          console.error("Error updating failed payment status", e);
+          console.error("Error deleting failed payment order", e);
         }
 
         alert("Payment Failed. " + response.error.description);
