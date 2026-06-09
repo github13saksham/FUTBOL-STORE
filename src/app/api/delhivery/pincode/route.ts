@@ -17,11 +17,12 @@ export async function GET(request: Request) {
   }
 
   try {
-    const url = `https://track.delhivery.com/c/api/pin-codes/json/?token=${apiKey}&filter_codes=${pincode}`;
+    const url = `https://track.delhivery.com/c/api/pin-codes/json/?filter_codes=${pincode}`;
     
     const response = await fetch(url, {
       method: "GET",
       headers: {
+        "Authorization": `Token ${apiKey}`,
         "Accept": "application/json",
       },
     });
