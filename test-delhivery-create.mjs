@@ -21,7 +21,7 @@ async function testDelhivery() {
         cod_amount: 0,
         total_amount: 500,
         seller_add: "Futbol Store HQ",
-        seller_name: "Futbol Store",
+        seller_name: "THE FÚTBOL STORE",
         quantity: 1,
         weight: 500, 
         length: 25,

@@ -38,7 +38,7 @@ export async function POST(request: Request) {
             order_date: new Date().toISOString(),
             total_amount: orderData.totalAmount?.toString() || "0",
             seller_add: "Futbol Store HQ",
-            seller_name: "Futbol Store",
+            seller_name: "THE FÚTBOL STORE",
             quantity: orderData.items?.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0) || 1,
             shipment_width: Number(breadth) || 25,
             shipment_height: Number(height) || 5,

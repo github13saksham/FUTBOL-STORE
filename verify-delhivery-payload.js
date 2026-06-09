@@ -45,7 +45,7 @@ const shipmentData = {
         order_date: new Date().toISOString(),
         total_amount: (orderData.amount || orderData.totalAmount || "0").toString(),
         seller_add: "Futbol Store HQ",
-        seller_name: "Futbol Store",
+        seller_name: "THE FÚTBOL STORE",
         quantity: totalQuantity, // <--- FIXED DYNAMIC QUANTITY
         shipment_width: Number(breadth) || 25,
         shipment_height: Number(height) || 5,
