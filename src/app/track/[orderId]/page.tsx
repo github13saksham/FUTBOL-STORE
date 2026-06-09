@@ -288,7 +288,7 @@ export default function TrackShipmentPage() {
               {/* Vertical Line Fill */}
               <div 
                 className="absolute top-8 left-[31px] md:left-[47px] w-0.5 bg-green-500 transition-all duration-1000 ease-out"
-                style={{ height: `calc(${(currentStep / (steps.length - 1)) * 100}% - 32px)` }}
+                style={{ height: `${currentStep * 80}px` }}
               />
 
               <div className="space-y-12">
