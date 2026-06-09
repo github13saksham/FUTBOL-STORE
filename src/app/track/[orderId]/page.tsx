@@ -104,65 +104,68 @@ export default function TrackShipmentPage() {
 
   const mainItem = order.items && order.items.length > 0 ? order.items[0] : null;
 
-  // Determine current active step based on order and tracking data
-  // Steps: 0: Order Placed, 1: Shipped, 2: In Transit, 3: Delivered, 4: Completed
+  const adminSteps = ["New Order", "Processing", "Packed", "Shipped", "Delivered", "Completed"];
+  const statusIndex = adminSteps.indexOf(order.status);
+  
   let currentStep = 0;
   let currentStatusText = "Your order has been placed successfully.";
-  let deliveryDate = "Estimated delivery varies.";
 
-  if (order.status === "Completed") {
-    currentStep = 4;
-    currentStatusText = "Your order has been marked as completed.";
-  } else if (order.status === "Delivered" || (trackingData && (trackingData.Status?.StatusType?.toLowerCase() === "dl" || trackingData.Status?.Status?.toLowerCase().includes("delivered")))) {
-    currentStep = 3;
-    currentStatusText = "Your package has been delivered.";
-    deliveryDate = trackingData?.Status?.StatusDateTime || "Recently";
-  } else if (trackingData && (trackingData.Status?.Status?.toLowerCase().includes("transit") || trackingData.Status?.StatusType?.toLowerCase() === "ud" || trackingData.Scans?.length > 1)) {
-    currentStep = 2;
-    currentStatusText = "Your package is currently in transit.";
-    deliveryDate = trackingData.ExpectedDeliveryDate ? new Date(trackingData.ExpectedDeliveryDate).toLocaleDateString() : "Pending";
-  } else if (trackingData && (trackingData.Status?.Status?.toLowerCase().includes("dispatched") || trackingData.Status?.Status?.toLowerCase().includes("manifested") || trackingData.Status?.Status?.toLowerCase().includes("picked up") || trackingData.Scans?.length > 0)) {
-    currentStep = 1;
-    currentStatusText = "Your package has been shipped and is with the courier.";
-    deliveryDate = trackingData.ExpectedDeliveryDate ? new Date(trackingData.ExpectedDeliveryDate).toLocaleDateString() : "Pending";
-  } else if (order.status !== "New Order" && (order.delhiveryAwb || order.awb)) {
-    currentStep = 1;
-    currentStatusText = "AWB Generated. Waiting for courier pickup.";
-  }
-
-  // Generate Steps Array
-  const steps = [
-    {
-      title: "Order Placed",
-      description: "We've received your order.",
-      icon: <Package className="w-4 h-4" />,
-      date: new Date(order.createdAt).toLocaleDateString(),
-    },
-    {
-      title: "Shipped",
-      description: "Handed over to delivery partner.",
-      icon: <Truck className="w-4 h-4" />,
-      date: currentStep >= 1 && trackingData ? (trackingData.PickUpDate ? new Date(trackingData.PickUpDate).toLocaleDateString() : "Pending") : "",
-    },
-    {
-      title: "In Transit",
-      description: trackingData && currentStep >= 2 ? (trackingData.Status?.Instructions || "On the way to your city.") : "On the way to your city.",
-      icon: <Truck className="w-4 h-4" />,
-      date: currentStep >= 2 ? "Updated" : "",
-    },
-    {
-      title: "Delivered",
-      description: "Package delivered to your address.",
-      icon: <PackageCheck className="w-4 h-4" />,
-      date: currentStep >= 3 ? (trackingData?.Status?.StatusDateTime || "Delivered") : "",
-    },
-    {
-      title: "Completed",
-      description: "Order is marked as complete.",
-      icon: <CheckCircle2 className="w-4 h-4" />,
-      date: currentStep === 4 ? "Done" : "",
+  const steps = adminSteps.map((statusStr, index) => {
+    const historyStep = order.history?.find((h: any) => h.status === statusStr);
+    
+    // Fallback: If it's an old order without history, assume steps up to current status are completed
+    const isCompleted = !!historyStep || (statusIndex !== -1 && index <= statusIndex);
+    
+    if (isCompleted && index >= currentStep) {
+      currentStep = index;
+      currentStatusText = `Order is currently marked as ${statusStr}.`;
     }
-  ];
+
+    let description = "";
+    let icon = <Circle className="w-4 h-4" />;
+    
+    switch(statusStr) {
+      case "New Order":
+        description = "We've received your order.";
+        icon = <Package className="w-4 h-4" />;
+        break;
+      case "Processing":
+        description = "Your order is being processed.";
+        icon = <Package className="w-4 h-4" />;
+        break;
+      case "Packed":
+        description = "Order has been packed and is awaiting pickup.";
+        icon = <Package className="w-4 h-4" />;
+        break;
+      case "Shipped":
+        description = "Handed over to delivery partner.";
+        icon = <Truck className="w-4 h-4" />;
+        break;
+      case "Delivered":
+        description = "Package delivered to your address.";
+        icon = <PackageCheck className="w-4 h-4" />;
+        break;
+      case "Completed":
+        description = "Order is marked as complete.";
+        icon = <CheckCircle2 className="w-4 h-4" />;
+        break;
+    }
+
+    let dateStr = historyStep?.date ? new Date(historyStep.date).toLocaleString() : "";
+    if (statusStr === "New Order" && !dateStr && order.createdAt) {
+      dateStr = new Date(order.createdAt).toLocaleString();
+    } else if (isCompleted && !dateStr) {
+      dateStr = "Completed";
+    }
+
+    return {
+      title: statusStr,
+      description,
+      icon,
+      date: dateStr,
+      isCompleted
+    };
+  });
 
   return (
     <>

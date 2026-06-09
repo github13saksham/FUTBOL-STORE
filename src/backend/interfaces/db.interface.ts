@@ -88,6 +88,7 @@ export interface IDatabaseService {
   getOrderById(orderId: string): Promise<any | null>;
 
   updateOrder(orderId: string, updates: any): Promise<void>;
+  deleteOrder(orderId: string): Promise<void>;
 
   listenToOrder(orderId: string, callback: (order: any | null) => void): () => void;
 

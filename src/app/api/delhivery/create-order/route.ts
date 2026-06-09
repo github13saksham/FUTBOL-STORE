@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { orderId, orderData, pickupLocation, weight, length, breadth, height } = body;
+    const { orderId, orderData, pickupLocation, weight, length, breadth, height, dryRun } = body;
 
     if (!orderId || !orderData) {
       return NextResponse.json({ error: "Missing orderId or orderData" }, { status: 400 });
@@ -31,13 +31,15 @@ export async function POST(request: Request) {
             phone: orderData.shippingAddress?.phone || "",
             order: orderId,
             payment_mode: "Prepaid",
-            products_desc: orderData.product || "Sporting Goods",
+            products_desc: orderData.items?.length > 0 
+              ? orderData.items.map((item: any) => `${item.name} x${item.quantity || 1}`).join(", ") 
+              : (orderData.product || "Sporting Goods"),
             cod_amount: "0",
             order_date: new Date().toISOString(),
             total_amount: orderData.totalAmount?.toString() || "0",
             seller_add: "Futbol Store HQ",
             seller_name: "Futbol Store",
-            quantity: 1,
+            quantity: orderData.items?.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0) || 1,
             shipment_width: Number(breadth) || 25,
             shipment_height: Number(height) || 5,
             shipment_length: Number(length) || 25,
@@ -53,6 +55,13 @@ export async function POST(request: Request) {
         }
       })
     };
+
+    if (dryRun) {
+      console.log("=== DRY RUN PAYLOAD ===");
+      console.log(JSON.stringify(JSON.parse(shipmentData.data), null, 2));
+      console.log("=======================");
+      return NextResponse.json({ success: true, isDryRun: true, message: "Payload logged to web console successfully", payload: JSON.parse(shipmentData.data) });
+    }
 
     const searchParams = new URLSearchParams(shipmentData);
 

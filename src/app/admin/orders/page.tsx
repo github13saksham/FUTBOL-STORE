@@ -30,6 +30,13 @@ export default function AdminOrdersPage() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (selectedOrder) {
+      const totalItems = selectedOrder.items?.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0) || 1;
+      setPackageWeight((totalItems * 500).toString());
+    }
+  }, [selectedOrder]);
+
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
       const targetOrder = orders.find(o => o.id === orderId);
@@ -125,6 +132,43 @@ export default function AdminOrdersPage() {
     } catch (error) {
       console.error(error);
       alert("Error generating shipment");
+    } finally {
+      setIsGeneratingShipment(false);
+    }
+  };
+
+  const demoShipment = async (order: any) => {
+    setIsGeneratingShipment(true);
+    try {
+      const response = await fetch('/api/delhivery/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          orderId: order.id, 
+          orderData: order,
+          pickupLocation: selectedPickupLocation,
+          weight: packageWeight,
+          length: packageLength,
+          breadth: packageBreadth,
+          height: packageHeight,
+          dryRun: true
+        })
+      });
+      const data = await response.json();
+      
+      // Save the generated JSON payload to localStorage
+      localStorage.setItem('demoShipmentPayload', JSON.stringify({
+        orderId: order.id,
+        payload: data.payload,
+        generatedAt: new Date().toISOString()
+      }));
+      
+      // Redirect to the Shipment Details verification page
+      window.location.href = '/admin/shipments';
+      
+    } catch (error) {
+      console.error(error);
+      alert("Error generating demo shipment");
     } finally {
       setIsGeneratingShipment(false);
     }
@@ -477,13 +521,22 @@ export default function AdminOrdersPage() {
                     Copy Details
                   </button>
                   {!selectedOrder.delhiveryAwb ? (
-                    <button 
-                      onClick={() => generateShipment(selectedOrder)}
-                      disabled={isGeneratingShipment || selectedOrder.status === 'Rejected (Out of Stock)'}
-                      className="flex-1 py-2.5 px-4 bg-black text-white text-xs font-bold rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50"
-                    >
-                      {isGeneratingShipment ? "Sending to Delhivery..." : "Send to Delhivery (Manifest)"}
-                    </button>
+                    <>
+                      <button 
+                        onClick={() => demoShipment(selectedOrder)}
+                        disabled={isGeneratingShipment || selectedOrder.status === 'Rejected (Out of Stock)'}
+                        className="flex-1 py-2.5 px-4 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                      >
+                        Demo Shipment (Log)
+                      </button>
+                      <button 
+                        onClick={() => generateShipment(selectedOrder)}
+                        disabled={isGeneratingShipment || selectedOrder.status === 'Rejected (Out of Stock)'}
+                        className="flex-1 py-2.5 px-4 bg-black text-white text-xs font-bold rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50"
+                      >
+                        {isGeneratingShipment ? "Sending..." : "Send to Delhivery"}
+                      </button>
+                    </>
                   ) : (
                     <button 
                       onClick={() => window.open(`https://www.delhivery.com/tracking?id=${selectedOrder.delhiveryAwb}`, '_blank')}
