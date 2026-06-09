@@ -32,7 +32,7 @@ export async function POST(request: Request) {
             order: orderId,
             payment_mode: "Prepaid",
             products_desc: orderData.items?.length > 0 
-              ? orderData.items.map((item: any) => `${item.name} x${item.quantity || 1}`).join(", ") 
+              ? orderData.items.map((item: any) => `${item.name}`).join(", ") 
               : (orderData.product || "Sporting Goods"),
             cod_amount: "0",
             order_date: new Date().toISOString(),
@@ -40,9 +40,9 @@ export async function POST(request: Request) {
             seller_add: "Futbol Store HQ",
             seller_name: "THE FÚTBOL STORE",
             quantity: orderData.items?.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0) || 1,
-            shipment_width: Number(breadth) || 25,
-            shipment_height: Number(height) || 5,
-            shipment_length: Number(length) || 25,
+            shipment_width: breadth ? Number(breadth) : 25,
+            shipment_height: height ? Number(height) : 5,
+            shipment_length: length ? Number(length) : 25,
             weight: weight ? weight.toString() : "500", 
             breadth: breadth ? breadth.toString() : "25", 
             height: height ? height.toString() : "5", 
