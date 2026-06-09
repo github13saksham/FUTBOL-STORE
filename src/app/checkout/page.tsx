@@ -240,6 +240,12 @@ export default function CheckoutPage() {
       const res = await fetch(`/api/delhivery/pincode?pincode=${code}&weight=${weight}`);
       const data = await res.json();
       
+      if (!res.ok || data.error) {
+        setPincodeServiceable(false);
+        setPincodeMessage(`API Error: ${data.error || res.statusText}`);
+        return false;
+      }
+
       if (data.delivery_codes && data.delivery_codes.length > 0) {
         const pinData = data.delivery_codes[0].postal_code;
         

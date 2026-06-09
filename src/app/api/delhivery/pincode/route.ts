@@ -9,33 +9,52 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Pincode is required" }, { status: 400 });
   }
 
-  const apiKey = process.env.DELHIVERY_API_KEY;
-
+  let apiKey = process.env.DELHIVERY_API_KEY;
+  
   if (!apiKey) {
     console.error("Delhivery API Key is missing");
     return NextResponse.json({ error: "Delhivery API configuration is missing" }, { status: 500 });
   }
+  
+  apiKey = apiKey.trim();
 
   try {
-    const url = `https://track.delhivery.com/c/api/pin-codes/json/?filter_codes=${pincode}`;
+    const url = `https://track.delhivery.com/c/api/pin-codes/json/?token=${apiKey}&filter_codes=${pincode}`;
     
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        "Authorization": `Token ${apiKey}`,
         "Accept": "application/json",
       },
     });
 
+    const responseText = await response.text();
+    
     if (!response.ok) {
-      throw new Error(`Delhivery API returned status ${response.status}`);
+      console.error(`Delhivery API returned status ${response.status}:`, responseText);
+      const maskedKey = apiKey ? apiKey.substring(0, 4) + '...' : 'MISSING';
+      return NextResponse.json({ 
+        error: `Delhivery API Error ${response.status} (Key starts with ${maskedKey})`, 
+        details: responseText 
+      }, { status: 502 });
     }
 
-    const data = await response.json();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error("Delhivery returned invalid JSON:", responseText);
+      return NextResponse.json({ error: "Invalid JSON from Delhivery", raw: responseText }, { status: 502 });
+    }
+
+    // Handle case where Delhivery returns an array: [ { delivery_codes: [...] } ]
+    if (Array.isArray(data) && data.length > 0 && data[0].delivery_codes) {
+      data = data[0];
+    }
     
     // If serviceable, calculate shipping cost
     let shippingCost = 0;
-    if (data.delivery_codes && data.delivery_codes.length > 0) {
+    if (data && data.delivery_codes && data.delivery_codes.length > 0) {
       const originPincode = process.env.DELHIVERY_ORIGIN_PINCODE || "110001";
       const costUrl = `https://track.delhivery.com/api/kinko/v1/invoice/charges/.json?md=S&ss=Delivered&d_pin=${pincode}&o_pin=${originPincode}&cgm=${weight}&glvl=1&tz=1`;
       
