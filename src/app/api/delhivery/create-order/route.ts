@@ -22,8 +22,8 @@ export async function POST(request: Request) {
       data: JSON.stringify({
         shipments: [
           {
-            name: orderData.customerName || orderData.shippingAddress?.firstName + " " + orderData.shippingAddress?.lastName,
-            add: orderData.shippingAddress?.address || "",
+            name: (orderData.customerName || (orderData.shippingAddress?.firstName + " " + (orderData.shippingAddress?.lastName || ""))).trim(),
+            add: `${orderData.shippingAddress?.address || ""}, ${orderData.shippingAddress?.city || ""}, ${orderData.shippingAddress?.state || ""} - ${orderData.shippingAddress?.pincode || ""} (Phone: ${orderData.shippingAddress?.phone || ""})`,
             pin: orderData.shippingAddress?.pincode || "",
             city: orderData.shippingAddress?.city || "",
             state: orderData.shippingAddress?.state || "",
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
             order: orderId,
             payment_mode: "Prepaid",
             products_desc: orderData.items?.length > 0 
-              ? orderData.items.map((item: any) => `${item.name}`).join(", ") 
+              ? orderData.items.map((item: any) => `${item.name} (Qty: ${item.quantity || 1})`).join("\n") 
               : (orderData.product || "Sporting Goods"),
             cod_amount: "0",
             order_date: new Date().toISOString(),

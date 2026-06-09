@@ -32,10 +32,47 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     if (selectedOrder) {
-      const totalItems = selectedOrder.items?.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0) || 1;
-      setPackageWeight((totalItems * 500).toString());
+      const savedConfig = localStorage.getItem(`draftShipmentConfig_${selectedOrder.id}`);
+      if (savedConfig) {
+         try {
+           const parsed = JSON.parse(savedConfig);
+           if (parsed.pickupLocation) setSelectedPickupLocation(parsed.pickupLocation);
+           if (parsed.length) setPackageLength(parsed.length);
+           if (parsed.breadth) setPackageBreadth(parsed.breadth);
+           if (parsed.height) setPackageHeight(parsed.height);
+           if (parsed.weight) setPackageWeight(parsed.weight);
+         } catch (e) {}
+      } else {
+         const totalItems = selectedOrder.items?.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0) || 1;
+         setPackageWeight((totalItems * 500).toString());
+         
+         const globalConfig = localStorage.getItem('draftShipmentConfig_global');
+         if (globalConfig) {
+           try {
+             const parsed = JSON.parse(globalConfig);
+             if (parsed.pickupLocation) setSelectedPickupLocation(parsed.pickupLocation);
+             if (parsed.length) setPackageLength(parsed.length);
+             if (parsed.breadth) setPackageBreadth(parsed.breadth);
+             if (parsed.height) setPackageHeight(parsed.height);
+           } catch (e) {}
+         }
+      }
     }
   }, [selectedOrder]);
+
+  useEffect(() => {
+    if (selectedOrder) {
+      const config = {
+        pickupLocation: selectedPickupLocation,
+        length: packageLength,
+        breadth: packageBreadth,
+        height: packageHeight,
+        weight: packageWeight
+      };
+      localStorage.setItem(`draftShipmentConfig_${selectedOrder.id}`, JSON.stringify(config));
+      localStorage.setItem('draftShipmentConfig_global', JSON.stringify(config));
+    }
+  }, [selectedPickupLocation, packageLength, packageBreadth, packageHeight, packageWeight, selectedOrder]);
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
