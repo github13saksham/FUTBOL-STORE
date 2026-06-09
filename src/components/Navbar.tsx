@@ -655,8 +655,8 @@ Browse our collection and bring home your next matchday essential.
                 <div className="space-y-3">
                   <span className="text-[10px] uppercase tracking-widest text-luxury-dark font-bold block">Available Standard Sizes</span>
                   <div className="grid grid-cols-5 gap-2">
-                    {["XS", "S", "M", "L", "XL"].map((size) => {
-                      const isOutOfStock = quickAddProduct.inventory?.[size] === 0;
+                    {["S", "M", "L", "XL", "2XL"].map((size) => {
+                      const isOutOfStock = (quickAddProduct.inventory?.[size] || 0) <= 0;
                       return (
                       <button
                         key={size}

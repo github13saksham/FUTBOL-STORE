@@ -206,14 +206,14 @@ export default function TrackShipmentPage() {
               <h3 className="text-sm uppercase tracking-widest text-white/50 font-bold mb-6">Items Ordered</h3>
               <div className="space-y-6">
                 {order.items && order.items.map((item: any, idx: number) => (
-                  <div key={idx} className="flex flex-col md:flex-row items-center gap-6">
-                    <div className="relative w-24 h-24 bg-black rounded-xl overflow-hidden border border-white/5 flex-shrink-0">
+                  <div key={idx} className="flex items-center gap-4 md:gap-6">
+                    <div className="relative w-20 h-20 md:w-24 md:h-24 bg-black rounded-xl overflow-hidden border border-white/5 flex-shrink-0">
                       <Image src={item.image} alt={item.name} fill style={{ objectFit: "cover" }} />
                     </div>
-                    <div className="flex-1 text-center md:text-left">
-                      <h2 className="text-base font-serif font-bold text-white mb-1">{item.name}</h2>
-                      <p className="text-xs text-white/50 font-sans uppercase tracking-widest mb-1">
-                        Size: {item.size} | Qty: {item.quantity}
+                    <div className="flex-1 text-left">
+                      <h2 className="text-sm md:text-base font-serif font-bold text-white mb-1">{item.name}</h2>
+                      <p className="text-[10px] md:text-xs text-white/50 font-sans uppercase tracking-widest mb-1">
+                        Qty: {item.quantity} | Size: {item.size}
                       </p>
                       {item.personalisation && (
                         <p className="text-[10px] text-[#cda491] uppercase tracking-widest">
@@ -222,7 +222,7 @@ export default function TrackShipmentPage() {
                       )}
                     </div>
                     <div className="text-right">
-                      <p className="text-base font-serif font-bold text-white">₹{item.price * item.quantity}</p>
+                      <p className="text-sm md:text-base font-serif font-bold text-white">₹{item.price * item.quantity}</p>
                     </div>
                   </div>
                 ))}

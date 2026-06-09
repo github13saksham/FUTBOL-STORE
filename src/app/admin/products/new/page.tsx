@@ -30,7 +30,7 @@ function SingleProductForm() {
     comparePrice: 0,
     image: '',
     desc: '',
-    inventory: { S: 0, M: 0, L: 0, XL: 0 },
+    inventory: { S: 0, M: 0, L: 0, XL: 0, '2XL': 0 },
     lowStockThreshold: 5,
     visibility: {
       active: true,
@@ -54,7 +54,7 @@ function SingleProductForm() {
       if (product) {
         setFormData({
           ...product,
-          inventory: product.inventory || { S: 0, M: 0, L: 0, XL: 0 },
+          inventory: product.inventory || { S: 0, M: 0, L: 0, XL: 0, '2XL': 0 },
           rating: (product as any).rating || 5,
           lowStockThreshold: (product as any).lowStockThreshold || 5,
           comparePrice: (product as any).comparePrice || 0,
@@ -323,8 +323,8 @@ function SingleProductForm() {
 
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Stock per Size</label>
-                <div className="grid grid-cols-4 gap-3">
-                  {['S', 'M', 'L', 'XL'].map((size) => (
+                <div className="grid grid-cols-5 gap-3">
+                  {['S', 'M', 'L', 'XL', '2XL'].map((size) => (
                     <div key={size}>
                       <span className="block text-xs text-center text-gray-500 mb-1 font-medium">{size}</span>
                       <input 

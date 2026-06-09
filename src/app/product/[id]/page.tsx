@@ -318,7 +318,7 @@ export default function ProductPage() {
 
               <div className="grid grid-cols-5 gap-2">
                 {["S", "M", "L", "XL", "2XL"].map((size) => {
-                  const isOutOfStock = product.inventory?.[size] === 0;
+                  const isOutOfStock = (product.inventory?.[size] || 0) <= 0;
                   
                   return (
                     <div key={size} className="flex flex-col items-center gap-1">
