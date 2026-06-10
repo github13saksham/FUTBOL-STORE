@@ -102,7 +102,7 @@ export default function AboutUsPage() {
           {/* Right Column: Immersive Picture Block */}
           <div className="lg:col-span-6 relative w-full h-[300px] md:h-[480px] rounded-3xl overflow-hidden border border-luxury-taupe/15 bg-transparent md:bg-neutral-900 shadow-none md:shadow-2xl">
             <Image 
-              src="/images/futbol store logo .JPEG" 
+              src="public/store-logo.jpeg" 
               alt="The Futbol Store Logo"
               fill
               className="object-contain md:object-cover object-center opacity-90 transform hover:scale-105 transition-transform duration-[2000ms] pointer-events-none"
