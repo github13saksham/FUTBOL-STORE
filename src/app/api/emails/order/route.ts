@@ -101,7 +101,7 @@ export async function POST(request: Request) {
           <tr>
             <td align="center" style="padding: 0; background-color: #ffffff; border-bottom: 1px solid #eaeaea;">
               <a href="${websiteUrl}" target="_blank">
-                <img src="${websiteUrl}/futbol%20store%20logo%20.JPEG" alt="The Futbol Store Logo" width="600" style="display: block; border: 0; width: 100%; max-width: 100%; height: auto;" />
+                <img src="${websiteUrl}/store-logo.jpeg" alt="The Futbol Store Logo" width="600" style="display: block; border: 0; width: 100%; max-width: 100%; height: auto;" />
               </a>
             </td>
           </tr>
