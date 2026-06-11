@@ -145,12 +145,30 @@ export async function POST(request: Request) {
 
               <!-- Shipping Address -->
               <h2 style="margin: 0 0 15px 0; font-size: 18px; color: #111111; border-bottom: 2px solid #eeeeee; padding-bottom: 10px;">Shipping Details</h2>
-              <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #555555;">
+              <p style="margin: 0 0 25px 0; font-size: 15px; line-height: 1.6; color: #555555;">
                 <strong>${shippingAddress.firstName} ${shippingAddress.lastName}</strong><br/>
                 ${shippingAddress.address}<br/>
                 ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}<br/>
                 Phone: ${shippingAddress.phone}
               </p>
+
+              <!-- Jersey Care Guide -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background-color: #d0e7f9; border-radius: 6px; padding: 25px; text-align: center;">
+                <tr>
+                  <td>
+                    <h2 style="margin: 0 0 15px 0; font-size: 16px; color: #111111; text-transform: uppercase; letter-spacing: 1px;">Make Your Jersey Last A Life Time</h2>
+                    <p style="margin: 0 0 20px 0; font-size: 14px; color: #111111; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Follow The Instructions</p>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="text-align: left; font-size: 13px; color: #111111; font-weight: bold; line-height: 2;">
+                      <tr><td>1. WASH INSIDE OUT</td></tr>
+                      <tr><td>2. USE COLD WATER & *LIQUID DETERGENT* ONLY</td></tr>
+                      <tr><td>3. NO BLEACH OR SOFTENERS</td></tr>
+                      <tr><td>4. AIR DRY - AVOID MACHINE DRYING</td></tr>
+                      <tr><td>5. DON'T IRON ON PRINTS OR LOGOS</td></tr>
+                      <tr><td>6. STORE IN A COOL, DRY PLACE</td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
@@ -194,6 +212,16 @@ ${shippingAddress.firstName} ${shippingAddress.lastName}
 ${shippingAddress.address}
 ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}
 Phone: ${shippingAddress.phone}
+
+JERSEY CARE GUIDE: MAKE YOUR JERSEY LAST A LIFE TIME
+------------------------------
+FOLLOW THE INSTRUCTIONS
+1. WASH INSIDE OUT
+2. USE COLD WATER & *LIQUID DETERGENT* ONLY
+3. NO BLEACH OR SOFTENERS
+4. AIR DRY - AVOID MACHINE DRYING
+5. DON'T IRON ON PRINTS OR LOGOS
+6. STORE IN A COOL, DRY PLACE
 
 NEED HELP?
 ------------------------------
