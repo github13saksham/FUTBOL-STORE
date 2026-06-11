@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { FirebaseDatabaseService } from '@/backend/firebase/db.service';
 import { Product } from '@/data/mockData';
-import { Loader2, Plus, Edit2, Trash2, Search, Power, Package } from 'lucide-react';
+import { Loader2, Plus, Edit2, Trash2, Search, Power, Package, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
@@ -61,6 +61,19 @@ function AdminProductsContent() {
     } catch (error) {
       console.error('Failed to toggle stock:', error);
       alert('Failed to toggle stock.');
+    }
+  };
+
+  const handleToggleVisibility = async (product: Product) => {
+    try {
+      const currentVisibility = product.visibility || { active: true, featured: false, bestSeller: false, newArrival: false };
+      const newActiveStatus = currentVisibility.active === false ? true : false;
+      const newVisibility = { ...currentVisibility, active: newActiveStatus };
+      await dbService.updateProduct(product.id, { visibility: newVisibility });
+      setProducts(products.map(p => p.id === product.id ? { ...p, visibility: newVisibility } : p));
+    } catch (error) {
+      console.error('Failed to toggle visibility:', error);
+      alert('Failed to toggle visibility.');
     }
   };
 
@@ -205,16 +218,30 @@ function AdminProductsContent() {
                       {product.category.replace('_', ' ')}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider ${
-                        product.inStock !== false 
-                          ? 'bg-black text-white' 
-                          : 'bg-red-50 text-red-600 border border-red-100'
-                      }`}>
-                        {product.inStock !== false ? 'In Stock' : 'Out of Stock'}
-                      </span>
+                      <div className="flex flex-col gap-1 items-start">
+                        <span className={`px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider ${
+                          product.inStock !== false 
+                            ? 'bg-black text-white' 
+                            : 'bg-red-50 text-red-600 border border-red-100'
+                        }`}>
+                          {product.inStock !== false ? 'In Stock' : 'Out of Stock'}
+                        </span>
+                        {product.visibility?.active === false && (
+                          <span className="px-2 py-1 rounded-md text-[10px] uppercase font-bold tracking-wider bg-gray-100 text-gray-500 border border-gray-200">
+                            Hidden
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-3">
+                        <button
+                          onClick={() => handleToggleVisibility(product)}
+                          className={`${product.visibility?.active !== false ? 'text-gray-400 hover:text-blue-500' : 'text-blue-500 hover:text-black'} transition-colors`}
+                          title={product.visibility?.active !== false ? "Hide Product" : "Show Product"}
+                        >
+                          {product.visibility?.active !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                        </button>
                         <button
                           onClick={() => handleToggleStock(product)}
                           className={`${product.inStock !== false ? 'text-gray-400 hover:text-red-500' : 'text-red-500 hover:text-black'} transition-colors`}

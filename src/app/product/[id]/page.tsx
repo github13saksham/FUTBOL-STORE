@@ -665,7 +665,7 @@ export default function ProductPage() {
                         </div>
                         <span className="text-[9px] font-bold text-white/60">{review.rating || 5}/5</span>
                       </div>
-                      <span className="text-[8px] uppercase tracking-wider text-white/40 font-mono">{review.date || new Date(review.createdAt).toLocaleDateString()}</span>
+        
                     </div>
                     <h4 className="text-[12px] font-bold text-white leading-tight mb-1.5">{review.title}</h4>
                     <p className="text-[11px] text-white/70 leading-snug font-light font-sans break-words line-clamp-3">
