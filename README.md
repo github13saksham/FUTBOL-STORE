@@ -1,1 +1,21 @@
-# FUTBOL-STORE
+# THE FÚTBOL STORE
+- Full-stack premium football jersey e-commerce web app built with **Next.js 14 (App Router)**, **TypeScript**, **Firebase Firestore**, and **Tailwind CSS**
+- Sells club kits, national team strips, retro editions, and custom name/number player jerseys
+- Product images hosted on **Cloudinary** for high-quality, fast-loading visuals
+- Customers can browse by club or national team, filter by size, and add items to cart
+- **Coupon code** support at checkout for discounts
+- Secure online payments via **Razorpay** (INR)
+- Automated **order confirmation emails** sent to customers and admin via Nodemailer SMTP
+- Shipping managed through the **Delhivery courier API** with a built-in order tracking page
+- **Firebase Authentication** — Google Sign-In and email/password login
+- Protected **account page** showing personal order history
+- Full-featured **Admin Dashboard** (`/admin`) for store management:
+  - Add, edit, delete products and manage per-size inventory
+  - Bulk product upload via Excel spreadsheet
+  - View and update order statuses (New → Processing → Shipped → Delivered)
+  - Create and track Delhivery shipments
+  - Manage coupon codes and customer reviews
+  - Control homepage banners, featured clubs, and carousels
+- Smooth scrolling powered by **Lenis**, with **GSAP** and **Framer Motion** animations
+- Interactive **3D national teams globe** built with Three.js + React Three Fiber
+- Luxury design system using **Playfair Display** (serif) and **Plus Jakarta Sans** typography

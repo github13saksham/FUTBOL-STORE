@@ -2,15 +2,19 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Shield, Loader2, Lock } from 'lucide-react';
+import { Shield, Loader2, Lock, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { FirebaseAuthService } from '@/backend/firebase/auth.service';
+import { auth } from '@/backend/firebase/config';
 
 export default function AdminLogin() {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const authService = new FirebaseAuthService();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,10 +22,21 @@ export default function AdminLogin() {
     setError('');
 
     try {
+      // 1. Authenticate with Firebase first
+      await authService.loginWithEmail(email, password);
+      
+      // 2. Get the Firebase ID token
+      const idToken = await auth.currentUser?.getIdToken();
+      
+      if (!idToken) {
+        throw new Error("Failed to retrieve authentication token.");
+      }
+
+      // 3. Send token to our Next.js backend to set the session cookie
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ idToken }),
       });
 
       if (res.ok) {
@@ -65,22 +80,43 @@ export default function AdminLogin() {
             </div>
           )}
 
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-luxury-ivory/80 font-bold block ml-1">
-              Admin Password
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Lock className="h-4 w-4 text-luxury-ivory/50" />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-luxury-ivory/80 font-bold block ml-1">
+                Admin Email
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Mail className="h-4 w-4 text-luxury-ivory/50" />
+                </div>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full pl-11 pr-4 py-3.5 bg-black/50 border border-luxury-sand/20 rounded-xl text-white placeholder-luxury-ivory/30 outline-none focus:border-luxury-ivory focus:bg-black/70 transition-all font-sans text-sm"
+                  placeholder="admin@example.com"
+                />
               </div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full pl-11 pr-4 py-3.5 bg-black/50 border border-luxury-sand/20 rounded-xl text-white placeholder-luxury-ivory/30 outline-none focus:border-luxury-ivory focus:bg-black/70 transition-all font-sans text-sm"
-                placeholder="Enter access code"
-              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-luxury-ivory/80 font-bold block ml-1">
+                Admin Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-4 w-4 text-luxury-ivory/50" />
+                </div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full pl-11 pr-4 py-3.5 bg-black/50 border border-luxury-sand/20 rounded-xl text-white placeholder-luxury-ivory/30 outline-none focus:border-luxury-ivory focus:bg-black/70 transition-all font-sans text-sm"
+                  placeholder="Enter access code"
+                />
+              </div>
             </div>
           </div>
 
