@@ -359,7 +359,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 style={{ perspective: 1000, transformStyle: "preserve-3d" }}
-                className="flex-shrink-0 w-[200px] sm:w-[240px] md:w-[350px] relative rounded-2xl border border-white/10 bg-luxury-dark hover:bg-black hover:z-20 flex flex-col justify-between transition-colors duration-500 overflow-hidden group/card"
+                className="flex-shrink-0 w-[200px] sm:w-[240px] md:w-[350px] relative rounded-2xl border border-white/10 bg-luxury-dark hover:bg-black hover:z-20 flex flex-col justify-between transition-colors duration-500 overflow-hidden group/card transform-gpu"
               >
                 {/* Image Container with zoom overlay */}
                 <div 

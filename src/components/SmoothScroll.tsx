@@ -17,6 +17,17 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
   const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
+    // Disable Lenis on touch devices / mobile to prevent Android GPU tearing issues
+    // JS-based smooth scrolling often causes severe rendering artifacts on Android WebViews and Chrome
+    const isTouchDevice = 
+      (typeof window !== "undefined" && "ontouchstart" in window) || 
+      (typeof navigator !== "undefined" && navigator.maxTouchPoints > 0) ||
+      (typeof window !== "undefined" && window.innerWidth <= 768);
+
+    if (isTouchDevice) {
+      return;
+    }
+
     const lenis = new Lenis({
       duration: 1.6,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),

@@ -173,7 +173,7 @@ export default function ClubsPage() {
                       boxShadow: "0 25px 50px -12px rgba(159, 126, 105, 0.15)"
                     }}
                     transition={{ duration: 0.4 }}
-                    className="bg-luxury-dark rounded-2xl border border-white/10 flex flex-col justify-between transition-colors duration-500 shadow-sm relative overflow-hidden group/card"
+                    className="bg-luxury-dark rounded-2xl border border-white/10 flex flex-col justify-between transition-colors duration-500 shadow-sm relative overflow-hidden group/card transform-gpu"
                   >
                     {/* Image Display */}
                     <div className="relative w-full aspect-square bg-neutral-100 group">
