@@ -160,14 +160,9 @@ export default function ClubsPage() {
           ) : (
           <>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8 bg-[#121212] md:bg-transparent border-t border-[#121212] md:border-transparent">
-              <AnimatePresence>
                 {paginatedProducts.map((product, index) => (
                     <motion.div
                     key={product.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
                     whileHover={{ 
                       y: -12, 
                       boxShadow: "0 25px 50px -12px rgba(159, 126, 105, 0.15)"
@@ -269,7 +264,6 @@ export default function ClubsPage() {
                     </div>
                   </motion.div>
                 ))}
-              </AnimatePresence>
             </div>
             
             {/* Pagination Controls */}
