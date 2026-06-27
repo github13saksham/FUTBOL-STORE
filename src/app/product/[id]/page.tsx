@@ -93,8 +93,9 @@ export default function ProductPage() {
   const loadReviews = async () => {
     setIsLoadingReviews(true);
     try {
-      const fetchedReviews = await dbService.getReviewsByProduct(product!.id);
-      setReviews(fetchedReviews);
+      // Fetching all reviews globally as requested
+      const fetchedReviews = await dbService.getAllReviews();
+      setReviews(fetchedReviews.filter(r => r.status === 'approved'));
     } catch (e) {
       console.error(e);
     } finally {
@@ -548,6 +549,9 @@ export default function ProductPage() {
           </div>
         </div>
 
+
+
+
         {/* D. Premium Customer Reviews Section */}
         <div id="reviews" className="border-t border-white/10 pt-12 mt-4 space-y-8 scroll-mt-24">
           <div className="border border-white/10 bg-white/5 backdrop-blur-sm rounded-xl p-6 md:p-8 space-y-8 relative overflow-hidden">
@@ -665,10 +669,9 @@ export default function ProductPage() {
                         </div>
                         <span className="text-[9px] font-bold text-white/60">{review.rating || 5}/5</span>
                       </div>
-        
                     </div>
                     <h4 className="text-[12px] font-bold text-white leading-tight mb-1.5">{review.title}</h4>
-                    <p className="text-[11px] text-white/70 leading-snug font-light font-sans break-words line-clamp-3">
+                    <p className="text-[11px] text-white/70 leading-snug font-light font-sans break-words whitespace-pre-wrap">
                       "{review.content}"
                     </p>
                   </div>
@@ -684,7 +687,6 @@ export default function ProductPage() {
             </div>
           </div>
         </div>
-
 
         {/* C. Exclusive Pairings recommended collection */}
         <div className="border-t border-white/10 pt-12 space-y-6">
