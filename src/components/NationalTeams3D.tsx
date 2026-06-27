@@ -149,6 +149,7 @@ export default function NationalTeams3D({ teams: propTeams }: NationalTeams3DPro
   const displayTeams = propTeams && propTeams.length > 0 ? propTeams : teams;
   const [mounted, setMounted] = useState(false);
   const [activeIndex, setActiveIndex] = useState(1); // Middle default
+  const [isMobile, setIsMobile] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { products } = useStore();
@@ -163,8 +164,12 @@ export default function NationalTeams3D({ teams: propTeams }: NationalTeams3DPro
 
   useEffect(() => {
     setMounted(true);
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
     // Align starting rotation to center
     x.set(0);
+    return () => window.removeEventListener('resize', checkMobile);
   }, [x]);
 
   const rotateTo = (index: number) => {
@@ -212,13 +217,13 @@ export default function NationalTeams3D({ teams: propTeams }: NationalTeams3DPro
   if (!mounted) return null;
 
   return (
-    <div className="relative w-full max-w-7xl mx-auto py-16 px-4 overflow-hidden">
+    <div className="relative w-full max-w-7xl mx-auto py-8 md:py-16 px-4 overflow-hidden">
       {/* Background glow beams */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 light-beam opacity-50 z-0" />
       
       <div className="relative text-center mb-4 md:mb-10 z-10">
-        <span className="text-xs uppercase tracking-[0.25em] text-black font-medium">Global Teams</span>
-        <h2 className="text-4xl md:text-6xl font-serif text-black mt-2">
+        <span className="text-[10px] md:text-xs uppercase tracking-[0.25em] text-black font-medium">Global Teams</span>
+        <h2 className="text-2xl md:text-6xl font-serif text-black mt-1 md:mt-2">
           Find Your National Team
         </h2>
         <p className="max-w-xl mx-auto text-sm text-black/70 mt-4 leading-relaxed font-sans font-light hidden md:block">
@@ -227,23 +232,23 @@ export default function NationalTeams3D({ teams: propTeams }: NationalTeams3DPro
       </div>
 
       {/* 3D Carousel container */}
-      <div className="relative w-full h-[400px] md:h-[450px] flex items-center justify-center z-10">
+      <div className="relative w-full h-[320px] md:h-[450px] flex items-center justify-center z-10">
         
         {/* Left/Right Buttons */}
         <button 
           onClick={handlePrev}
-          className="absolute left-4 md:left-12 p-4 rounded-full border border-luxury-taupe/20 bg-luxury-ivory/60 hover:bg-luxury-taupe hover:text-luxury-ivory backdrop-blur-md transition-all duration-300 z-30"
+          className="absolute left-2 md:left-12 p-2.5 md:p-4 rounded-full border border-luxury-taupe/20 bg-luxury-ivory/60 hover:bg-luxury-taupe hover:text-luxury-ivory backdrop-blur-md transition-all duration-300 z-30"
           aria-label="Previous Team"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
         </button>
         
         <button 
           onClick={handleNext}
-          className="absolute right-4 md:right-12 p-4 rounded-full border border-luxury-taupe/20 bg-luxury-ivory/60 hover:bg-luxury-taupe hover:text-luxury-ivory backdrop-blur-md transition-all duration-300 z-30"
+          className="absolute right-2 md:right-12 p-2.5 md:p-4 rounded-full border border-luxury-taupe/20 bg-luxury-ivory/60 hover:bg-luxury-taupe hover:text-luxury-ivory backdrop-blur-md transition-all duration-300 z-30"
           aria-label="Next Team"
         >
-          <ArrowRight className="w-5 h-5" />
+          <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
         </button>
 
         {/* Outer Perspective Wrapper */}
@@ -272,14 +277,19 @@ export default function NationalTeams3D({ teams: propTeams }: NationalTeams3DPro
 
               // Calculate static Y rotation for this item in the cylinder
               const itemAngle = index * angleStep;
-              // Radius of the circle (determines spacing/depth of the 3D ring)
-              const radius = 260; // pixels
+              // Radius: smaller on mobile to keep cards from going off-screen
+              const radius = isMobile ? 180 : 260; // pixels
+              // Card dimensions: smaller on mobile
+              const cardW = isMobile ? 140 : 200;
+              const cardH = isMobile ? 210 : 300;
 
               return (
                 <div
                   key={team.id}
-                  className="absolute w-[200px] h-[300px]"
+                  className="absolute"
                   style={{
+                    width: `${cardW}px`,
+                    height: `${cardH}px`,
                     transformStyle: "preserve-3d",
                     transform: `rotateY(${itemAngle}deg) translateZ(${radius}px)`,
                     backfaceVisibility: "visible",
@@ -289,7 +299,8 @@ export default function NationalTeams3D({ teams: propTeams }: NationalTeams3DPro
                     onTap={() => {
                       router.push(resolvedLink);
                     }}
-                    className={`relative w-full h-full rounded-2xl p-6 flex flex-col justify-between overflow-hidden shadow-2xl transition-shadow duration-500 bg-gradient-to-b ${team.color} border border-white/20 cursor-pointer`}
+                    className={`relative w-full h-full rounded-2xl flex flex-col justify-between overflow-hidden shadow-2xl transition-shadow duration-500 bg-gradient-to-b ${team.color} border border-white/20 cursor-pointer`}
+                    style={{ padding: isMobile ? '12px' : '24px' }}
                     whileHover={{ y: -8 }}
                   >
                     {/* Subtle jersey stripes / textures rendered with pure CSS */}
@@ -312,14 +323,14 @@ export default function NationalTeams3D({ teams: propTeams }: NationalTeams3DPro
                   <div className="flex justify-between items-start z-10">
                     <div>
                       
-                      <h3 className="text-xl mr-3 font-serif text-luxury-ivory mt-1 tracking-wide">{team.name}</h3>
+                      <h3 style={{ fontSize: isMobile ? '14px' : '20px' }} className="font-serif text-luxury-ivory mt-1 tracking-wide leading-tight">{team.name}</h3>
                     </div>
                     {/* Glowing National Shield Graphic */}
                     
                   </div>
 
                   {/* Interactive floating logo in 3D card */}
-                  <div className="relative w-full h-28 flex items-center justify-center z-10 mt-4 group">
+                  <div className="relative w-full flex items-center justify-center z-10 group" style={{ height: isMobile ? '80px' : '112px', marginTop: isMobile ? '8px' : '16px' }}>
                     {/* Shadow overlay */}
                     <div className="absolute bottom-0 w-24 h-3 bg-luxury-dark/30 rounded-full blur-md md:group-hover:scale-110 transition-transform duration-500" />
                     
@@ -327,7 +338,8 @@ export default function NationalTeams3D({ teams: propTeams }: NationalTeams3DPro
                       e.stopPropagation();
                     }}>
                       <motion.div 
-                        className="relative w-20 h-20 rounded-full overflow-hidden shadow-2xl border-2 border-luxury-ivory/20"
+                        className="relative rounded-full overflow-hidden shadow-2xl border-2 border-luxury-ivory/20"
+                        style={{ width: isMobile ? '66px' : '80px', height: isMobile ? '66px' : '80px' }}
                         animate={{ 
                           y: activeIndex === index ? [0, -10, 0] : 0 
                         }}

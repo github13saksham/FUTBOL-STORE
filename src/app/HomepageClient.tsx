@@ -190,40 +190,40 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
       </section>
 
       {/* 2.5 Built for Football Culture Section */}
-      <section className="py-16 md:py-24 px-6 md:px-12 max-w-7xl mx-auto bg-transparent text-black">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
+      <section className="py-10 md:py-24 px-5 md:px-12 max-w-7xl mx-auto bg-transparent text-black">
+        <div className="grid grid-cols-[3fr_2fr] md:grid-cols-2 gap-5 md:gap-16 items-center">
           
           {/* Left Column: Text */}
-          <div className="space-y-6">
-            <span className="text-[16px] md:text-[20px] uppercase tracking-[0.3em] font-semibold text-black flex items-center gap-3 pb-10 md:pb-20">
-              <span className="w-8 h-[1px] bg-luxury-taupe"></span>
-              LIMITED TIME ARRIVAL
+          <div className="space-y-3 md:space-y-6 flex flex-col justify-center">
+            <span className="text-[10px] md:text-[20px] uppercase tracking-[0.15em] md:tracking-[0.3em] font-semibold text-black flex items-center gap-2 md:gap-3 pb-0 md:pb-20">
+              <span className="w-5 md:w-8 h-[1px] bg-luxury-taupe flex-shrink-0"></span>
+              <span className="leading-tight">LIMITED TIME ARRIVAL</span>
             </span>
             
-            <h2 className="text-5xl md:text-7xl font-serif text-black font-light leading-[1.05] tracking-tight">
+            <h2 className="text-2xl md:text-7xl font-serif text-black font-light leading-[1.1] tracking-tight">
               {homepageSettings?.hero?.subtitle?.split(' ').slice(0, 4).join(' ') || "The Road to Glory"} <br />
               <span className="italic font-medium text-black">{homepageSettings?.hero?.subtitle?.split(' ').slice(4).join(' ') || "Begins Now."}</span>
             </h2>
             
-            <p className="text-lg text-black font-sans leading-relaxed max-w-md">
+            <p className="text-xs md:text-lg text-black font-sans leading-relaxed max-w-md">
               Discover the FIFA World Cup 2026 Collection and wear the pride of your nation.
             </p>
             
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 pt-4">
+            <div className="flex items-center pt-1 md:pt-4">
               <button 
                 onClick={() => {
                   router.push("/national-teams");
                 }}
-                className="text-xs uppercase tracking-widest font-semibold text-black hover:text-black flex items-center gap-2 transition-colors duration-300"
+                className="text-[10px] md:text-xs uppercase tracking-widest font-semibold text-black hover:text-black flex items-center gap-1.5 md:gap-2 transition-colors duration-300"
               >
-                Discover Now <ArrowRight className="w-3.5 h-3.5" />
+                Discover Now <ArrowRight className="w-3 h-3 md:w-3.5 md:h-3.5" />
               </button>
             </div>
           </div>
 
           {/* Right Column: Card with Image */}
           <div className="relative flex justify-center md:justify-end">
-            <div className="w-full max-w-[380px] bg-[#1a1c21] rounded-xl overflow-hidden h-[450px] md:h-[500px] relative shadow-2xl group flex flex-col justify-end">
+            <div className="w-full max-w-[380px] bg-[#1a1c21] rounded-xl overflow-hidden h-[260px] md:h-[500px] relative shadow-2xl group flex flex-col justify-end">
               <Image 
                 src="/NATIONAL_TEAM_LOGO/WORLDCUP_IMG.jpeg"
                 alt="World Cup Trophy Scene"
@@ -260,18 +260,21 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
           <div className="hidden md:flex absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 items-center justify-center text-white font-serif italic text-3xl">
             VS
           </div>
+          {/* VS Divider Mobile */}
+          
 
-          <div className="grid md:grid-cols-2 gap-12 relative">
-            {/* Card 1: Player Version (Elite, Performance, Matchday) */}
+          <div className="grid grid-cols-2 gap-3 md:gap-12 relative">
+            {/* Card 1: Player Version */}
             <m.div 
               whileHover={{ y: -6 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="group relative h-[480px] w-full max-w-[400px] rounded-3xl overflow-hidden border border-luxury-sand/15 bg-neutral-900/60 shadow-[0_0_40px_rgba(205,164,145,0.12)] hover:shadow-[0_0_50px_rgba(205,164,145,0.25)] transition-shadow duration-500 flex flex-col items-center justify-start mx-auto"
+              className="group relative w-full max-w-[400px] rounded-2xl md:rounded-3xl overflow-hidden border border-luxury-sand/15 bg-neutral-900/60 shadow-[0_0_40px_rgba(205,164,145,0.12)] hover:shadow-[0_0_50px_rgba(205,164,145,0.25)] transition-shadow duration-500 flex flex-col mx-auto md:h-[480px] md:items-center md:justify-start"
             >
               {/* Background Image overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10 pointer-events-none" />
 
-              <div className="relative w-full h-[320px]">
+              {/* Image */}
+              <div className="relative w-full h-[130px] md:h-[320px] flex-shrink-0">
                 <Image 
                   src="/HEAT-PRESSED LOGOS.svg"
                   alt="Heat Pressed Logos"
@@ -281,27 +284,28 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
                 />
               </div>
               
-              <div className="relative z-20 w-full flex flex-col items-center mt-auto px-6 pb-8">
-                <h2 className="italic text-3xl md:text-4xl font-serif font-light text-white tracking-wide text-center  mt-[-8rem] mb-2">
+              {/* Text — mobile: natural flow, desktop: overlay with negative margin */}
+              <div className="relative z-20 w-full flex flex-col items-center px-3 pb-4 pt-2 md:mt-auto md:px-6 md:pb-8 md:pt-0">
+                <h2 className="italic text-sm md:text-4xl font-serif font-light text-white tracking-wide text-center mb-1 md:mb-2 md:mt-[-8rem]">
                   Player <span className="italic font-normal text-white">Version</span>
                 </h2>
-                <p className="text-sm text-white font-light font-sans text-center">
-                 
-Built for elite performance, the Player Version Jersey features a slim athletic fit, lightweight breathable fabric, and heat-pressed details for an authentic on-pitch feel just like the jerseys worn by professionals.
+                <p className="text-[9px] leading-[1.4] md:text-sm text-white/80 font-light font-sans text-center">
+                  Built for elite performance, the Player Version Jersey features a slim athletic fit, lightweight breathable fabric, and heat-pressed details for an authentic on-pitch feel.
                 </p>
               </div>
             </m.div>
 
-            {/* Card 2: Fan Version (Lifestyle, Streetwear) */}
+            {/* Card 2: Fan Version */}
             <m.div 
               whileHover={{ y: -6 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="group relative h-[480px] w-full max-w-[400px] rounded-3xl overflow-hidden border border-luxury-sand/15 bg-neutral-900/60 shadow-[0_0_40px_rgba(205,164,145,0.12)] hover:shadow-[0_0_50px_rgba(205,164,145,0.25)] transition-shadow duration-500 flex flex-col items-center justify-start mx-auto"
+              className="group relative w-full max-w-[400px] rounded-2xl md:rounded-3xl overflow-hidden border border-luxury-sand/15 bg-neutral-900/60 shadow-[0_0_40px_rgba(205,164,145,0.12)] hover:shadow-[0_0_50px_rgba(205,164,145,0.25)] transition-shadow duration-500 flex flex-col mx-auto md:h-[480px] md:items-center md:justify-start"
             >
               {/* Background Image overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10 pointer-events-none" />
 
-              <div className="relative w-full h-[320px]">
+              {/* Image */}
+              <div className="relative w-full h-[130px] md:h-[320px] flex-shrink-0">
                 <Image 
                   src="/HEAT-PRESSED LOGOS (2).svg"
                   alt="Fan Lifestyle"
@@ -311,12 +315,13 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                 />
               </div>
               
-              <div className="relative z-20 w-full flex flex-col items-center mt-auto px-6 pb-8">
-                <h2 className="italic text-3xl md:text-4xl font-serif font-light text-white tracking-wide text-center mt-[-8rem] mb-2">
+              {/* Text */}
+              <div className="relative z-20 w-full flex flex-col items-center px-3 pb-4 pt-2 md:mt-auto md:px-6 md:pb-8 md:pt-0">
+                <h2 className="italic text-sm md:text-4xl font-serif font-light text-white tracking-wide text-center mb-1 md:mb-2 md:mt-[-8rem]">
                   Fan <span className="italic font-normal text-white">Version</span>
                 </h2>
-                <p className="text-sm text-white font-light font-sans text-center">
-                Designed for everyday comfort, the Fan Version Jersey offers a relaxed fit with high-quality stitched details and breathable fabric perfect for matchdays and casual wear.
+                <p className="text-[9px] leading-[1.4] md:text-sm text-white/80 font-light font-sans text-center">
+                  Designed for everyday comfort, the Fan Version Jersey offers a relaxed fit with high-quality stitched details and breathable fabric perfect for matchdays and casual wear.
                 </p>
               </div>
             </m.div>
@@ -325,11 +330,11 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
       </section>
 
       {/* 4. Best Sellers Section */}
-      <section id="bestsellers" className="py-16 md:py-32 px-6 md:px-12 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
+      <section id="bestsellers" className="py-8 md:py-32 px-6 md:px-12 max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 md:mb-16 gap-2 md:gap-6">
           <div>
           
-            <h2 className="text-4xl md:text-6xl font-serif text-black mt-2 font-light">
+            <h2 className="text-3xl md:text-6xl font-serif text-black mt-2 font-light">
               Best <span className="italic font-medium text-black">Sellers</span>
             </h2>
           </div>
@@ -359,7 +364,7 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 style={{ perspective: 1000, transformStyle: "preserve-3d" }}
-                className="flex-shrink-0 w-[200px] sm:w-[240px] md:w-[350px] relative rounded-2xl border border-white/10 bg-luxury-dark hover:bg-black hover:z-20 flex flex-col justify-between transition-colors duration-500 overflow-hidden group/card transform-gpu"
+                className="flex-shrink-0 w-[160px] sm:w-[200px] md:w-[350px] relative rounded-2xl border border-white/10 bg-luxury-dark hover:bg-black hover:z-20 flex flex-col transition-colors duration-500 overflow-hidden group/card transform-gpu"
               >
                 {/* Image Container with zoom overlay */}
                 <div 
@@ -429,25 +434,25 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
                 </div>
 
                 {/* Text specifications */}
-                <div className="p-4 md:p-5 md:pt-4 space-y-2 flex-grow flex flex-col justify-between">
+                <div className="p-3 md:p-5 md:pt-4 space-y-1.5 md:space-y-2">
                   <div>
-                  <div className="flex justify-between items-center mb-1 mt-0.5">
-                    <span className="text-[9px] uppercase tracking-widest font-semibold text-white/80 md:text-white block">
+                  <div className="flex justify-between items-center mb-0.5 mt-0.5">
+                    <span className="text-[8px] md:text-[9px] uppercase tracking-widest font-semibold text-white/80 md:text-white block">
                       {product.category || product.realProduct?.category || "PLAYER VERSION"}
                     </span>
                     <div className="flex items-center text-[#cda491]">
-                      {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-2.5 h-2.5 ${Math.round(product.rating || product.realProduct?.rating || 0) >= star ? 'fill-current' : 'opacity-30'}`} />)}
+                      {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-2 h-2 md:w-2.5 md:h-2.5 ${Math.round(product.rating || product.realProduct?.rating || 0) >= star ? 'fill-current' : 'opacity-30'}`} />)}
                     </div>
                   </div>
-                    <Link href={`/product/${product.realId}`} className="block mt-1">
-                      <h3 className="font-serif text-[13px] md:text-[15px] font-medium leading-tight text-white hover:text-luxury-taupe transition-colors md:whitespace-normal" style={{ transform: "translateZ(20px)" }}>
+                    <Link href={`/product/${product.realId}`} className="block mt-0.5">
+                      <h3 className="font-serif text-[12px] md:text-[15px] font-medium leading-tight text-white hover:text-luxury-taupe transition-colors md:whitespace-normal" style={{ transform: "translateZ(20px)" }}>
                         {product.realProduct?.name || product.name}
                       </h3>
                     </Link>
                   </div>
 
                   <div className="flex justify-between items-end pb-1 border-b border-white/20 pt-1 md:pt-0">
-                    <span className="font-serif text-base md:text-lg text-white font-medium">
+                    <span className="font-serif text-sm md:text-lg text-white font-medium">
                       {product.realProduct?.priceStr || product.priceStr}
                     </span>
                     <Link
@@ -465,19 +470,19 @@ Built for elite performance, the Player Version Jersey features a slim athletic 
       </section>
 
       {/* 5. Shop By Clubs Grid Section */}
-      <section id="clubs" className="py-16 md:py-32 bg-luxury-dark text-white relative overflow-hidden">
+      <section id="clubs" className="py-8 md:py-32 bg-luxury-dark text-white relative overflow-hidden">
         {/* Cinematic shadows & lighting */}
         <div className="absolute right-0 bottom-0 w-[600px] h-[600px] bg-luxury-taupe/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute left-[10%] top-[10%] w-[400px] h-[400px] bg-luxury-sage/5 rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-          <div className="max-w-2xl mb-20 space-y-4">
+        <div className="max-w-7xl mx-auto px-5 md:px-12 relative z-10">
+          <div className="max-w-2xl mb-6 md:mb-20 space-y-2 md:space-y-4">
     
-            <h2 className="text-5xl md:text-7xl font-serif text-white tracking-wide">
+            <h2 className="text-3xl md:text-7xl font-serif text-white tracking-wide">
               Shop By <span className="italic font-light text-white">Clubs</span>
             </h2>
-            <p className="text-sm text-white font-sans leading-relaxed font-light">
-              Discover premium club jerseys inspired by football’s most iconic teams
+            <p className="text-xs md:text-sm text-white font-sans leading-relaxed font-light">
+              Discover premium club jerseys inspired by football's most iconic teams
             </p>
           </div>
 

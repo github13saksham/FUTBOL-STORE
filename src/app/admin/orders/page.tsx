@@ -17,6 +17,9 @@ export default function AdminOrdersPage() {
   const [packageLength, setPackageLength] = useState("25");
   const [packageBreadth, setPackageBreadth] = useState("25");
   const [packageHeight, setPackageHeight] = useState("5");
+  const [manualAwb, setManualAwb] = useState('');
+  const [isSavingAwb, setIsSavingAwb] = useState(false);
+  const [awbSaved, setAwbSaved] = useState(false);
   
   const dbService = new FirebaseDatabaseService();
 
@@ -32,6 +35,8 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     if (selectedOrder) {
+      setManualAwb('');
+      setAwbSaved(false);
       const savedConfig = localStorage.getItem(`draftShipmentConfig_${selectedOrder.id}`);
       if (savedConfig) {
          try {
@@ -114,6 +119,28 @@ export default function AdminOrdersPage() {
     } catch (error) {
       console.error("Error deleting order:", error);
       alert("Failed to delete order.");
+    }
+  };
+
+  const saveManualAwb = async () => {
+    if (!manualAwb.trim() || !selectedOrder) return;
+    setIsSavingAwb(true);
+    try {
+      const awb = manualAwb.trim();
+      await dbService.updateOrder(selectedOrder.id, { delhiveryAwb: awb });
+      const updatedOrders = orders.map(o =>
+        o.id === selectedOrder.id ? { ...o, delhiveryAwb: awb } : o
+      );
+      setOrders(updatedOrders);
+      setSelectedOrder({ ...selectedOrder, delhiveryAwb: awb });
+      setManualAwb('');
+      setAwbSaved(true);
+      setTimeout(() => setAwbSaved(false), 3000);
+    } catch (error) {
+      console.error('Error saving AWB:', error);
+      alert('Failed to save AWB number.');
+    } finally {
+      setIsSavingAwb(false);
     }
   };
 
@@ -402,23 +429,46 @@ export default function AdminOrdersPage() {
                 <div>
                   <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Customer Details</h3>
                   <div className="space-y-2 text-xs">
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <span className="text-gray-500">Name</span>
-                      <span className="font-medium text-black">{selectedOrder.customerName}</span>
+                      <span className="font-medium text-black flex items-center gap-2">
+                        {selectedOrder.customerName}
+                        <Copy className="w-3 h-3 text-gray-400 cursor-pointer hover:text-black flex-shrink-0" onClick={() => navigator.clipboard.writeText(selectedOrder.customerName)} />
+                      </span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <span className="text-gray-500">Phone</span>
-                      <span className="font-medium text-black">{selectedOrder.shippingAddress?.phone || 'N/A'}</span>
+                      <span className="font-medium text-black flex items-center gap-2">
+                        {selectedOrder.shippingAddress?.phone || 'N/A'}
+                        {selectedOrder.shippingAddress?.phone && <Copy className="w-3 h-3 text-gray-400 cursor-pointer hover:text-black flex-shrink-0" onClick={() => navigator.clipboard.writeText(selectedOrder.shippingAddress.phone)} />}
+                      </span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <span className="text-gray-500">Email</span>
-                      <span className="font-medium text-black">{selectedOrder.shippingAddress?.email || 'N/A'}</span>
+                      <span className="font-medium text-black flex items-center gap-2">
+                        {selectedOrder.shippingAddress?.email || 'N/A'}
+                        {selectedOrder.shippingAddress?.email && <Copy className="w-3 h-3 text-gray-400 cursor-pointer hover:text-black flex-shrink-0" onClick={() => navigator.clipboard.writeText(selectedOrder.shippingAddress.email)} />}
+                      </span>
                     </div>
                     <div>
-                      <span className="text-gray-500 block mb-1">Shipping Address</span>
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="text-gray-500">Shipping Address</span>
+                        <Copy className="w-3 h-3 text-gray-400 cursor-pointer hover:text-black flex-shrink-0 mt-0.5" onClick={() => navigator.clipboard.writeText(`${selectedOrder.shippingAddress?.address}, ${selectedOrder.shippingAddress?.city}, ${selectedOrder.shippingAddress?.state} ${selectedOrder.shippingAddress?.pincode}`)} />
+                      </div>
                       <p className="font-medium text-black leading-relaxed">
                         {selectedOrder.shippingAddress?.address}, {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state} {selectedOrder.shippingAddress?.pincode}
                       </p>
+                      <div className="grid grid-cols-3 gap-1 mt-2">
+                        <button className="text-[10px] bg-gray-50 border border-gray-100 rounded px-2 py-1 text-gray-600 hover:bg-gray-100 flex items-center gap-1 justify-center" onClick={() => navigator.clipboard.writeText(selectedOrder.shippingAddress?.city || '')}>
+                          <Copy className="w-2.5 h-2.5" /> City
+                        </button>
+                        <button className="text-[10px] bg-gray-50 border border-gray-100 rounded px-2 py-1 text-gray-600 hover:bg-gray-100 flex items-center gap-1 justify-center" onClick={() => navigator.clipboard.writeText(selectedOrder.shippingAddress?.state || '')}>
+                          <Copy className="w-2.5 h-2.5" /> State
+                        </button>
+                        <button className="text-[10px] bg-gray-50 border border-gray-100 rounded px-2 py-1 text-gray-600 hover:bg-gray-100 flex items-center gap-1 justify-center" onClick={() => navigator.clipboard.writeText(selectedOrder.shippingAddress?.pincode || '')}>
+                          <Copy className="w-2.5 h-2.5" /> Pincode
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -496,58 +546,59 @@ export default function AdminOrdersPage() {
                         <Truck className="w-4 h-4 text-gray-400" /> {selectedOrder.status}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
-                      <span className="text-gray-500">Delhivery AWB</span>
-                      <span className="font-mono text-xs font-medium text-black flex items-center gap-2">
-                        {selectedOrder.delhiveryAwb || "Not Generated"} 
-                        {selectedOrder.delhiveryAwb && (
-                          <Copy 
-                            className="w-3 h-3 text-gray-400 cursor-pointer hover:text-black" 
-                            onClick={() => navigator.clipboard.writeText(selectedOrder.delhiveryAwb)}
+                    <div className="mt-2 pt-2 border-t border-gray-100">
+                      {/* Current AWB display */}
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-gray-500">Delhivery AWB</span>
+                        <span className="font-mono text-xs font-medium text-black flex items-center gap-2">
+                          {selectedOrder.delhiveryAwb ? (
+                            <>
+                              <span className="text-green-600 font-bold">{selectedOrder.delhiveryAwb}</span>
+                              <Copy 
+                                className="w-3 h-3 text-gray-400 cursor-pointer hover:text-black" 
+                                onClick={() => navigator.clipboard.writeText(selectedOrder.delhiveryAwb)}
+                              />
+                            </>
+                          ) : (
+                            <span className="text-orange-500 font-semibold">Not Set</span>
+                          )}
+                        </span>
+                      </div>
+
+                      {/* Manual AWB Entry */}
+                      <div className="bg-gray-50 rounded-xl p-3 border border-gray-200">
+                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                          <Package className="w-3 h-3" />
+                          {selectedOrder.delhiveryAwb ? 'Update AWB Number' : 'Enter AWB Number Manually'}
+                        </p>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={manualAwb}
+                            onChange={(e) => setManualAwb(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && saveManualAwb()}
+                            placeholder={selectedOrder.delhiveryAwb || "Paste AWB from Delhivery..."}
+                            className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-black font-mono"
                           />
+                          <button
+                            onClick={saveManualAwb}
+                            disabled={isSavingAwb || !manualAwb.trim()}
+                            className="px-3 py-2 bg-black text-white text-xs font-bold rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-40 whitespace-nowrap"
+                          >
+                            {isSavingAwb ? 'Saving...' : 'Save AWB'}
+                          </button>
+                        </div>
+                        {awbSaved && (
+                          <p className="text-[10px] text-green-600 font-semibold mt-1.5 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" /> AWB saved — tracking page updated in real-time!
+                          </p>
                         )}
-                      </span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {!selectedOrder.delhiveryAwb && selectedOrder.status !== 'Rejected (Out of Stock)' && (
-                  <>
-                    <div className="w-full h-px bg-gray-100"></div>
-                    <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                      <h3 className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-3 flex items-center gap-1">
-                        <Package className="w-3 h-3" /> Draft Shipment Configuration
-                      </h3>
-                      <div className="grid grid-cols-2 gap-3 mb-3">
-                        <div>
-                          <label className="text-[10px] font-semibold text-gray-500 block mb-1">Weight (grams)</label>
-                          <input type="number" value={packageWeight} onChange={e => setPackageWeight(e.target.value)} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500" />
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-semibold text-gray-500 block mb-1">Length (cm)</label>
-                          <input type="number" value={packageLength} onChange={e => setPackageLength(e.target.value)} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500" />
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-semibold text-gray-500 block mb-1">Breadth (cm)</label>
-                          <input type="number" value={packageBreadth} onChange={e => setPackageBreadth(e.target.value)} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500" />
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-semibold text-gray-500 block mb-1">Height (cm)</label>
-                          <input type="number" value={packageHeight} onChange={e => setPackageHeight(e.target.value)} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500" />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-semibold text-gray-500 block mb-1">Pickup Location</label>
-                        <select value={selectedPickupLocation} onChange={e => setSelectedPickupLocation(e.target.value)} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500">
-                          <option value="TFS">TFS</option>
-                          <option value="Venu Sports">Venu Sports</option>
-                          <option value="AY Enterprises">AY Enterprises</option>
-                          <option value="Sports Plaza">Sports Plaza</option>
-                        </select>
-                      </div>
-                    </div>
-                  </>
-                )}
+
 
               </div>
 
@@ -555,29 +606,12 @@ export default function AdminOrdersPage() {
               <div className="p-4 md:p-5 border-t border-gray-100 bg-white sticky bottom-0 z-10 flex flex-col gap-3">
                 <div className="flex gap-3">
                   <button onClick={() => navigator.clipboard.writeText(JSON.stringify(selectedOrder, null, 2))} className="flex-1 py-2.5 px-4 bg-white border border-gray-200 text-black text-xs font-bold rounded-lg hover:bg-gray-50 transition-colors">
-                    Copy Details
+                    Copy All Details
                   </button>
-                  {!selectedOrder.delhiveryAwb ? (
-                    <>
-                      <button 
-                        onClick={() => demoShipment(selectedOrder)}
-                        disabled={isGeneratingShipment || selectedOrder.status === 'Rejected (Out of Stock)'}
-                        className="flex-1 py-2.5 px-4 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                      >
-                        Demo Shipment (Log)
-                      </button>
-                      <button 
-                        onClick={() => generateShipment(selectedOrder)}
-                        disabled={isGeneratingShipment || selectedOrder.status === 'Rejected (Out of Stock)'}
-                        className="flex-1 py-2.5 px-4 bg-black text-white text-xs font-bold rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50"
-                      >
-                        {isGeneratingShipment ? "Sending..." : "Send to Delhivery"}
-                      </button>
-                    </>
-                  ) : (
+                  {selectedOrder.delhiveryAwb && (
                     <button 
                       onClick={() => window.open(`https://www.delhivery.com/tracking?id=${selectedOrder.delhiveryAwb}`, '_blank')}
-                      className="flex-1 py-2.5 px-4 bg-green-600 text-white text-xs font-bold rounded-lg hover:bg-green-700 transition-colors"
+                      className="flex-1 py-2.5 px-4 bg-black text-white text-xs font-bold rounded-lg hover:bg-gray-900 transition-colors"
                     >
                       Track Shipment
                     </button>
