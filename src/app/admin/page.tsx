@@ -98,58 +98,58 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* 4 Premium Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col">
           <div className="flex justify-between items-start mb-4">
-            <p className="text-sm font-medium text-gray-500">Total Products</p>
-            <Package className="w-5 h-5 text-gray-400" />
+            <p className="text-xs sm:text-sm font-medium text-gray-500">Total Products</p>
+            <Package className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
           </div>
           <div className="mt-auto">
-            <h3 className="text-3xl font-bold text-black">{loading ? '-' : products.length}</h3>
-            <div className="flex items-center gap-1 mt-2 text-xs font-medium text-gray-500">
+            <h3 className="text-2xl sm:text-3xl font-bold text-black">{loading ? '-' : products.length}</h3>
+            <div className="flex items-center gap-1 mt-2 text-[10px] sm:text-xs font-medium text-gray-500">
               <TrendingUp className="w-3 h-3 text-black" />
               <span>+12 added this week</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col">
+        <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col">
           <div className="flex justify-between items-start mb-4">
-            <p className="text-sm font-medium text-gray-500">Pending Orders</p>
-            <ShoppingBag className="w-5 h-5 text-gray-400" />
+            <p className="text-xs sm:text-sm font-medium text-gray-500">Pending Orders</p>
+            <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
           </div>
           <div className="mt-auto">
-            <h3 className="text-3xl font-bold text-black">{loading ? '-' : pendingOrdersCount}</h3>
-            <div className="flex items-center gap-1 mt-2 text-xs font-medium text-gray-500">
+            <h3 className="text-2xl sm:text-3xl font-bold text-black">{loading ? '-' : pendingOrdersCount}</h3>
+            <div className="flex items-center gap-1 mt-2 text-[10px] sm:text-xs font-medium text-gray-500">
               <span className="text-black font-bold">Action required</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col">
+        <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col">
           <div className="flex justify-between items-start mb-4">
-            <p className="text-sm font-medium text-gray-500">Inventory Value</p>
-            <span className="w-5 h-5 flex items-center justify-center text-gray-400 font-serif">₹</span>
+            <p className="text-xs sm:text-sm font-medium text-gray-500">Inventory Value</p>
+            <span className="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-gray-400 font-serif">₹</span>
           </div>
           <div className="mt-auto">
-            <h3 className="text-3xl font-bold text-black">
+            <h3 className="text-2xl sm:text-3xl font-bold text-black">
               {loading ? '-' : `₹${(inventoryValue / 1000).toFixed(1)}k`}
             </h3>
-            <div className="flex items-center gap-1 mt-2 text-xs font-medium text-gray-500">
+            <div className="flex items-center gap-1 mt-2 text-[10px] sm:text-xs font-medium text-gray-500">
               <TrendingUp className="w-3 h-3 text-black" />
               <span>+2.4% from last month</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col">
+        <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col">
           <div className="flex justify-between items-start mb-4">
-            <p className="text-sm font-medium text-gray-500">Low Stock Items</p>
-            <AlertCircle className="w-5 h-5 text-gray-400" />
+            <p className="text-xs sm:text-sm font-medium text-gray-500">Low Stock Items</p>
+            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
           </div>
           <div className="mt-auto">
-            <h3 className="text-3xl font-bold text-black">{loading ? '-' : lowStockProducts.length}</h3>
-            <div className="flex items-center gap-1 mt-2 text-xs font-medium text-gray-500">
+            <h3 className="text-2xl sm:text-3xl font-bold text-black">{loading ? '-' : lowStockProducts.length}</h3>
+            <div className="flex items-center gap-1 mt-2 text-[10px] sm:text-xs font-medium text-gray-500">
               <TrendingDown className="w-3 h-3 text-black" />
               <span>Needs restocking soon</span>
             </div>
