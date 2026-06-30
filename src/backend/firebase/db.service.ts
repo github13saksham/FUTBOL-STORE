@@ -161,6 +161,39 @@ export class FirebaseDatabaseService implements IDatabaseService {
     }
   }
 
+  // --- Pending Orders ---
+  async createPendingOrder(razorpayOrderId: string, orderData: any): Promise<void> {
+    const docRef = doc(db, "pending_orders", razorpayOrderId);
+    await setDoc(docRef, {
+      ...orderData,
+      razorpayOrderId,
+      createdAt: new Date().toISOString()
+    });
+  }
+
+  async getPendingOrder(razorpayOrderId: string): Promise<any | null> {
+    try {
+      const docRef = doc(db, "pending_orders", razorpayOrderId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return docSnap.data();
+      }
+      return null;
+    } catch (error) {
+      console.error(`Error fetching pending order ${razorpayOrderId}:`, error);
+      return null;
+    }
+  }
+
+  async deletePendingOrder(razorpayOrderId: string): Promise<void> {
+    try {
+      const docRef = doc(db, "pending_orders", razorpayOrderId);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.error(`Error deleting pending order ${razorpayOrderId}:`, error);
+    }
+  }
+
   // --- Orders ---
   private async getNextOrderId(): Promise<string> {
     const counterRef = doc(db, "counters", "orders");
@@ -181,6 +214,26 @@ export class FirebaseDatabaseService implements IDatabaseService {
       // Fallback to random if transaction fails
       return `TFS-${Math.floor(Math.random() * 10000).toString().padStart(4, "0")}`;
     }
+  }
+
+  async confirmOrder(razorpayOrderId: string, paymentId: string): Promise<string> {
+    const q = query(collection(db, "orders"), where("razorpayOrderId", "==", razorpayOrderId));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      return querySnapshot.docs[0].id;
+    }
+
+    const pending = await this.getPendingOrder(razorpayOrderId);
+    if (!pending) throw new Error("Pending order not found");
+
+    pending.paymentId = paymentId;
+    
+    const orderId = await this.getNextOrderId();
+    const docRef = doc(db, "orders", orderId);
+    await setDoc(docRef, { ...pending, id: orderId });
+    
+    await this.deletePendingOrder(razorpayOrderId);
+    return orderId;
   }
 
   async createOrder(userId: string, orderData: any): Promise<string> {
@@ -231,7 +284,7 @@ export class FirebaseDatabaseService implements IDatabaseService {
     try {
       // Limit to 50 for cost optimization as requested
       const { limit, orderBy } = await import('firebase/firestore');
-      const q = query(collection(db, "orders"), limit(50));
+      const q = query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(50));
       const querySnapshot = await getDocs(q);
       const orders: any[] = [];
       querySnapshot.forEach((doc) => {

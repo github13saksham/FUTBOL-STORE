@@ -78,6 +78,11 @@ export interface IDatabaseService {
   createOrder(userId: string, orderData: any): Promise<string>;
 
   /**
+   * Confirm a pending order from Razorpay webhook.
+   */
+  confirmOrder(razorpayOrderId: string, paymentId: string): Promise<string>;
+
+  /**
    * Fetch order history for a specific user.
    */
   getUserOrders(userId: string): Promise<any[]>;

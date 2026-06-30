@@ -359,13 +359,14 @@ export default function CheckoutPage() {
         },
         paymentId: "PENDING",
         razorpayOrderId: data.id,
-        status: "Payment Pending",
-        history: [{ status: "Payment Pending", date: new Date().toISOString(), completed: true }]
+        status: "New Order",
+        history: [{ status: "New Order", date: new Date().toISOString(), completed: true }]
       };
 
       const safePayload = JSON.parse(JSON.stringify(rawPayload));
-      const createdOrderId = await dbService.createOrder(userId, safePayload);
+      await dbService.createPendingOrder(data.id, safePayload);
       let paymentSuccessful = false;
+      let createdOrderId = "";
       // ---------------------------------
 
       const options = {
@@ -394,16 +395,7 @@ export default function CheckoutPage() {
               paymentSuccessful = true;
               try {
                 // UPDATE PENDING ORDER TO NEW ORDER
-                const updatedHistory = [
-                  ...safePayload.history,
-                  { status: "New Order", date: new Date().toISOString(), completed: true }
-                ];
-
-                await dbService.updateOrder(createdOrderId, {
-                  status: "New Order",
-                  paymentId: response.razorpay_payment_id || "UNKNOWN",
-                  history: updatedHistory
-                });
+                createdOrderId = await dbService.confirmOrder(response.razorpay_order_id, response.razorpay_payment_id || "UNKNOWN");
 
                 // Send confirmation email and await it to ensure it is not cancelled by navigation
                 try {
@@ -516,9 +508,9 @@ export default function CheckoutPage() {
         modal: {
           ondismiss: async function () {
             setIsProcessing(false);
-            if (!paymentSuccessful && createdOrderId) {
+            if (!paymentSuccessful) {
               try {
-                await dbService.deleteOrder(createdOrderId);
+                await dbService.deletePendingOrder(data.id);
               } catch (e) {
                 console.error("Failed to delete pending order on dismiss", e);
               }
@@ -530,11 +522,11 @@ export default function CheckoutPage() {
       const paymentObject = new (window as any).Razorpay(options);
       
       paymentObject.on("payment.failed", async function (response: any) {
-        // Delete order on payment failure to save DB space and order IDs
+        // Delete pending order on payment failure
         try {
-          await dbService.deleteOrder(createdOrderId);
+          await dbService.deletePendingOrder(data.id);
         } catch (e) {
-          console.error("Error deleting failed payment order", e);
+          console.error("Error deleting failed pending order", e);
         }
 
         alert("Payment Failed. " + response.error.description);
