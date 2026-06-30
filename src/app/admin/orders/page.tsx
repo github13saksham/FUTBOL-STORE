@@ -13,6 +13,7 @@ export default function AdminOrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [isGeneratingShipment, setIsGeneratingShipment] = useState(false);
   const [selectedPickupLocation, setSelectedPickupLocation] = useState('TFS');
   const [packageWeight, setPackageWeight] = useState("500");
   const [packageLength, setPackageLength] = useState("25");
