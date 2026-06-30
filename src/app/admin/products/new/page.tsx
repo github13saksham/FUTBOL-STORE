@@ -98,7 +98,7 @@ function SingleProductForm() {
       ...prev,
       inventory: {
         ...prev.inventory,
-        [size]: Number(value)
+        [size]: value === "" ? "" : Number(value)
       }
     }));
   };
@@ -330,7 +330,7 @@ function SingleProductForm() {
                       <input 
                         type="number" 
                         min="0"
-                        value={formData.inventory?.[size] || 0}
+                        value={formData.inventory?.[size] !== undefined ? formData.inventory[size] : 0}
                         onChange={(e) => handleInventoryChange(size, e.target.value)}
                         className="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-sm text-center text-black outline-none focus:bg-white focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
                       />
