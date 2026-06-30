@@ -310,6 +310,20 @@ export class FirebaseDatabaseService implements IDatabaseService {
     });
   }
 
+  listenToPendingOrders(callback: (orders: any[]) => void): () => void {
+    const q = query(collection(db, "pending_orders"));
+    return onSnapshot(q, (querySnapshot) => {
+      const orders: any[] = [];
+      querySnapshot.forEach((doc) => {
+        orders.push(doc.data());
+      });
+      callback(orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+    }, (error) => {
+      console.error("Error listening to pending orders:", error);
+    });
+  }
+
+
   listenToOrder(orderId: string, callback: (order: any | null) => void): () => void {
     const docRef = doc(db, "orders", orderId);
     return onSnapshot(docRef, (docSnap) => {

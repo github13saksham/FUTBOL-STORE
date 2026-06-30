@@ -96,6 +96,10 @@ export interface IDatabaseService {
   deleteOrder(orderId: string): Promise<void>;
 
   listenToOrder(orderId: string, callback: (order: any | null) => void): () => void;
+  listenToPendingOrders(callback: (orders: any[]) => void): () => void;
+  createPendingOrder(razorpayOrderId: string, orderData: any): Promise<void>;
+  getPendingOrder(razorpayOrderId: string): Promise<any | null>;
+  deletePendingOrder(razorpayOrderId: string): Promise<void>;
 
   /**
    * User Profile methods for storing extra user metadata like phone and addresses.

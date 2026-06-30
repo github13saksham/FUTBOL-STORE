@@ -7,11 +7,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
+  const [pendingOrders, setPendingOrders] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'All Orders' | 'Pending Orders'>('All Orders');
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [isGeneratingShipment, setIsGeneratingShipment] = useState(false);
   const [selectedPickupLocation, setSelectedPickupLocation] = useState('TFS');
   const [packageWeight, setPackageWeight] = useState("500");
   const [packageLength, setPackageLength] = useState("25");
@@ -25,12 +26,19 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     setLoading(true);
-    const unsubscribe = dbService.listenToAllOrders((fetchedOrders) => {
+    const unsubscribeOrders = dbService.listenToAllOrders((fetchedOrders) => {
       setOrders(fetchedOrders);
       setLoading(false);
     });
     
-    return () => unsubscribe();
+    const unsubscribePending = dbService.listenToPendingOrders((fetchedPending) => {
+      setPendingOrders(fetchedPending);
+    });
+    
+    return () => {
+      unsubscribeOrders();
+      unsubscribePending();
+    };
   }, []);
 
   useEffect(() => {
@@ -107,13 +115,18 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const handleDeleteOrder = async (orderId: string) => {
+  const handleDeleteOrder = async (orderId: string, isPending: boolean = false) => {
     if (!confirm("Are you sure you want to delete this order? This cannot be undone.")) return;
     
     try {
-      await dbService.deleteOrder(orderId);
-      setOrders(orders.filter(o => o.id !== orderId));
-      if (selectedOrder && selectedOrder.id === orderId) {
+      if (isPending) {
+        await dbService.deletePendingOrder(orderId);
+        setPendingOrders(pendingOrders.filter(o => o.razorpayOrderId !== orderId));
+      } else {
+        await dbService.deleteOrder(orderId);
+        setOrders(orders.filter(o => o.id !== orderId));
+      }
+      if (selectedOrder && (selectedOrder.id === orderId || selectedOrder.razorpayOrderId === orderId)) {
         setSelectedOrder(null);
       }
     } catch (error) {
@@ -251,9 +264,10 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const filteredOrders = orders.filter(o => {
-    const matchesSearch = o.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          o.customerName.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredOrders = (activeTab === 'All Orders' ? orders : pendingOrders).filter(o => {
+    const orderId = o.id || o.razorpayOrderId || '';
+    const matchesSearch = orderId.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          (o.customerName && o.customerName.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesStatus = statusFilter === 'All' || o.status === statusFilter;
     
@@ -265,9 +279,25 @@ export default function AdminOrdersPage() {
       
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-gray-200 pb-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-black mb-1">Orders Management</h1>
-          <p className="text-sm text-gray-500">Track, manage, and fulfill all customer orders.</p>
+        <div className="flex flex-col gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-black mb-1">Orders Management</h1>
+            <p className="text-sm text-gray-500">Track, manage, and fulfill all customer orders.</p>
+          </div>
+          <div className="flex gap-4">
+            <button 
+              className={`pb-2 text-sm font-semibold transition-colors ${activeTab === 'All Orders' ? 'border-b-2 border-black text-black' : 'text-gray-400 hover:text-black'}`}
+              onClick={() => setActiveTab('All Orders')}
+            >
+              All Orders ({orders.length})
+            </button>
+            <button 
+              className={`pb-2 text-sm font-semibold transition-colors ${activeTab === 'Pending Orders' ? 'border-b-2 border-black text-black' : 'text-gray-400 hover:text-black'}`}
+              onClick={() => setActiveTab('Pending Orders')}
+            >
+              Pending Orders ({pendingOrders.length})
+            </button>
+          </div>
         </div>
         <div className="flex gap-3 w-full md:w-auto">
           <div className="relative w-full md:w-64">
@@ -321,8 +351,8 @@ export default function AdminOrdersPage() {
                 </tr>
               ) : filteredOrders.length > 0 ? (
                 filteredOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => setSelectedOrder(order)}>
-                    <td className="px-6 py-4 font-mono text-xs font-bold text-black">{order.id}</td>
+                  <tr key={order.id || order.razorpayOrderId} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => setSelectedOrder(order)}>
+                    <td className="px-6 py-4 font-mono text-xs font-bold text-black">{order.id || order.razorpayOrderId}</td>
                     <td className="px-6 py-4 text-gray-500">{order.date}</td>
                     <td className="px-6 py-4 font-medium text-gray-900">{order.customerName}</td>
                     <td className="px-6 py-4 text-gray-500 truncate max-w-[200px]">{order.product}</td>
@@ -333,7 +363,7 @@ export default function AdminOrdersPage() {
                         <button onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); }} className="text-gray-400 hover:text-black" title="View Order">
                           <ArrowUpRight className="w-4 h-4" />
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); handleDeleteOrder(order.id); }} className="text-red-400 hover:text-red-600" title="Delete Order">
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteOrder(order.id || order.razorpayOrderId, activeTab === 'Pending Orders'); }} className="text-red-400 hover:text-red-600" title="Delete Order">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -371,7 +401,7 @@ export default function AdminOrdersPage() {
               {/* Drawer Header */}
               <div className="p-4 md:p-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
                 <div>
-                  <h2 className="text-base font-bold text-black">{selectedOrder.id}</h2>
+                  <h2 className="text-base font-bold text-black">{selectedOrder.id || selectedOrder.razorpayOrderId}</h2>
                   <p className="text-xs text-gray-500 mt-1">{selectedOrder.date}</p>
                 </div>
                 <button onClick={() => setSelectedOrder(null)} className="p-2 text-gray-400 hover:bg-gray-100 hover:text-black rounded-full transition-colors">
