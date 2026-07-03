@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    const { amount } = await request.json();
+    const { amount, phone } = await request.json();
 
     if (!amount) {
       return NextResponse.json({ error: 'Amount is required' }, { status: 400 });
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       order_currency: 'INR',
       customer_details: {
         customer_id: `cust_${Date.now()}`,
-        customer_phone: '9999999999', // placeholder; SDK pre-fills actual contact
+        customer_phone: phone || '9999999999', // Uses provided phone or falls back to a placeholder
       },
       order_meta: {
         // Cashfree requires HTTPS for notify_url — always use the production domain

@@ -323,7 +323,7 @@ export default function CheckoutPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ amount: finalTotal }),
+        body: JSON.stringify({ amount: finalTotal, phone: phone }),
       }).then((t) => t.json());
 
       if (!data.id) {
