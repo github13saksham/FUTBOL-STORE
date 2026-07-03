@@ -556,11 +556,11 @@ export default function AdminOrdersPage() {
                     <div className="flex justify-between items-center">
                       <span className="text-gray-500">Payment Status</span>
                       <span className="px-2 py-1 bg-green-50 text-green-600 text-xs font-bold rounded">
-                        {selectedOrder.paymentId ? "PAID (Razorpay)" : "PENDING"}
+                        {selectedOrder.paymentId ? "PAID (Cashfree)" : "PENDING"}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-500">Razorpay ID</span>
+                      <span className="text-gray-500">Cashfree Payment ID</span>
                       <span className="font-mono text-xs font-medium text-black flex items-center gap-2">
                         {selectedOrder.paymentId || "N/A"} 
                         {selectedOrder.paymentId && (
