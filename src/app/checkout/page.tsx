@@ -350,6 +350,7 @@ export default function CheckoutPage() {
         customerName: customerName,
         product: productName,
         date: finalDate,
+        userId: userId,
         shippingAddress: {
           firstName: firstName || "", 
           lastName: lastName || "", 

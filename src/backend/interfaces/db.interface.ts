@@ -85,7 +85,7 @@ export interface IDatabaseService {
   /**
    * Fetch order history for a specific user.
    */
-  getUserOrders(userId: string): Promise<any[]>;
+  getUserOrders(userId: string, userEmail?: string | null): Promise<any[]>;
 
   /**
    * Fetch a specific order by ID.

@@ -64,7 +64,7 @@ export default function AccountPage() {
   useEffect(() => {
     if (user && activeTab === "orders") {
       setLoadingOrders(true);
-      dbService.getUserOrders(user.uid).then(data => {
+      dbService.getUserOrders(user.uid, user.email).then(data => {
         setOrders(data);
         setLoadingOrders(false);
       }).catch(err => {

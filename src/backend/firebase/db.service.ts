@@ -250,14 +250,27 @@ export class FirebaseDatabaseService implements IDatabaseService {
     return orderId;
   }
 
-  async getUserOrders(userId: string): Promise<any[]> {
+  async getUserOrders(userId: string, userEmail?: string | null): Promise<any[]> {
     try {
-      const q = query(collection(db, "orders"), where("userId", "==", userId));
-      const querySnapshot = await getDocs(q);
-      const orders: any[] = [];
-      querySnapshot.forEach((doc) => {
-        orders.push(doc.data());
+      const q1 = query(collection(db, "orders"), where("userId", "==", userId));
+      const snapshot1 = await getDocs(q1);
+      
+      const ordersMap = new Map();
+      snapshot1.forEach((doc) => {
+        ordersMap.set(doc.id, doc.data());
       });
+      
+      if (userEmail) {
+        const q2 = query(collection(db, "orders"), where("shippingAddress.email", "==", userEmail));
+        const snapshot2 = await getDocs(q2);
+        snapshot2.forEach((doc) => {
+          if (!ordersMap.has(doc.id)) {
+            ordersMap.set(doc.id, doc.data());
+          }
+        });
+      }
+      
+      const orders = Array.from(ordersMap.values());
       return orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     } catch (error) {
       console.error("Error fetching orders:", error);
