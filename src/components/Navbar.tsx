@@ -106,9 +106,11 @@ export default function Navbar() {
               <Image
                 src="/logo.png"
                 alt="The Futbol Store Logo"
-                height={90}
-                width={90}
-                className="object-contain w-16 h-16 md:w-[90px] md:h-[90px]"
+                height={200}
+                width={300}
+                quality={100}
+                unoptimized
+                className="object-contain w-32 h-20 md:w-[180px] md:h-[100px] hover:scale-105 transition-transform duration-300"
                 priority
               />
             </Link>

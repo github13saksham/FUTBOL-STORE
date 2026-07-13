@@ -263,18 +263,18 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
           {/* VS Divider Mobile */}
           
 
-          <div className="grid grid-cols-2 gap-3 md:gap-12 relative">
+          <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 no-scrollbar md:grid md:grid-cols-2 md:gap-12 relative max-w-none mx-auto w-full items-stretch">
             {/* Card 1: Player Version */}
             <m.div 
               whileHover={{ y: -6 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="group relative w-full max-w-[400px] rounded-2xl md:rounded-3xl overflow-hidden border border-luxury-sand/15 bg-neutral-900/60 shadow-[0_0_40px_rgba(205,164,145,0.12)] hover:shadow-[0_0_50px_rgba(205,164,145,0.25)] transition-shadow duration-500 flex flex-col mx-auto md:h-[480px] md:items-center md:justify-start"
+              className="group relative w-[85vw] max-w-[400px] md:w-full rounded-2xl md:rounded-3xl overflow-hidden border border-luxury-sand/15 bg-neutral-900/60 shadow-[0_0_40px_rgba(205,164,145,0.12)] hover:shadow-[0_0_50px_rgba(205,164,145,0.25)] transition-shadow duration-500 flex flex-col mx-auto md:h-[480px] md:items-center md:justify-start shrink-0 snap-center"
             >
               {/* Background Image overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10 pointer-events-none" />
 
               {/* Image */}
-              <div className="relative w-full h-[130px] md:h-[320px] flex-shrink-0">
+              <div className="relative w-full h-[240px] md:h-[320px] flex-shrink-0">
                 <Image 
                   src="/HEAT-PRESSED LOGOS.svg"
                   alt="Heat Pressed Logos"
@@ -299,13 +299,13 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
             <m.div 
               whileHover={{ y: -6 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="group relative w-full max-w-[400px] rounded-2xl md:rounded-3xl overflow-hidden border border-luxury-sand/15 bg-neutral-900/60 shadow-[0_0_40px_rgba(205,164,145,0.12)] hover:shadow-[0_0_50px_rgba(205,164,145,0.25)] transition-shadow duration-500 flex flex-col mx-auto md:h-[480px] md:items-center md:justify-start"
+              className="group relative w-[85vw] max-w-[400px] md:w-full rounded-2xl md:rounded-3xl overflow-hidden border border-luxury-sand/15 bg-neutral-900/60 shadow-[0_0_40px_rgba(205,164,145,0.12)] hover:shadow-[0_0_50px_rgba(205,164,145,0.25)] transition-shadow duration-500 flex flex-col mx-auto md:h-[480px] md:items-center md:justify-start shrink-0 snap-center"
             >
               {/* Background Image overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10 pointer-events-none" />
 
               {/* Image */}
-              <div className="relative w-full h-[130px] md:h-[320px] flex-shrink-0">
+              <div className="relative w-full h-[240px] md:h-[320px] flex-shrink-0">
                 <Image 
                   src="/HEAT-PRESSED LOGOS (2).svg"
                   alt="Fan Lifestyle"
@@ -436,10 +436,7 @@ export default function HomepageClient({ initialSettings }: { initialSettings: a
                 {/* Text specifications */}
                 <div className="p-3 md:p-5 md:pt-4 space-y-1.5 md:space-y-2">
                   <div>
-                  <div className="flex justify-between items-center mb-0.5 mt-0.5">
-                    <span className="text-[8px] md:text-[9px] uppercase tracking-widest font-semibold text-white/80 md:text-white block">
-                      {product.category || product.realProduct?.category || "PLAYER VERSION"}
-                    </span>
+                  <div className="flex justify-end items-center mb-0.5 mt-0.5">
                     <div className="flex items-center text-[#cda491]">
                       {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-2 h-2 md:w-2.5 md:h-2.5 ${Math.round(product.rating || product.realProduct?.rating || 0) >= star ? 'fill-current' : 'opacity-30'}`} />)}
                     </div>

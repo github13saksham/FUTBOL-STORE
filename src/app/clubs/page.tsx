@@ -233,10 +233,7 @@ export default function ClubsPage() {
                     {/* Specifications */}
                     <div className="p-4 md:p-5 md:pt-4 space-y-2 flex-grow flex flex-col justify-between">
                       <div>
-                        <div className="flex justify-between items-center mb-1 mt-0.5">
-                          <span className="text-[9px] uppercase tracking-widest font-semibold text-white/80 md:text-white block">
-                            {product.category || "PLAYER VERSION"}
-                          </span>
+                        <div className="flex justify-end items-center mb-1 mt-0.5">
                           <div className="flex items-center text-[#cda491]">
                             {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-2.5 h-2.5 ${Math.round(product.rating || 0) >= star ? 'fill-current' : 'opacity-30'}`} />)}
                           </div>
