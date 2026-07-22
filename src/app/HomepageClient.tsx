@@ -120,13 +120,13 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
   // Sync mute state when settings load
   useEffect(() => {
     if (homepageSettings?.hero?.mediaVolume !== undefined) {
-      setIsMuted(homepageSettings.hero.mediaVolume === 0);
+      setIsMuted(Number(homepageSettings.hero.mediaVolume) === 0);
     }
   }, [homepageSettings?.hero?.mediaVolume]);
 
   // Apply video volume
   useEffect(() => {
-    const vol = isMuted ? 0 : (homepageSettings?.hero?.mediaVolume ?? 0) / 100;
+    const vol = isMuted ? 0 : (Number(homepageSettings?.hero?.mediaVolume) ?? 0) / 100;
     if (desktopVideoRef.current) {
       desktopVideoRef.current.volume = vol;
     }
@@ -206,7 +206,7 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
                     loop 
                     muted={isMuted} 
                     playsInline 
-                    preload="none" 
+                    preload="auto" 
                     className="hidden md:block absolute inset-0 w-full h-full z-0" 
                     style={{ 
                       width: '100%',
@@ -224,7 +224,7 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
                     loop 
                     muted={isMuted} 
                     playsInline 
-                    preload="none" 
+                    preload="auto" 
                     className="block md:hidden absolute inset-0 w-full h-full z-0" 
                     style={{ 
                       width: '100%',
@@ -271,7 +271,7 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
               <div className="absolute left-[-5%] bottom-[-5%] w-[400px] h-[400px] bg-luxury-sage/20 rounded-full blur-[80px] z-0" />
 
               {/* Mute Toggle Button */}
-              {homepageSettings?.hero?.mediaType === 'video' && (
+              {homepageSettings?.hero?.mediaType === 'video' && Number(homepageSettings?.hero?.mediaVolume) !== 0 && (
                 <button
                   onClick={() => setIsMuted(!isMuted)}
                   className="absolute bottom-8 right-6 md:bottom-12 md:right-12 z-20 p-3 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white transition-all duration-300 shadow-lg border border-white/20 hover:scale-105"
