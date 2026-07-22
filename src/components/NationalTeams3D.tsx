@@ -143,9 +143,14 @@ const teams: TeamCard[] = [
 
 interface NationalTeams3DProps {
   teams?: TeamCard[];
+  sectionHeadings?: {
+    eyebrow?: string;
+    heading?: string;
+    description?: string;
+  };
 }
 
-export default function NationalTeams3D({ teams: propTeams }: NationalTeams3DProps) {
+export default function NationalTeams3D({ teams: propTeams, sectionHeadings }: NationalTeams3DProps) {
   const displayTeams = propTeams && propTeams.length > 0 ? propTeams : teams;
   const [mounted, setMounted] = useState(false);
   const [activeIndex, setActiveIndex] = useState(1); // Middle default
@@ -222,12 +227,14 @@ export default function NationalTeams3D({ teams: propTeams }: NationalTeams3DPro
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 light-beam opacity-50 z-0" />
       
       <div className="relative text-center mb-4 md:mb-10 z-10">
-        <span className="text-[10px] md:text-xs uppercase tracking-[0.25em] text-black font-medium">Global Teams</span>
+        <span className="text-[10px] md:text-xs uppercase tracking-[0.25em] text-black font-medium">
+          {sectionHeadings?.eyebrow || "Global Teams"}
+        </span>
         <h2 className="text-2xl md:text-6xl font-serif text-black mt-1 md:mt-2">
-          Find Your National Team
+          {sectionHeadings?.heading || "Find Your National Team"}
         </h2>
         <p className="max-w-xl mx-auto text-sm text-black/70 mt-4 leading-relaxed font-sans font-light hidden md:block">
-          An immersive journey through the world's most elegant colors. Experience custom tailoring and historical pride in perfect 3D fidelity.
+          {sectionHeadings?.description || "An immersive journey through the world's most elegant colors. Experience custom tailoring and historical pride in perfect 3D fidelity."}
         </p>
       </div>
 

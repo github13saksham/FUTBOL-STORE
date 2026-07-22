@@ -2,18 +2,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { FirebaseDatabaseService } from '@/backend/firebase/db.service';
-import { Save, Loader2, Upload, LayoutGrid, LayoutTemplate, Link as LinkIcon, Image as ImageIcon, Search, Video, Monitor, Smartphone, Flag, Shield, Plus, Trash2 } from 'lucide-react';
+import { Save, Loader2, Upload, LayoutGrid, LayoutTemplate, Link as LinkIcon, Image as ImageIcon, Search, Video, Monitor, Smartphone, Flag, Shield, Plus, Trash2, Palette, ChevronRight } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/backend/firebase/config';
 import { motion } from 'framer-motion';
+import HomepageClient from '@/app/HomepageClient';
 
 export default function HomepageManagerPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'hero' | 'featured' | 'seo' | 'clubs' | 'national' | 'banner'>('hero');
+  const [activeTab, setActiveTab] = useState<'hero' | 'featured' | 'seo' | 'clubs' | 'national' | 'banner' | 'styling' | 'collectionPromo'>('hero');
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
-  
+
   const defaultNationalTeams = [
     {
       id: 1,
@@ -152,17 +153,40 @@ export default function HomepageManagerPage() {
       text: 'Get Flat ₹100 OFF on all orders above ₹999.'
     },
     hero: {
-      mediaType: 'video', 
+      mediaType: 'video',
       desktopMediaUrl: '/images/Hero_Section_vid.MP4',
       mobileMediaUrl: '/images/Hero_Section_vid.MP4',
+      mediaFit: 'cover',
+      mediaPosition: 'top',
+      mediaPositionCustomX: 50,
+      mediaPositionCustomY: 50,
+      mediaVolume: 0,
+      mediaZoom: 100,
+      mobileMediaFit: 'cover',
+      mobileMediaPosition: 'top',
+      mobileMediaPositionCustomX: 50,
+      mobileMediaPositionCustomY: 50,
+      mobileMediaZoom: 100,
       title: 'Inspired By Greatness',
       subtitle: 'The Road to Glory Begins Now.',
       ctaText: 'SHOP NOW',
       ctaLink: '/clubs',
       overlayOpacity: 40,
     },
+    collectionPromo: {
+      enabled: true,
+      eyebrow: 'LIMITED TIME ARRIVAL',
+      heading1: 'The Road to Glory',
+      heading2Italic: 'Begins Now.',
+      description: 'Discover the FIFA World Cup 2026 Collection and wear the pride of your nation.',
+      ctaText: 'DISCOVER NOW',
+      ctaLink: '/national-teams',
+      imageUrl: '',
+      desktopImageUrl: '',
+      mobileImageUrl: ''
+    },
     featured: {
-      layout: 'carousel', 
+      layout: 'carousel',
       sectionTitle: 'Best Sellers',
       itemsCount: 8,
     },
@@ -173,12 +197,38 @@ export default function HomepageManagerPage() {
     },
     clubs: defaultClubs,
     nationalTeams: defaultNationalTeams,
-    bestSellersItems: defaultBestSellers
+    bestSellersItems: defaultBestSellers,
+    styling: {
+      textSize: 100,
+      sectionPadding: 100,
+      desktopTextSize: 100,
+      desktopSectionPadding: 100,
+      mobileTextSize: 100,
+      mobileSectionPadding: 100,
+    },
+    nationalTeamsSection: {
+      eyebrow: 'GLOBAL TEAMS',
+      heading: 'Find Your National Team',
+      description: "An immersive journey through the world's most elegant colors. Experience custom tailoring and historical pride in perfect 3D fidelity."
+    }
   });
 
   useEffect(() => {
     fetchSettings();
   }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('homepage_preview_settings', JSON.stringify(settings));
+      const iframe = document.getElementById('homepage-preview-iframe') as HTMLIFrameElement;
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+          type: 'UPDATE_HOMEPAGE_SETTINGS',
+          settings: settings
+        }, '*');
+      }
+    }
+  }, [settings]);
 
   const fetchSettings = async () => {
     try {
@@ -187,9 +237,9 @@ export default function HomepageManagerPage() {
       if (docSnap.exists()) {
         const data = docSnap.data() as any;
         if (data.hero && data.hero.backgroundImage && !data.hero.desktopMediaUrl) {
-           data.hero.mediaType = 'image';
-           data.hero.desktopMediaUrl = data.hero.backgroundImage;
-           data.hero.mobileMediaUrl = data.hero.backgroundImage;
+          data.hero.mediaType = 'image';
+          data.hero.desktopMediaUrl = data.hero.backgroundImage;
+          data.hero.mobileMediaUrl = data.hero.backgroundImage;
         }
         // Ensure arrays exist
         if (!data.clubs) data.clubs = defaultClubs;
@@ -200,7 +250,34 @@ export default function HomepageManagerPage() {
         }
         if (!data.bestSellersItems) data.bestSellersItems = defaultBestSellers;
         if (!data.banner) data.banner = { enabled: true, text: 'Get Flat ₹100 OFF on all orders above ₹999.' };
-        
+        if (!data.styling) data.styling = { textSize: 100, sectionPadding: 100 };
+        if (!data.collectionPromo) {
+          data.collectionPromo = {
+            enabled: false,
+            eyebrow: 'LIMITED TIME ARRIVAL',
+            heading1: 'The Road to Glory',
+            heading2Italic: 'Begins Now.',
+            description: 'Discover the FIFA World Cup 2026 Collection and wear the pride of your nation.',
+            ctaText: 'DISCOVER NOW',
+            ctaLink: '/national-teams',
+            imageUrl: '',
+            desktopImageUrl: '',
+            mobileImageUrl: ''
+          };
+        } else {
+          // If collectionPromo exists but desktop/mobile fields don't, ensure they exist
+          if (!data.collectionPromo.desktopImageUrl) data.collectionPromo.desktopImageUrl = '';
+          if (!data.collectionPromo.mobileImageUrl) data.collectionPromo.mobileImageUrl = '';
+        }
+
+        if (!data.nationalTeamsSection) {
+          data.nationalTeamsSection = {
+            eyebrow: 'GLOBAL TEAMS',
+            heading: 'Find Your National Team',
+            description: "An immersive journey through the world's most elegant colors. Experience custom tailoring and historical pride in perfect 3D fidelity."
+          };
+        }
+
         setSettings(data);
       }
     } catch (error) {
@@ -215,14 +292,14 @@ export default function HomepageManagerPage() {
     try {
       const docRef = doc(db, 'settings', 'homepage');
       await setDoc(docRef, settings);
-      
+
       // Revalidate the homepage cache
       await fetch('/api/revalidate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: '/' })
       });
-      
+
       alert('Homepage settings saved successfully!');
     } catch (error) {
       console.error("Error saving homepage settings:", error);
@@ -235,7 +312,7 @@ export default function HomepageManagerPage() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, setterCallback: (url: string) => void, uploadId: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     setUploading(uploadId);
     try {
       const dbService = new FirebaseDatabaseService();
@@ -263,6 +340,17 @@ export default function HomepageManagerPage() {
     }));
   };
 
+  const handleStylingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSettings(prev => ({
+      ...prev,
+      styling: {
+        ...prev.styling,
+        [name]: parseInt(value) || 100
+      }
+    }));
+  };
+
   const handleHeroChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setSettings(prev => ({ ...prev, hero: { ...prev.hero, [name]: value } }));
@@ -282,6 +370,12 @@ export default function HomepageManagerPage() {
   const handleSeoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setSettings(prev => ({ ...prev, seo: { ...prev.seo, [name]: value } }));
+  };
+
+  const handleCollectionPromoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target as HTMLInputElement;
+    const checked = (e.target as HTMLInputElement).checked;
+    setSettings(prev => ({ ...prev, collectionPromo: { ...prev.collectionPromo, [name]: type === 'checkbox' ? checked : value } }));
   };
 
   const handleClubChange = (index: number, field: string, value: string) => {
@@ -335,7 +429,7 @@ export default function HomepageManagerPage() {
   // Common Save Button for reuse in tabs
   const SaveButton = () => (
     <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end">
-      <button 
+      <button
         onClick={handleSave}
         disabled={saving}
         className="flex items-center gap-2 bg-black text-white px-8 py-3 rounded-xl hover:bg-gray-800 transition-colors font-bold text-sm disabled:opacity-70 shadow-lg hover:shadow-xl"
@@ -353,7 +447,7 @@ export default function HomepageManagerPage() {
           <h1 className="text-2xl font-bold tracking-tight text-black mb-1">Homepage Manager</h1>
           <p className="text-gray-500 text-sm">Control the content, layout, and SEO of your storefront.</p>
         </div>
-        <button 
+        <button
           onClick={handleSave}
           disabled={saving}
           className="flex items-center gap-2 bg-black text-white px-6 py-2.5 rounded-lg hover:bg-gray-800 transition-colors font-bold text-sm disabled:opacity-70 shadow-sm"
@@ -364,7 +458,7 @@ export default function HomepageManagerPage() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        
+
         {/* Sidebar Nav */}
         <div className="w-full lg:w-56 flex-shrink-0">
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-2 flex flex-col gap-1 sticky top-8">
@@ -379,6 +473,12 @@ export default function HomepageManagerPage() {
               className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-bold transition-colors ${activeTab === 'banner' ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'}`}
             >
               <LayoutGrid className="w-4 h-4" /> Promo Banner
+            </button>
+            <button
+              onClick={() => setActiveTab('collectionPromo')}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-bold transition-colors ${activeTab === 'collectionPromo' ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+            >
+              <LayoutTemplate className="w-4 h-4" /> Collection Promo
             </button>
             <button
               onClick={() => setActiveTab('clubs')}
@@ -404,16 +504,22 @@ export default function HomepageManagerPage() {
             >
               <Search className="w-4 h-4" /> SEO & Meta
             </button>
+            <button
+              onClick={() => setActiveTab('styling')}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-bold transition-colors ${activeTab === 'styling' ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+            >
+              <Palette className="w-4 h-4" /> Styling & Layout
+            </button>
           </div>
         </div>
 
         {/* Content Area */}
         <div className="flex-1 min-w-0">
-          
+
           {/* Hero Tab */}
           {activeTab === 'hero' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              
+
               {/* Media Configuration */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
                 <h2 className="text-base font-bold text-black border-b border-gray-100 pb-3">Hero Background Media</h2>
@@ -437,7 +543,7 @@ export default function HomepageManagerPage() {
                       <input type="text" name="desktopMediaUrl" value={settings.hero.desktopMediaUrl} onChange={handleHeroChange} className="flex-1 min-w-0 bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" />
                       <label className="cursor-pointer flex items-center justify-center bg-gray-100 border border-gray-200 px-4 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-200 transition-colors">
                         {uploading === 'hero-desktop' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                        <input type="file" className="hidden" accept="image/*,video/*" onChange={(e) => handleFileUpload(e, (url) => setSettings(p => ({...p, hero: {...p.hero, desktopMediaUrl: url}})), 'hero-desktop')} />
+                        <input type="file" className="hidden" accept="image/*,video/*" onChange={(e) => handleFileUpload(e, (url) => setSettings(p => ({ ...p, hero: { ...p.hero, desktopMediaUrl: url } })), 'hero-desktop')} />
                       </label>
                     </div>
                   </div>
@@ -449,12 +555,128 @@ export default function HomepageManagerPage() {
                       <input type="text" name="mobileMediaUrl" value={settings.hero.mobileMediaUrl} onChange={handleHeroChange} className="flex-1 min-w-0 bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" />
                       <label className="cursor-pointer flex items-center justify-center bg-gray-100 border border-gray-200 px-4 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-200 transition-colors">
                         {uploading === 'hero-mobile' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                        <input type="file" className="hidden" accept="image/*,video/*" onChange={(e) => handleFileUpload(e, (url) => setSettings(p => ({...p, hero: {...p.hero, mobileMediaUrl: url}})), 'hero-mobile')} />
+                        <input type="file" className="hidden" accept="image/*,video/*" onChange={(e) => handleFileUpload(e, (url) => setSettings(p => ({ ...p, hero: { ...p.hero, mobileMediaUrl: url } })), 'hero-mobile')} />
                       </label>
                     </div>
                     <p className="text-xs text-gray-500 mt-2">Optional. If empty, desktop media will be used.</p>
                   </div>
                 </div>
+                {/* DESKTOP CONFIGURATION */}
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-4">
+                  <h3 className="text-sm font-bold text-black border-b border-gray-200 pb-2 mb-4 flex items-center gap-2"><Monitor className="w-4 h-4"/> Desktop Tweaks</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Media Fit</label>
+                      <select name="mediaFit" value={settings.hero.mediaFit || 'cover'} onChange={handleHeroChange} className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:border-gray-400 transition-all">
+                        <option value="cover">Cover (Fills Area, May Crop)</option>
+                        <option value="contain">Contain (Shows Full Video)</option>
+                        <option value="none">Manual (Original Size)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 bg-white p-4 rounded-lg border border-gray-200 mt-2">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">X Offset (Horizontal): {settings.hero.mediaPositionCustomX ?? 50}%</label>
+                      <input 
+                        type="range" 
+                        name="mediaPositionCustomX" 
+                        min="0" max="100" 
+                        value={settings.hero.mediaPositionCustomX ?? 50} 
+                        onChange={(e) => {
+                          handleHeroChange(e);
+                          setSettings(prev => ({ ...prev, hero: { ...prev.hero, mediaPosition: 'custom' } }));
+                        }} 
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Y Offset (Vertical): {settings.hero.mediaPositionCustomY ?? 50}%</label>
+                      <input 
+                        type="range" 
+                        name="mediaPositionCustomY" 
+                        min="0" max="100" 
+                        value={settings.hero.mediaPositionCustomY ?? 50} 
+                        onChange={(e) => {
+                          handleHeroChange(e);
+                          setSettings(prev => ({ ...prev, hero: { ...prev.hero, mediaPosition: 'custom' } }));
+                        }} 
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black" 
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                      Desktop Media Zoom: {settings.hero.mediaZoom ?? 100}%
+                    </label>
+                    <input type="range" name="mediaZoom" min="100" max="300" value={settings.hero.mediaZoom ?? 100} onChange={handleHeroChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black" />
+                  </div>
+                </div>
+
+                {/* MOBILE CONFIGURATION */}
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-4 mt-6">
+                  <h3 className="text-sm font-bold text-black border-b border-gray-200 pb-2 mb-4 flex items-center gap-2"><Smartphone className="w-4 h-4"/> Mobile Tweaks</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Mobile Fit</label>
+                      <select name="mobileMediaFit" value={settings.hero.mobileMediaFit || settings.hero.mediaFit || 'cover'} onChange={handleHeroChange} className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:border-gray-400 transition-all">
+                        <option value="cover">Cover (Fills Area, May Crop)</option>
+                        <option value="contain">Contain (Shows Full Video)</option>
+                        <option value="none">Manual (Original Size)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 bg-white p-4 rounded-lg border border-gray-200 mt-2">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">X Offset (Horizontal): {settings.hero.mobileMediaPositionCustomX ?? settings.hero.mediaPositionCustomX ?? 50}%</label>
+                      <input 
+                        type="range" 
+                        name="mobileMediaPositionCustomX" 
+                        min="0" max="100" 
+                        value={settings.hero.mobileMediaPositionCustomX ?? settings.hero.mediaPositionCustomX ?? 50} 
+                        onChange={(e) => {
+                          handleHeroChange(e);
+                          setSettings(prev => ({ ...prev, hero: { ...prev.hero, mobileMediaPosition: 'custom' } }));
+                        }} 
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Y Offset (Vertical): {settings.hero.mobileMediaPositionCustomY ?? settings.hero.mediaPositionCustomY ?? 50}%</label>
+                      <input 
+                        type="range" 
+                        name="mobileMediaPositionCustomY" 
+                        min="0" max="100" 
+                        value={settings.hero.mobileMediaPositionCustomY ?? settings.hero.mediaPositionCustomY ?? 50} 
+                        onChange={(e) => {
+                          handleHeroChange(e);
+                          setSettings(prev => ({ ...prev, hero: { ...prev.hero, mobileMediaPosition: 'custom' } }));
+                        }} 
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black" 
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                      Mobile Media Zoom: {settings.hero.mobileMediaZoom ?? settings.hero.mediaZoom ?? 100}%
+                    </label>
+                    <input type="range" name="mobileMediaZoom" min="100" max="300" value={settings.hero.mobileMediaZoom ?? settings.hero.mediaZoom ?? 100} onChange={handleHeroChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black" />
+                  </div>
+                </div>
+
+                {settings.hero.mediaType === 'video' && (
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                      Video Volume: {settings.hero.mediaVolume ?? 0}%
+                    </label>
+                    <input type="range" name="mediaVolume" min="0" max="100" value={settings.hero.mediaVolume ?? 0} onChange={handleHeroChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black" />
+                    <p className="text-[10px] text-gray-500 mt-1">If volume is 0%, the video is muted and will reliably autoplay. Unmuted videos may be blocked from autoplaying by some browsers.</p>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Dark Overlay Opacity: {settings.hero.overlayOpacity}%</label>
                   <input type="range" name="overlayOpacity" min="0" max="100" value={settings.hero.overlayOpacity} onChange={handleHeroChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black" />
@@ -482,6 +704,75 @@ export default function HomepageManagerPage() {
                     <input type="text" name="ctaLink" value={settings.hero.ctaLink} onChange={handleHeroChange} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" />
                   </div>
                 </div>
+                <SaveButton />
+              </div>
+            </div>
+          )}
+
+          {/* Collection Promo Tab */}
+          {activeTab === 'collectionPromo' && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+                <div className="flex justify-between items-center border-b border-gray-100 pb-3 mb-2">
+                  <h2 className="text-base font-bold text-black">Collection Promo Section</h2>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-sm font-bold text-gray-700">Enable Section</span>
+                    <input type="checkbox" name="enabled" checked={settings.collectionPromo.enabled} onChange={handleCollectionPromoChange} className="w-4 h-4 accent-black" />
+                  </label>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Eyebrow Text</label>
+                      <input type="text" name="eyebrow" value={settings.collectionPromo.eyebrow} onChange={handleCollectionPromoChange} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Heading Line 1</label>
+                      <input type="text" name="heading1" value={settings.collectionPromo.heading1} onChange={handleCollectionPromoChange} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Heading Line 2 (Italic)</label>
+                      <input type="text" name="heading2Italic" value={settings.collectionPromo.heading2Italic} onChange={handleCollectionPromoChange} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Description</label>
+                      <textarea name="description" value={settings.collectionPromo.description} onChange={handleCollectionPromoChange} rows={3} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all resize-none" />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Desktop Image URL</label>
+                      <div className="flex gap-2">
+                        <input type="text" name="desktopImageUrl" value={settings.collectionPromo.desktopImageUrl || settings.collectionPromo.imageUrl || ''} onChange={handleCollectionPromoChange} className="flex-1 min-w-0 bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" />
+                        <label className="cursor-pointer flex items-center justify-center bg-gray-100 border border-gray-200 px-4 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-200 transition-colors">
+                          {uploading === 'collection-promo-desktop' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                          <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, (url) => setSettings(p => ({ ...p, collectionPromo: { ...p.collectionPromo, desktopImageUrl: url } })), 'collection-promo-desktop')} />
+                        </label>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Mobile Image URL</label>
+                      <div className="flex gap-2">
+                        <input type="text" name="mobileImageUrl" value={settings.collectionPromo.mobileImageUrl || settings.collectionPromo.imageUrl || ''} onChange={handleCollectionPromoChange} className="flex-1 min-w-0 bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" />
+                        <label className="cursor-pointer flex items-center justify-center bg-gray-100 border border-gray-200 px-4 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-200 transition-colors">
+                          {uploading === 'collection-promo-mobile' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                          <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, (url) => setSettings(p => ({ ...p, collectionPromo: { ...p.collectionPromo, mobileImageUrl: url } })), 'collection-promo-mobile')} />
+                        </label>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">CTA Button Text</label>
+                      <input type="text" name="ctaText" value={settings.collectionPromo.ctaText} onChange={handleCollectionPromoChange} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">CTA Button Link</label>
+                      <input type="text" name="ctaLink" value={settings.collectionPromo.ctaLink} onChange={handleCollectionPromoChange} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" />
+                    </div>
+                  </div>
+                </div>
+
                 <SaveButton />
               </div>
             </div>
@@ -528,7 +819,7 @@ export default function HomepageManagerPage() {
                     </div>
                   ))}
                 </div>
-                <div 
+                <div
                   onClick={handleAddClub}
                   className="mt-6 flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 hover:bg-gray-100 hover:border-gray-400 cursor-pointer transition-all text-gray-600 hover:text-black group"
                 >
@@ -544,7 +835,44 @@ export default function HomepageManagerPage() {
           {activeTab === 'national' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+                
+                {/* Heading Configuration */}
                 <div>
+                  <h2 className="text-base font-bold text-black border-b border-gray-100 pb-3 mb-2">Section Headings</h2>
+                  <p className="text-sm text-gray-500 mb-6">Customize the title and description for the National Teams section.</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Eyebrow Text (Small Top Text)</label>
+                      <input 
+                        type="text" 
+                        value={settings.nationalTeamsSection?.eyebrow ?? 'GLOBAL TEAMS'} 
+                        onChange={(e) => setSettings(prev => ({ ...prev, nationalTeamsSection: { ...prev.nationalTeamsSection, eyebrow: e.target.value } }))} 
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Main Heading</label>
+                      <input 
+                        type="text" 
+                        value={settings.nationalTeamsSection?.heading ?? 'Find Your National Team'} 
+                        onChange={(e) => setSettings(prev => ({ ...prev, nationalTeamsSection: { ...prev.nationalTeamsSection, heading: e.target.value } }))} 
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" 
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Description / Subtitle</label>
+                      <textarea 
+                        value={settings.nationalTeamsSection?.description ?? "An immersive journey through the world's most elegant colors. Experience custom tailoring and historical pride in perfect 3D fidelity."} 
+                        onChange={(e) => setSettings(prev => ({ ...prev, nationalTeamsSection: { ...prev.nationalTeamsSection, description: e.target.value } }))} 
+                        rows={2} 
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-8">
                   <h2 className="text-base font-bold text-black border-b border-gray-100 pb-3 mb-2">National Teams 3D Carousel (6 Cards)</h2>
                   <p className="text-sm text-gray-500 mb-6">Edit the 6 jerseys shown in the 3D rotating section.</p>
                 </div>
@@ -674,13 +1002,13 @@ export default function HomepageManagerPage() {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
                 <h2 className="text-base font-bold text-black border-b border-gray-100 pb-3">Promo Banner Configuration</h2>
-                
+
                 <div className="flex items-center gap-3 mb-6">
-                  <input 
-                    type="checkbox" 
-                    id="bannerEnabled" 
+                  <input
+                    type="checkbox"
+                    id="bannerEnabled"
                     name="enabled"
-                    checked={settings.banner.enabled} 
+                    checked={settings.banner.enabled}
                     onChange={handleBannerChange}
                     className="w-5 h-5 accent-black cursor-pointer rounded border-gray-300"
                   />
@@ -691,17 +1019,17 @@ export default function HomepageManagerPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Banner Text</label>
-                  <input 
-                    type="text" 
-                    name="text" 
-                    value={settings.banner.text} 
-                    onChange={handleBannerChange} 
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" 
+                  <input
+                    type="text"
+                    name="text"
+                    value={settings.banner.text}
+                    onChange={handleBannerChange}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all"
                     placeholder="e.g. Get Flat ₹100 OFF on all orders above ₹999."
                   />
                   <p className="text-xs text-gray-500 mt-2">This text will scroll horizontally at the top of the homepage.</p>
                 </div>
-                
+
                 {/* Live Preview of Banner */}
                 {settings.banner.enabled && (
                   <div className="mt-8 border border-gray-200 rounded-lg overflow-hidden relative bg-black">
@@ -721,56 +1049,154 @@ export default function HomepageManagerPage() {
                     </div>
                   </div>
                 )}
-                
+
+                <SaveButton />
+              </div>
+            </div>
+          )}
+
+          {/* Styling & Layout Tab */}
+          {activeTab === 'styling' && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+                <div>
+                  <h2 className="text-base font-bold text-black border-b border-gray-100 pb-3 mb-2">Styling & Layout Controls</h2>
+                  <p className="text-sm text-gray-500 mb-6">Adjust the overall text sizes and section spacing for the storefront homepage. Changes apply globally across the homepage.</p>
+                </div>
+
+                <div className="space-y-8">
+                  
+                  {/* Desktop Styling */}
+                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-6">
+                    <h3 className="text-sm font-bold text-black border-b border-gray-200 pb-2 flex items-center gap-2"><Monitor className="w-4 h-4"/> Desktop Styling</h3>
+                    
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">Desktop Text Size Scaling</label>
+                        <span className="text-sm font-bold text-black bg-gray-100 px-3 py-1 rounded-full">{settings.styling?.desktopTextSize ?? settings.styling?.textSize ?? 100}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        name="desktopTextSize"
+                        min="80"
+                        max="150"
+                        step="5"
+                        value={settings.styling?.desktopTextSize ?? settings.styling?.textSize ?? 100}
+                        onChange={handleStylingChange}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">Desktop Section Padding</label>
+                        <span className="text-sm font-bold text-black bg-gray-100 px-3 py-1 rounded-full">{settings.styling?.desktopSectionPadding ?? settings.styling?.sectionPadding ?? 100}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        name="desktopSectionPadding"
+                        min="50"
+                        max="200"
+                        step="10"
+                        value={settings.styling?.desktopSectionPadding ?? settings.styling?.sectionPadding ?? 100}
+                        onChange={handleStylingChange}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Mobile Styling */}
+                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-6">
+                    <h3 className="text-sm font-bold text-black border-b border-gray-200 pb-2 flex items-center gap-2"><Smartphone className="w-4 h-4"/> Mobile Styling</h3>
+                    
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">Mobile Text Size Scaling</label>
+                        <span className="text-sm font-bold text-black bg-gray-100 px-3 py-1 rounded-full">{settings.styling?.mobileTextSize ?? settings.styling?.textSize ?? 100}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        name="mobileTextSize"
+                        min="80"
+                        max="150"
+                        step="5"
+                        value={settings.styling?.mobileTextSize ?? settings.styling?.textSize ?? 100}
+                        onChange={handleStylingChange}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">Mobile Section Padding</label>
+                        <span className="text-sm font-bold text-black bg-gray-100 px-3 py-1 rounded-full">{settings.styling?.mobileSectionPadding ?? settings.styling?.sectionPadding ?? 100}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        name="mobileSectionPadding"
+                        min="50"
+                        max="200"
+                        step="10"
+                        value={settings.styling?.mobileSectionPadding ?? settings.styling?.sectionPadding ?? 100}
+                        onChange={handleStylingChange}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
+                      />
+                    </div>
+                  </div>
+
+                </div>
+
                 <SaveButton />
               </div>
             </div>
           )}
 
         </div>
-
-        {/* Live Preview Panel (Hero Only) */}
-        {activeTab === 'hero' && (
-          <div className="w-full lg:w-[400px] flex-shrink-0 animate-in fade-in zoom-in-95 duration-300">
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden sticky top-8">
-              <div className="bg-gray-50 border-b border-gray-200 p-3 flex justify-between items-center">
-                <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Live Preview</span>
-                <div className="flex bg-white rounded border border-gray-200">
-                  <button onClick={() => setPreviewDevice('desktop')} className={`p-1.5 ${previewDevice === 'desktop' ? 'bg-gray-200 text-black' : 'text-gray-400 hover:text-black'}`}>
-                    <Monitor className="w-3.5 h-3.5" />
-                  </button>
-                  <button onClick={() => setPreviewDevice('mobile')} className={`p-1.5 ${previewDevice === 'mobile' ? 'bg-gray-200 text-black' : 'text-gray-400 hover:text-black'}`}>
-                    <Smartphone className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+        <div className="w-full lg:w-[480px] flex-shrink-0 animate-in fade-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden sticky top-8">
+            <div className="bg-gray-50 border-b border-gray-200 p-3 flex justify-between items-center">
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Live Storefront Preview</span>
+                <span className="text-[10px] text-gray-400">Scroll to view full page</span>
               </div>
-              <div className={`mx-auto bg-black relative transition-all duration-300 overflow-hidden ${previewDevice === 'desktop' ? 'w-full aspect-video' : 'w-[220px] h-[400px] my-6 rounded-[24px] border-4 border-gray-900 shadow-2xl'}`}>
-                <div className="absolute inset-0 z-0">
-                  {settings.hero.mediaType === 'video' ? (
-                    <video autoPlay loop muted playsInline key={previewDevice === 'desktop' ? settings.hero.desktopMediaUrl : (settings.hero.mobileMediaUrl || settings.hero.desktopMediaUrl)} className="w-full h-full object-cover">
-                      <source src={previewDevice === 'desktop' ? settings.hero.desktopMediaUrl : (settings.hero.mobileMediaUrl || settings.hero.desktopMediaUrl)} />
-                    </video>
-                  ) : (
-                    <img src={previewDevice === 'desktop' ? settings.hero.desktopMediaUrl : (settings.hero.mobileMediaUrl || settings.hero.desktopMediaUrl)} alt="Hero preview" className="w-full h-full object-cover" />
-                  )}
-                  <div className="absolute inset-0 bg-black" style={{ opacity: settings.hero.overlayOpacity / 100 }}></div>
-                </div>
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center p-4">
-                  <h1 className={`${previewDevice === 'desktop' ? 'text-2xl' : 'text-xl'} font-serif text-white leading-tight italic font-light`}>
-                    "{settings.hero.title}"
-                  </h1>
-                  <div className="flex gap-2 mt-4 scale-[0.6] origin-top">
-                    <div className="px-6 py-2 bg-[#1c1c1c] text-white rounded-full text-xs font-bold tracking-widest uppercase border border-transparent">
-                      {settings.hero.ctaText}
-                    </div>
-                  </div>
-                </div>
+              <div className="flex bg-white rounded border border-gray-200">
+                <button onClick={() => setPreviewDevice('desktop')} className={`p-1.5 ${previewDevice === 'desktop' ? 'bg-gray-200 text-black' : 'text-gray-400 hover:text-black'}`} title="Desktop View">
+                  <Monitor className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => setPreviewDevice('mobile')} className={`p-1.5 ${previewDevice === 'mobile' ? 'bg-gray-200 text-black' : 'text-gray-400 hover:text-black'}`} title="Mobile View">
+                  <Smartphone className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Viewport container */}
+            <div className="bg-gray-100 p-4 flex justify-start sm:justify-center overflow-x-auto w-full">
+              <div 
+                className={`bg-white relative transition-all duration-300 shadow-xl border-gray-900 overflow-hidden shrink-0 ${
+                  previewDevice === 'desktop' 
+                    ? 'w-[448px] h-[650px]' 
+                    : 'w-[320px] h-[600px] rounded-[36px] border-[10px]'
+                }`}
+              >
+                <iframe 
+                  id="homepage-preview-iframe"
+                  src="/?preview=true"
+                  className={`border-none origin-top-left ${
+                    previewDevice === 'desktop'
+                      ? 'w-[1280px] h-[1857px] scale-[0.35]'
+                      : 'w-[375px] h-[725px] scale-[0.8]'
+                  }`}
+                  style={{
+                    pointerEvents: 'auto'
+                  }}
+                />
               </div>
             </div>
           </div>
-        )}
+        </div>
 
       </div>
     </div>
   );
 }
+

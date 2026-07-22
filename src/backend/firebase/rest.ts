@@ -72,7 +72,7 @@ export async function fetchHomepageSettingsRest() {
   try {
     const res = await fetch(`${BASE_URL}/settings/homepage`, { 
       next: { tags: ['homepage'] },
-      cache: 'force-cache'
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error("REST API failed");
     const data = await res.json();
