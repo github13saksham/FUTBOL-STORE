@@ -215,11 +215,7 @@ export default function NationalTeamsPage() {
                 {/* Text Specifications */}
                 <div className="p-4 md:p-5 md:pt-4 space-y-2 flex-grow flex flex-col justify-between">
                   <div>
-                    <div className="flex justify-end items-center mb-1 mt-0.5">
-                      <div className="flex items-center text-[#cda491]">
-                        {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-2.5 h-2.5 ${Math.round(product.rating || 0) >= star ? 'fill-current' : 'opacity-30'}`} />)}
-                      </div>
-                    </div>
+
                     <div className="flex justify-between items-start mt-1 md:mt-0">
                       <Link href={`/product/${product.id}`} className="block flex-1 min-w-0">
                         <h3 className="text-[14px] md:text-base font-serif text-white font-medium md:mt-1 leading-tight tracking-wide hover:text-luxury-ivory transition-colors duration-300 truncate md:whitespace-normal">

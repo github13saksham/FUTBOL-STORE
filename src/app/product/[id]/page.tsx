@@ -93,8 +93,8 @@ export default function ProductPage() {
   const loadReviews = async () => {
     setIsLoadingReviews(true);
     try {
-      // Fetching all reviews globally as requested
-      const fetchedReviews = await dbService.getAllReviews();
+      // Fetching reviews for this product only
+      const fetchedReviews = await dbService.getReviewsByProduct(product.id);
       setReviews(fetchedReviews.filter(r => r.status === 'approved'));
     } catch (e) {
       console.error(e);
@@ -294,7 +294,7 @@ export default function ProductPage() {
                   ))}
                 </div>
                 <a href="#reviews" className="text-[10px] text-white/50 hover:text-white transition-colors uppercase tracking-widest font-bold">
-                  {averageRating}/5 ({reviews.length} Reviews)
+                  {averageRating}/5
                 </a>
               </div>
 
@@ -577,7 +577,7 @@ export default function ProductPage() {
                       </button>
                     ))}
                   </div>
-                  <span className="text-[11px] uppercase tracking-widest text-white/50 font-bold">{averageRating}/5 ({reviews.length} Reviews)</span>
+                  <span className="text-[11px] uppercase tracking-widest text-white/50 font-bold">{averageRating}/5</span>
                 </div>
               </div>
               <button 

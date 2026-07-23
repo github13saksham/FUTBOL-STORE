@@ -596,11 +596,7 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
                   {/* Text specifications */}
                   <div className="p-3 md:p-5 md:pt-4 space-y-1.5 md:space-y-2">
                     <div>
-                      <div className="flex justify-end items-center mb-0.5 mt-0.5">
-                        <div className="flex items-center text-[#cda491]">
-                          {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-2 h-2 md:w-2.5 md:h-2.5 ${Math.round(product.rating || product.realProduct?.rating || 0) >= star ? 'fill-current' : 'opacity-30'}`} />)}
-                        </div>
-                      </div>
+
                       <Link href={`/product/${product.realId}`} className="block mt-0.5">
                         <h3 className="font-serif text-[12px] md:text-[15px] font-medium leading-tight text-white hover:text-luxury-taupe transition-colors md:whitespace-normal" style={{ transform: "translateZ(20px)" }}>
                           {product.realProduct?.name || product.name}
