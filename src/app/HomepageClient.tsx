@@ -192,8 +192,25 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
         <section className={`relative w-full flex flex-col justify-center items-start overflow-hidden py-[calc(var(--pad-scale,1)*6rem)] md:py-[calc(var(--pad-scale,1)*8rem)] px-6 md:px-12 lg:px-24 ${isPreview ? 'h-[720px] md:h-[900px]' : 'min-h-[100svh]'}`}>
 
           {!homepageSettings ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-black">
-              <Loader2 className="w-12 h-12 animate-spin text-white/50" />
+            <div className="absolute inset-0 flex items-center justify-center bg-black z-50">
+              <m.div
+                initial={{ opacity: 1, scale: 1 }}
+                animate={{ opacity: [1, 0.6, 1], scale: [1, 0.95, 1] }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="relative w-36 h-36 md:w-48 md:h-48"
+              >
+                <Image
+                  src="/FUTBOL STORE IT'S ALL ABOUT THE QUALITY (1).svg"
+                  alt="Loading..."
+                  fill
+                  style={{ objectFit: 'contain' }}
+                  priority
+                />
+              </m.div>
             </div>
           ) : (
             <>
