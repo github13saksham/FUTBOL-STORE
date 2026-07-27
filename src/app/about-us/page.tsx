@@ -105,7 +105,7 @@ export default function AboutUsPage() {
               src="/store-logo.jpeg" 
               alt="The Futbol Store Logo"
               fill
-              className="object-contain md:object-cover object-center opacity-90 transform hover:scale-105 transition-transform duration-[2000ms] pointer-events-none"
+              className="object-cover object-center opacity-90 transform hover:scale-105 transition-transform duration-[2000ms] pointer-events-none"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-luxury-dark/70 via-transparent to-transparent pointer-events-none hidden md:block" />
                      
