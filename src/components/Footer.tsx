@@ -40,7 +40,7 @@ export default function Footer() {
   return (
     <>
       {!shouldHideFooter && (
-        <footer className="bg-luxury-dark text-luxury-ivory pt-12 pb-12 relative overflow-hidden">
+        <footer className="bg-luxury-dark text-luxury-ivory pt-12 pb-[80px] md:pb-12 relative overflow-hidden">
           {/* Global Policy Cards (Shown on all pages except Account) */}
           <div className="max-w-7xl mx-auto px-4 md:px-12 pb-12 md:pb-24 border-b border-white/5 mb-12">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
@@ -76,7 +76,7 @@ export default function Footer() {
           </div>
 
           {/* Main Footer Links */}
-          <div className="hidden md:grid max-w-7xl mx-auto px-6 md:px-12 grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 pb-4">
+          <div className="grid max-w-7xl mx-auto px-6 md:px-12 grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 pb-4">
           
           {/* Logo column */}
           <div className="col-span-2 flex flex-col items-start space-y-4">
