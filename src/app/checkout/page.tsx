@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import confetti from "canvas-confetti";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/context/StoreContext";
@@ -161,7 +162,7 @@ export default function CheckoutPage() {
   // Reactive Coupon Validation
   useEffect(() => {
     if (appliedCoupon) {
-      const validation = validateCoupon(appliedCoupon, subTotal, cart);
+      const validation = validateCoupon(appliedCoupon, subTotal, cart, email);
       if (!validation.valid) {
         setAppliedCoupon(null);
         setCouponError(validation.error || "Coupon removed because it's no longer valid for your cart.");
@@ -194,7 +195,7 @@ export default function CheckoutPage() {
       } else if (coupon.expiryDate && new Date(coupon.expiryDate).getTime() < new Date().getTime()) {
         setCouponError("This coupon has expired");
       } else {
-        const validation = validateCoupon(coupon, subTotal, cart);
+        const validation = validateCoupon(coupon, subTotal, cart, email);
         if (!validation.valid) {
           setCouponError(validation.error || `This coupon is not valid for your current cart.`);
           setAppliedCoupon(null);
@@ -202,6 +203,12 @@ export default function CheckoutPage() {
         } else {
           setAppliedCoupon(coupon);
           setCouponCodeInput("");
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#000000', '#ffffff', '#e5e7eb', '#9ca3af']
+          });
         }
       }
     } catch (err) {

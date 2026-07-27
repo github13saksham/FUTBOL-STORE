@@ -23,6 +23,9 @@ export interface Coupon {
   description?: string;
   expiryDate?: string;
   isActive: boolean;
+  assignedToUserEmail?: string;
+  isSingleUse?: boolean;
+  isUsed?: boolean;
 }
 
 export interface UserProfile {

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { dbService } from '@/backend';
 import { Coupon } from '@/backend/interfaces/db.interface';
-import { Loader2, Plus, Trash2, Power, Search, Ticket } from 'lucide-react';
+import { Loader2, Plus, Trash2, Power, Search, Ticket, Copy } from 'lucide-react';
 
 export default function AdminCouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -20,7 +20,9 @@ export default function AdminCouponsPage() {
     isActive: true,
     minOrderValue: 0,
     minQuantity: 0,
-    description: ''
+    description: '',
+    isSingleUse: false,
+    assignedToUserEmail: ''
   });
 
   useEffect(() => {
@@ -49,6 +51,11 @@ export default function AdminCouponsPage() {
     } finally {
       setDeletingId(null);
     }
+  };
+
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    alert(`Copied ${code} to clipboard`);
   };
 
   const handleToggleActive = async (coupon: Coupon) => {
@@ -84,7 +91,9 @@ export default function AdminCouponsPage() {
         isActive: true,
         minOrderValue: 0,
         minQuantity: 0,
-        description: ''
+        description: '',
+        isSingleUse: false,
+        assignedToUserEmail: ''
       });
     } catch (error) {
       alert('Failed to create coupon.');
@@ -178,6 +187,13 @@ export default function AdminCouponsPage() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-3">
                         <button
+                          onClick={() => handleCopyCode(coupon.code)}
+                          className="text-gray-400 hover:text-black transition-colors"
+                          title="Copy Code"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => handleToggleActive(coupon)}
                           className={`${coupon.isActive ? 'text-gray-400 hover:text-red-500' : 'text-red-500 hover:text-black'} transition-colors`}
                           title="Toggle Status"
@@ -211,14 +227,26 @@ export default function AdminCouponsPage() {
             <div className="p-6 overflow-y-auto space-y-5">
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Coupon Code</label>
-                <input 
-                  type="text" 
-                  required
-                  value={newCoupon.code}
-                  onChange={(e) => setNewCoupon({...newCoupon, code: e.target.value.toUpperCase()})}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all uppercase"
-                  placeholder="e.g. SUMMER2026"
-                />
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    required
+                    value={newCoupon.code}
+                    onChange={(e) => setNewCoupon({...newCoupon, code: e.target.value.toUpperCase()})}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all uppercase"
+                    placeholder="e.g. SUMMER2026"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      const randomChars = Math.random().toString(36).substring(2, 8).toUpperCase();
+                      setNewCoupon({...newCoupon, code: `TFS-${randomChars}`});
+                    }}
+                    className="bg-gray-200 hover:bg-gray-300 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase transition-colors whitespace-nowrap"
+                  >
+                    Generate
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -285,6 +313,30 @@ export default function AdminCouponsPage() {
                   className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all"
                   placeholder="e.g. BUY 2 JERSEY AND GET 100 RUPEES OFF"
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Assigned To Email (Optional)</label>
+                  <input 
+                    type="email" 
+                    value={newCoupon.assignedToUserEmail || ''}
+                    onChange={(e) => setNewCoupon({...newCoupon, assignedToUserEmail: e.target.value})}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all"
+                    placeholder="e.g. customer@example.com"
+                  />
+                </div>
+                <div className="flex flex-col justify-center">
+                  <label className="flex items-center gap-3 cursor-pointer mt-6">
+                    <input 
+                      type="checkbox"
+                      checked={newCoupon.isSingleUse || false}
+                      onChange={(e) => setNewCoupon({...newCoupon, isSingleUse: e.target.checked})}
+                      className="w-5 h-5 accent-black rounded"
+                    />
+                    <span className="text-sm font-bold text-gray-700 uppercase tracking-wider">Single Use Only</span>
+                  </label>
+                </div>
               </div>
 
             </div>

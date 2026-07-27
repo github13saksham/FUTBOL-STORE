@@ -24,11 +24,17 @@ export const calculateShipping = (stateName: string, quantity: number): number |
   return rate1500g + (quantity - 3) * (rate1000g - rate500g);
 };
 
-export const validateCoupon = (coupon: any, subTotal: number, cart: any[]): { valid: boolean; error?: string } => {
+export const validateCoupon = (coupon: any, subTotal: number, cart: any[], userEmail?: string): { valid: boolean; error?: string } => {
   if (!coupon) return { valid: true };
   
   const now = new Date().getTime();
   if (!coupon.isActive) return { valid: false, error: "This coupon is currently disabled." };
+  if (coupon.isUsed) return { valid: false, error: "This coupon has already been used." };
+  if (coupon.assignedToUserEmail) {
+    if (!userEmail || coupon.assignedToUserEmail.toLowerCase() !== userEmail.toLowerCase()) {
+      return { valid: false, error: "This coupon is not valid for your account." };
+    }
+  }
   if (coupon.expiryDate && new Date(coupon.expiryDate).getTime() < now) return { valid: false, error: "This coupon has expired." };
 
   const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);

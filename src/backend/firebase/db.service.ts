@@ -228,6 +228,18 @@ export class FirebaseDatabaseService implements IDatabaseService {
 
     pending.paymentId = paymentId;
     
+    // Check for single use coupon and mark as used
+    if (pending.couponApplied) {
+      try {
+        const coupon = await this.getCouponByCode(pending.couponApplied);
+        if (coupon && coupon.isSingleUse) {
+          await this.updateCoupon(coupon.id, { isUsed: true, isActive: false });
+        }
+      } catch (e) {
+        console.error("Failed to mark single-use coupon as used", e);
+      }
+    }
+    
     const orderId = await this.getNextOrderId();
     const docRef = doc(db, "orders", orderId);
     await setDoc(docRef, { ...pending, id: orderId });
