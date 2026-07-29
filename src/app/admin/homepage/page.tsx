@@ -140,11 +140,11 @@ export default function HomepageManagerPage() {
   ];
 
   const defaultBestSellers = [
-    { id: "bs-1", name: "SPAIN 2026 AWAY PLAYER", category: "PLAYER VERSION", club: "SPAIN", priceStr: "₹949.00", image: "/NATIONAL_TEAM_LOGO/national_team5.png" },
-    { id: "bs-2", name: "PORTUGAL 2026 AWAY FAN", category: "FAN VERSION", club: "PORTUGAL", priceStr: "₹799.00", image: "/NATIONAL_TEAM_LOGO/national_team4.jpeg" },
-    { id: "bs-3", name: "REAL MADRID 25/26 HOME PLAYER", category: "PLAYER VERSION", club: "REAL MADRID CF", priceStr: "₹999.00", image: "/images/25-26_club-jerseys/real_madrid25-26_HPV.jpeg" },
-    { id: "bs-4", name: "ARGENTINA 2026 AWAY PLAYER", category: "PLAYER VERSION", club: "ARGENTINA", priceStr: "₹999.00", image: "/NATIONAL_TEAM_LOGO/national_team1.jpeg" },
-    { id: "bs-5", name: "MANCHESTER CITY 25/26 AWAY PLAYER", category: "PLAYER VERSION", club: "MANCHESTER CITY", priceStr: "₹999.00", image: "/images/25-26_club-jerseys/MC25-26_HPV.jpeg" }
+    { id: "bs-1", name: "SPAIN 2026 AWAY PLAYER", category: "PLAYER VERSION", club: "SPAIN", priceStr: "₹949.00", image: "/NATIONAL_TEAM_LOGO/national_team5.png", link: "" },
+    { id: "bs-2", name: "PORTUGAL 2026 AWAY FAN", category: "FAN VERSION", club: "PORTUGAL", priceStr: "₹799.00", image: "/NATIONAL_TEAM_LOGO/national_team4.jpeg", link: "" },
+    { id: "bs-3", name: "REAL MADRID 25/26 HOME PLAYER", category: "PLAYER VERSION", club: "REAL MADRID CF", priceStr: "₹999.00", image: "/images/25-26_club-jerseys/real_madrid25-26_HPV.jpeg", link: "" },
+    { id: "bs-4", name: "ARGENTINA 2026 AWAY PLAYER", category: "PLAYER VERSION", club: "ARGENTINA", priceStr: "₹999.00", image: "/NATIONAL_TEAM_LOGO/national_team1.jpeg", link: "" },
+    { id: "bs-5", name: "MANCHESTER CITY 25/26 AWAY PLAYER", category: "PLAYER VERSION", club: "MANCHESTER CITY", priceStr: "₹999.00", image: "/images/25-26_club-jerseys/MC25-26_HPV.jpeg", link: "" }
   ];
 
   const [settings, setSettings] = useState({
@@ -954,6 +954,10 @@ export default function HomepageManagerPage() {
                         <div>
                           <label className="block text-xs font-bold text-gray-700 mb-1">Price String (e.g. ₹999.00)</label>
                           <input type="text" value={item.priceStr} onChange={(e) => handleBestSellerChange(index, 'priceStr', e.target.value)} className="w-full border-gray-300 rounded-md p-2 text-sm" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1">Product Link (Optional)</label>
+                          <input type="text" value={item.link || ''} onChange={(e) => handleBestSellerChange(index, 'link', e.target.value)} placeholder="/product/some-id or /national-teams?team=..." className="w-full border-gray-300 rounded-md p-2 text-sm" />
                         </div>
                         <div className="md:col-span-2">
                           <label className="block text-xs font-bold text-gray-700 mb-1">Image URL</label>

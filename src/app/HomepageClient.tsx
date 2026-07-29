@@ -531,7 +531,7 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
                     className="relative w-full aspect-[35/32] md:aspect-auto md:h-[320px] bg-neutral-100 group"
                     style={{ transform: "translateZ(30px)" }}
                   >
-                    <Link href={`/product/${product.realId}`}>
+                    <Link href={product.link || `/product/${product.realId}`}>
                       <Image
                         src={product.image}
                         alt={product.name}
@@ -571,7 +571,7 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
                         if (product.realProduct) {
                           setQuickAddProduct(product.realProduct);
                         } else {
-                          router.push(`/product/${product.realId}`);
+                          router.push(product.link || `/product/${product.realId}`);
                         }
                       }}
                       className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-2.5 bg-luxury-dark text-white hover:bg-luxury-taupe hover:text-black text-[10px] tracking-widest uppercase font-semibold rounded-full shadow-lg opacity-0 md:group-hover:opacity-100 translate-y-3 md:group-hover:translate-y-0 transition-all duration-300 backdrop-blur-md z-10"
@@ -597,7 +597,7 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
                   <div className="p-3 md:p-5 md:pt-4 space-y-1.5 md:space-y-2">
                     <div>
 
-                      <Link href={`/product/${product.realId}`} className="block mt-0.5">
+                      <Link href={product.link || `/product/${product.realId}`} className="block mt-0.5">
                         <h3 className="font-serif text-[12px] md:text-[15px] font-medium leading-tight text-white hover:text-luxury-taupe transition-colors md:whitespace-normal" style={{ transform: "translateZ(20px)" }}>
                           {product.realProduct?.name || product.name}
                         </h3>

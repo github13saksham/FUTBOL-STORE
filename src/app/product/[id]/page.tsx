@@ -93,8 +93,8 @@ export default function ProductPage() {
   const loadReviews = async () => {
     setIsLoadingReviews(true);
     try {
-      // Fetching reviews for this product only
-      const fetchedReviews = await dbService.getReviewsByProduct(product.id);
+      // Fetching reviews for all products
+      const fetchedReviews = await dbService.getAllReviews();
       setReviews(fetchedReviews.filter(r => r.status === 'approved'));
     } catch (e) {
       console.error(e);
@@ -527,11 +527,11 @@ export default function ProductPage() {
                       className="overflow-hidden bg-black/20"
                     >
                       <div className="text-xs text-white/60 leading-relaxed font-sans font-light p-4 space-y-2 border-t border-white/10">
-                        <div className="flex gap-2 items-start text-red-400 bg-red-500/10 p-2.5 rounded border border-red-500/20">
+                        <div className="flex gap-2 items-start text-emerald-400 bg-emerald-500/10 p-2.5 rounded border border-emerald-500/20">
                           <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" />
                           <div>
-                            <span className="font-bold text-[9px] uppercase tracking-widest block">COD is Strictly Unavailable</span>
-                            <span>Cash on Delivery is not supported. We only accept secure pre-paid methods (UPI, Card, Wallets) to protect customized name & number jersey allocations.</span>
+                            <span className="font-bold text-[9px] uppercase tracking-widest block">COD is Available</span>
+                            <span>Cash on Delivery is available for all products. We also accept secure pre-paid methods (UPI, Card, Wallets).</span>
                           </div>
                         </div>
                         <div className="flex gap-2 items-center text-white/70 pt-1">
