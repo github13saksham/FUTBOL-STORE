@@ -49,7 +49,7 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 export default function StoreProvider({ children, initialProducts = [], initialClubs = [] }: { children: React.ReactNode, initialProducts?: Product[], initialClubs?: Club[] }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [clubs, setClubs] = useState<Club[]>(initialClubs);
-  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
@@ -79,6 +79,12 @@ export default function StoreProvider({ children, initialProducts = [], initialC
         }
       }
       fetchData();
+    } else {
+      // Artificial delay for aesthetic skeleton loading
+      const timer = setTimeout(() => {
+        setIsLoadingData(false);
+      }, 1500);
+      return () => clearTimeout(timer);
     }
   }, []);
 

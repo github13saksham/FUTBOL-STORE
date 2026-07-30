@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useStore } from "@/context/StoreContext";
 import { Club, Product } from "@/data/mockData";
+import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 
 export default function ClubsPage() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function ClubsPage() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 12;
-  const { products, clubs, wishlist, toggleWishlist, setQuickAddProduct } = useStore();
+  const { products, clubs, wishlist, toggleWishlist, setQuickAddProduct, isLoadingData } = useStore();
 
   useEffect(() => {
     const clubId = searchParams.get("id");
@@ -73,7 +74,7 @@ export default function ClubsPage() {
         
         <div className="w-full space-y-4 flex flex-col items-start text-left">
           <span className="text-[12px] uppercase tracking-[0.3em] text-luxury-dark font-bold block">
-            2025-2026 Jersey's Section
+            2026-2027 Season
           </span>
           <h1 className="text-5xl md:text-8xl font-serif font-light text-luxury-dark tracking-tight leading-none">
             Club <span className="italic font-medium text-luxury-dark">Jersey's</span> 
@@ -149,7 +150,13 @@ export default function ClubsPage() {
       {/* 4. Products Grid */}
       <div className="w-full flex-grow bg-[#121212] pt-16 pb-24 mt-0">
         <section className="max-w-7xl mx-auto px-6 md:px-12">
-          {filteredProducts.length === 0 ? (
+          {isLoadingData ? (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8 bg-[#121212] md:bg-transparent border-t border-[#121212] md:border-transparent">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <ProductCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : filteredProducts.length === 0 ? (
             <div className="text-center py-24 space-y-4">
               <ShieldAlert className="w-12 h-12 text-white/40 mx-auto" />
               <h3 className="text-xl font-serif text-white">No active items in this collection</h3>

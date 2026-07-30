@@ -4,9 +4,9 @@ import { fetchHomepageSettingsRest } from "@/backend/firebase/rest";
 // Disable static generation, always fetch the latest on request. 
 // The client will also subscribe via onSnapshot for instant updates when admin changes it.
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60; // Cache the page for 60 seconds (Incremental Static Regeneration)
 
-export default async function Homepage({ searchParams }: { searchParams: { preview?: string } }) {
+export default async function Homepage() {
   let initialSettings = null;
   
   try {
@@ -15,7 +15,5 @@ export default async function Homepage({ searchParams }: { searchParams: { previ
     console.error("Error fetching homepage settings on server:", error);
   }
 
-  const isPreview = searchParams?.preview === 'true';
-
-  return <HomepageClient initialSettings={initialSettings} isPreview={isPreview} />;
+  return <HomepageClient initialSettings={initialSettings} />;
 }

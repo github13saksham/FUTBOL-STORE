@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 const NationalTeams3D = dynamic(() => import("@/components/NationalTeams3D"), { ssr: false });
+import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import { useStore } from "@/context/StoreContext";
 import { FAQS } from "@/data/mockData";
 import { useRouter } from "next/navigation";
@@ -514,9 +515,16 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
               dragElastic={0.05}
               className="flex gap-8 w-max min-w-full pr-6 md:pr-12"
             >
-              {bestSellers.map((product: any) => (
-                <m.div
-                  key={product.id}
+              {isLoadingData ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex-shrink-0 w-[160px] sm:w-[200px] md:w-[350px]">
+                    <ProductCardSkeleton />
+                  </div>
+                ))
+              ) : (
+                bestSellers.map((product: any) => (
+                  <m.div
+                    key={product.id}
                   whileHover={{
 
 
@@ -609,7 +617,7 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
                         {product.realProduct?.priceStr || product.priceStr}
                       </span>
                       <Link
-                        href={`/product/${product.realId}`}
+                        href={product.link || `/product/${product.realId}`}
                         className="flex text-[8px] md:text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 hover:text-white items-center gap-1 transition-colors duration-300"
                       >
                         View Item <ChevronRight className="w-3 h-3" />
@@ -617,7 +625,7 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
                     </div>
                   </div>
                 </m.div>
-              ))}
+              )))}
             </m.div>
           </m.div>
         </div>
@@ -835,5 +843,7 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
         </section>
       </div>
     </LazyMotion>
+              
   );
+
 }

@@ -6,10 +6,9 @@ import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import { LazyMotion, domMax, m } from "framer-motion";
 
-const PUBLIC_ROUTES = [
-  "/",
-  "/login",
-  "/about-us"
+const PROTECTED_ROUTES = [
+  "/account",
+  "/checkout"
 ];
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -22,26 +21,22 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
+  const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
+
   useEffect(() => {
     if (!loading && mounted) {
-      // Allow admin routes (they have their own middleware protection)
-      if (pathname.startsWith("/admin")) {
-        return;
-      }
-
-      const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
-
-      // If user is not logged in and trying to access a protected route
-      if (!user && !isPublicRoute) {
+      if (!user && isProtectedRoute) {
         router.push("/login");
       }
     }
-  }, [user, loading, pathname, router, mounted]);
+  }, [user, loading, pathname, router, mounted, isProtectedRoute]);
 
+  // Show the logo loading screen globally while the app is mounting or auth is loading
+  // This provides a professional splash screen effect.
   if (!mounted || loading) {
     return (
       <LazyMotion features={domMax}>
-        <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="min-h-screen bg-white flex items-center justify-center z-50 fixed inset-0">
           <m.div
             initial={{ opacity: 1, scale: 1 }}
             animate={{ opacity: [1, 0.3, 1], scale: [1, 0.95, 1] }}
@@ -65,32 +60,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
-  if (!user && !isPublicRoute && !pathname.startsWith("/admin")) {
-    // Prevent flash of protected content during redirect
-    return (
-      <LazyMotion features={domMax}>
-        <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center">
-          <m.div
-            animate={{ opacity: [0.5, 1, 0.5], scale: [0.95, 1.05, 0.95] }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="relative w-25 h-25 md:w-28 md:h-28"
-          >
-            <Image
-              src="/logo.png"
-              alt="Loading..."
-              fill
-              style={{ objectFit: 'contain' }}
-              priority
-            />
-          </m.div>
-        </div>
-      </LazyMotion>
-    );
+  // Prevent flash of protected content during redirect
+  if (!user && isProtectedRoute) {
+    return null;
   }
 
   return <>{children}</>;
