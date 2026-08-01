@@ -251,9 +251,29 @@ export default function ClubsPage() {
                       </div>
 
                       <div className="flex justify-between items-end pb-1 border-b border-white/20 pt-1 md:pt-0">
-                        <span className="font-serif text-base md:text-lg text-white font-medium">
-                          {product.priceStr}
-                        </span>
+                        <div className="flex flex-col">
+                          {(() => {
+                            const compPrice = product.comparePrice || 0;
+                            const currentPrice = product.price || 0;
+                            if (compPrice > currentPrice) {
+                              const percentOff = Math.round(((compPrice - currentPrice) / compPrice) * 100);
+                              return (
+                                <div className="flex items-center gap-1.5 mb-0.5">
+                                  <span className="font-sans text-xs md:text-sm text-white/50 line-through">
+                                    ₹{compPrice}
+                                  </span>
+                                  <span className="font-sans text-[10px] md:text-xs text-luxury-taupe font-bold tracking-wider">
+                                    {percentOff}% OFF
+                                  </span>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
+                          <span className="font-serif text-base md:text-lg text-white font-medium leading-none mt-1">
+                            {product.priceStr}
+                          </span>
+                        </div>
                         <Link
                           href={`/product/${product.id}`}
                           className="flex text-[8px] md:text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 hover:text-white items-center gap-1 transition-colors duration-300"

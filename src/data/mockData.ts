@@ -3,6 +3,7 @@ export interface Product {
   name: string;
   club: string;
   price: number;
+  comparePrice?: number;
   priceStr: string;
   image: string;
   category: string;

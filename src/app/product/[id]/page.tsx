@@ -298,9 +298,29 @@ export default function ProductPage() {
                 </a>
               </div>
 
-              <span className="text-xl font-serif font-semibold text-white block mt-3">
-                ₹{product.price.toFixed(0)}
-              </span>
+              <div className="flex items-end gap-3 mt-3">
+                {(() => {
+                  const compPrice = product.comparePrice || 0;
+                  const currentPrice = product.price || 0;
+                  if (compPrice > currentPrice) {
+                    const percentOff = Math.round(((compPrice - currentPrice) / compPrice) * 100);
+                    return (
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-base font-sans text-white/50 line-through">
+                          ₹{compPrice}
+                        </span>
+                        <span className="text-sm font-sans text-luxury-taupe font-bold tracking-wider px-2 py-0.5 rounded bg-luxury-taupe/10 border border-luxury-taupe/20">
+                          {percentOff}% OFF
+                        </span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+                <span className="text-xl font-serif font-semibold text-white block">
+                  ₹{product.price.toFixed(0)}
+                </span>
+              </div>
             </div>
 
             {/* Size Selection Grid */}
@@ -728,9 +748,29 @@ export default function ProductPage() {
                   </div>
 
                   <div className="flex justify-between items-end pb-1 border-b border-white/20 pt-1 md:pt-0">
-                    <span className="font-serif text-base md:text-lg text-white font-medium">
-                      ₹{item.price.toFixed(2)}
-                    </span>
+                    <div className="flex flex-col">
+                      {(() => {
+                        const compPrice = item.comparePrice || 0;
+                        const currentPrice = item.price || 0;
+                        if (compPrice > currentPrice) {
+                          const percentOff = Math.round(((compPrice - currentPrice) / compPrice) * 100);
+                          return (
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <span className="font-sans text-xs md:text-sm text-white/50 line-through">
+                                ₹{compPrice}
+                              </span>
+                              <span className="font-sans text-[10px] md:text-xs text-luxury-taupe font-bold tracking-wider">
+                                {percentOff}% OFF
+                              </span>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
+                      <span className="font-serif text-base md:text-lg text-white font-medium leading-none mt-1">
+                        ₹{item.price.toFixed(2)}
+                      </span>
+                    </div>
                     <span className="flex text-[8px] md:text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 group-hover:text-white items-center gap-1 transition-colors duration-300">
                       View Item <ChevronRight className="w-3 h-3" />
                     </span>
