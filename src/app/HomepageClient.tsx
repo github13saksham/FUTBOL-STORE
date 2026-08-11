@@ -602,7 +602,7 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
                   </div>
 
                   {/* Text specifications */}
-                  <div className="p-3 md:p-5 md:pt-4 space-y-1.5 md:space-y-2">
+                  <div className="p-3 md:p-5 md:pt-4 flex-grow flex flex-col justify-between space-y-1.5 md:space-y-2">
                     <div>
 
                       <Link href={product.link || `/product/${product.realId}`} className="block mt-0.5">
@@ -612,35 +612,37 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
                       </Link>
                     </div>
 
-                    <div className="flex justify-between items-end pb-1 border-b border-white/20 pt-1 md:pt-0">
-                      <div className="flex flex-col">
-                        {(() => {
-                          const compPrice = product.realProduct?.comparePrice || product.comparePrice || 0;
-                          const currentPrice = product.realProduct?.price || product.price || 0;
-                          if (compPrice > currentPrice) {
-                            const percentOff = Math.round(((compPrice - currentPrice) / compPrice) * 100);
-                            return (
-                              <div className="flex items-center gap-1.5 mb-0.5">
-                                <span className="font-sans text-xs md:text-sm text-white/50 line-through">
-                                  ₹{compPrice}
-                                </span>
-                                <span className="font-sans text-[10px] md:text-xs text-luxury-taupe font-bold tracking-wider">
-                                  {percentOff}% OFF
-                                </span>
-                              </div>
-                            );
-                          }
-                          return null;
-                        })()}
-                        <span className="font-serif text-sm md:text-lg text-white font-medium leading-none mt-1">
+                    <div className="flex justify-between items-end pb-1 border-b border-white/20 pt-1 md:pt-0 gap-1">
+                      <div className="flex flex-col min-w-0">
+                        <div className="h-5 md:h-6 flex items-center">
+                          {(() => {
+                            const compPrice = product.realProduct?.comparePrice || product.comparePrice || 0;
+                            const currentPrice = product.realProduct?.price || product.price || 0;
+                            if (compPrice > currentPrice) {
+                              const percentOff = Math.round(((compPrice - currentPrice) / compPrice) * 100);
+                              return (
+                                <div className="flex items-center gap-1 md:gap-1.5 whitespace-nowrap shrink-0">
+                                  <span className="font-sans text-[10px] md:text-sm text-white/50 line-through">
+                                    ₹{compPrice}
+                                  </span>
+                                  <span className="font-sans text-[8px] md:text-xs text-luxury-taupe font-bold tracking-wider">
+                                    {percentOff}% OFF
+                                  </span>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
+                        </div>
+                        <span className="font-serif text-sm md:text-lg text-white font-medium leading-none mt-1 whitespace-nowrap">
                           {product.realProduct?.priceStr || product.priceStr}
                         </span>
                       </div>
                       <Link
                         href={product.link || `/product/${product.realId}`}
-                        className="flex text-[8px] md:text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 hover:text-white items-center gap-1 transition-colors duration-300"
+                        className="flex text-[8px] md:text-[9px] uppercase tracking-[0.2em] font-semibold text-white/80 hover:text-white items-center gap-1 transition-colors duration-300 whitespace-nowrap shrink-0 mb-0.5"
                       >
-                        View Item <ChevronRight className="w-3 h-3" />
+                        <span className="hidden md:inline">View Item</span> <ChevronRight className="w-3 h-3 shrink-0" />
                       </Link>
                     </div>
                   </div>
