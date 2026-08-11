@@ -544,7 +544,7 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
                         src={product.image}
                         alt={product.name}
                         fill
-                        className="object-contain md:object-cover transition-transform duration-[1000ms] ease-out scale-105 "
+                        className="object-cover transition-transform duration-[1000ms] ease-out scale-105 "
                         loading="lazy"
                       />
 
