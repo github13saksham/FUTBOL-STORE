@@ -110,7 +110,7 @@ export default function Navbar() {
                 width={300}
                 quality={100}
                 unoptimized
-                className="object-contain w-32 h-20 md:w-[180px] md:h-[100px] hover:scale-105 transition-transform duration-300"
+                className="object-contain w-[128px] h-[80px] md:w-[180px] md:h-[100px] hover:scale-105 transition-transform duration-300"
                 priority
               />
             </Link>
