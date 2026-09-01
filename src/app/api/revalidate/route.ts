@@ -18,6 +18,8 @@ export async function POST(request: NextRequest) {
     // Default: revalidate the data endpoints and cache tags
     revalidatePath('/api/data/products');
     revalidatePath('/api/data/clubs');
+    revalidatePath('/', 'layout');
+    revalidatePath('/product/[id]', 'page');
     revalidateTag('products');
     revalidateTag('clubs');
     revalidateTag('homepage');

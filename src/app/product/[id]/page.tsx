@@ -32,7 +32,7 @@ export default function ProductPage() {
   } = useStore();
 
   // Find product
-  const product = products.find((p) => p.id === id) || [...BEST_SELLERS, ...CLUB_PRODUCTS].find((p) => p.id === id);
+  const product = products.find((p) => p.id === id);
 
   if (isLoadingData) {
     return (

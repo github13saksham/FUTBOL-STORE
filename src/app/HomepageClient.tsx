@@ -145,7 +145,7 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
       { id: "bs-5", name: "MANCHESTER CITY 25/26 AWAY PLAYER", category: "PLAYER VERSION", club: "MANCHESTER CITY", priceStr: "₹999.00", image: "/images/25-26_club-jerseys/MC25-26_HPV.jpeg" }
     ];
 
-    return items.map((item: any) => {
+    const mapped = items.map((item: any) => {
       // Find a matching product in the real database
       const realProduct = products.find(p =>
         p.name.toUpperCase() === item.name.toUpperCase() ||
@@ -159,6 +159,11 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
         realProduct: realProduct || null
       };
     });
+
+    if (products.length > 0) {
+      return mapped.filter((item: any) => item.realProduct !== null);
+    }
+    return mapped;
   }, [homepageSettings, products]);
 
   return (
@@ -308,7 +313,18 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
                   <h1
                     className="text-4xl sm:text-6xl md:text-8xl lg:text-[90px] font-serif text-white leading-[1.1] sm:leading-[0.9] italic tracking-tight font-light sm:whitespace-nowrap text-center px-4 drop-shadow-lg animate-hero-fade-in"
                   >
-                    "{homepageSettings?.hero?.title || 'Inspired By Greatness'}"
+                    {/* Phone / Mobile */}
+                    <span className="block md:hidden">
+                      "{homepageSettings?.hero?.mobileTitle || homepageSettings?.hero?.title || 'Inspired By Greatness'}"
+                    </span>
+                    {/* Tab / Tablet */}
+                    <span className="hidden md:block lg:hidden">
+                      "{homepageSettings?.hero?.tabletTitle || homepageSettings?.hero?.desktopTitle || homepageSettings?.hero?.title || 'Inspired By Greatness'}"
+                    </span>
+                    {/* Laptop / Desktop */}
+                    <span className="hidden lg:block">
+                      "{homepageSettings?.hero?.desktopTitle || homepageSettings?.hero?.title || 'Inspired By Greatness'}"
+                    </span>
                   </h1>
 
                   <div

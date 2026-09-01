@@ -34,7 +34,7 @@ export async function fetchProductsRest() {
   try {
     const res = await fetch(`${BASE_URL}/products?pageSize=100`, { 
       next: { tags: ['products'] },
-      cache: 'force-cache'
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error("REST API failed");
     const data = await res.json();

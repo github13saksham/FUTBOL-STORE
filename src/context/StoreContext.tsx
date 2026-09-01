@@ -57,35 +57,31 @@ export default function StoreProvider({ children, initialProducts = [], initialC
   const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    // If not passed initially (e.g. somehow rendered without layout data), fetch them.
-    if (products.length === 0 && clubs.length === 0) {
-      async function fetchData() {
-        setIsLoadingData(true);
-        try {
-          const [productsRes, clubsRes] = await Promise.all([
-            fetch('/api/data/products'),
-            fetch('/api/data/clubs')
-          ]);
+    async function fetchData() {
+      try {
+        const [productsRes, clubsRes] = await Promise.all([
+          fetch('/api/data/products'),
+          fetch('/api/data/clubs')
+        ]);
+        if (productsRes.ok && clubsRes.ok) {
           const fetchedProducts = await productsRes.json();
           const fetchedClubs = await clubsRes.json();
-          // Filter out inactive products for the frontend store
-          const activeProducts = fetchedProducts.filter((p: Product) => p.visibility?.active !== false);
-          setProducts(activeProducts);
-          setClubs(fetchedClubs);
-        } catch (e) {
-          console.error("Failed to load global data", e);
-        } finally {
-          setIsLoadingData(false);
+          if (Array.isArray(fetchedProducts)) {
+            const activeProducts = fetchedProducts.filter((p: Product) => p.visibility?.active !== false);
+            setProducts(activeProducts);
+          }
+          if (Array.isArray(fetchedClubs)) {
+            setClubs(fetchedClubs);
+          }
         }
-      }
-      fetchData();
-    } else {
-      // Artificial delay for aesthetic skeleton loading
-      const timer = setTimeout(() => {
+      } catch (e) {
+        console.error("Failed to load global data", e);
+      } finally {
         setIsLoadingData(false);
-      }, 1500);
-      return () => clearTimeout(timer);
+      }
     }
+    
+    fetchData();
   }, []);
 
   useEffect(() => {

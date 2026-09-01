@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FirebaseDatabaseService } from '@/backend/firebase/db.service';
-import { Save, Loader2, Upload, LayoutGrid, LayoutTemplate, Link as LinkIcon, Image as ImageIcon, Search, Video, Monitor, Smartphone, Flag, Shield, Plus, Trash2, Palette, ChevronRight } from 'lucide-react';
+import { Save, Loader2, Upload, LayoutGrid, LayoutTemplate, Link as LinkIcon, Image as ImageIcon, Search, Video, Monitor, Smartphone, Tablet, Flag, Shield, Plus, Trash2, Palette, ChevronRight } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/backend/firebase/config';
 import { motion } from 'framer-motion';
@@ -168,6 +168,9 @@ export default function HomepageManagerPage() {
       mobileMediaPositionCustomY: 50,
       mobileMediaZoom: 100,
       title: 'Inspired By Greatness',
+      desktopTitle: 'Inspired By Greatness',
+      tabletTitle: 'Inspired By Greatness',
+      mobileTitle: 'Inspired By Greatness',
       subtitle: 'The Road to Glory Begins Now.',
       ctaText: 'SHOP NOW',
       ctaLink: '/clubs',
@@ -240,6 +243,11 @@ export default function HomepageManagerPage() {
           data.hero.mediaType = 'image';
           data.hero.desktopMediaUrl = data.hero.backgroundImage;
           data.hero.mobileMediaUrl = data.hero.backgroundImage;
+        }
+        if (data.hero) {
+          if (!data.hero.desktopTitle) data.hero.desktopTitle = data.hero.title || 'Inspired By Greatness';
+          if (!data.hero.tabletTitle) data.hero.tabletTitle = data.hero.desktopTitle || data.hero.title || 'Inspired By Greatness';
+          if (!data.hero.mobileTitle) data.hero.mobileTitle = data.hero.title || 'Inspired By Greatness';
         }
         // Ensure arrays exist
         if (!data.clubs) data.clubs = defaultClubs;
@@ -686,9 +694,67 @@ export default function HomepageManagerPage() {
               {/* Text & Content */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
                 <h2 className="text-base font-bold text-black border-b border-gray-100 pb-3">Hero Content</h2>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Primary Title</label>
-                  <input type="text" name="title" value={settings.hero.title} onChange={handleHeroChange} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 transition-all" />
+                
+                <div className="space-y-4 bg-gray-50 border border-gray-200 rounded-xl p-5">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-black border-b border-gray-200 pb-2 flex items-center justify-between">
+                    <span>Hero Section Headings (Per Device)</span>
+                    <span className="text-[11px] font-normal text-gray-500 lowercase">custom headings for phone, tab & laptop</span>
+                  </h3>
+                  
+                  {/* Laptop / Desktop Heading */}
+                  <div>
+                    <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                      <Monitor className="w-4 h-4 text-black" /> Laptop / Desktop Heading
+                    </label>
+                    <input 
+                      type="text" 
+                      name="desktopTitle" 
+                      value={settings.hero.desktopTitle ?? settings.hero.title ?? ''} 
+                      onChange={(e) => {
+                        handleHeroChange(e);
+                        setSettings(prev => ({
+                          ...prev,
+                          hero: {
+                            ...prev.hero,
+                            desktopTitle: e.target.value,
+                            title: e.target.value
+                          }
+                        }));
+                      }} 
+                      className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:border-gray-400 transition-all font-serif" 
+                      placeholder="Inspired By Greatness"
+                    />
+                  </div>
+
+                  {/* Tablet / Tab Heading */}
+                  <div>
+                    <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                      <Tablet className="w-4 h-4 text-black" /> Tab / Tablet Heading
+                    </label>
+                    <input 
+                      type="text" 
+                      name="tabletTitle" 
+                      value={settings.hero.tabletTitle ?? settings.hero.desktopTitle ?? settings.hero.title ?? ''} 
+                      onChange={handleHeroChange} 
+                      className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:border-gray-400 transition-all font-serif" 
+                      placeholder="Inspired By Greatness"
+                    />
+                  </div>
+
+                  {/* Phone / Mobile Heading */}
+                  <div>
+                    <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                      <Smartphone className="w-4 h-4 text-black" /> Phone / Mobile Heading
+                    </label>
+                    <input 
+                      type="text" 
+                      name="mobileTitle" 
+                      value={settings.hero.mobileTitle ?? settings.hero.title ?? ''} 
+                      onChange={handleHeroChange} 
+                      className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:border-gray-400 transition-all font-serif" 
+                      placeholder="Inspired By Greatness"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Subtitle</label>
