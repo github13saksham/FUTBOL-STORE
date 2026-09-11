@@ -145,24 +145,42 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
       { id: "bs-5", name: "MANCHESTER CITY 25/26 AWAY PLAYER", category: "PLAYER VERSION", club: "MANCHESTER CITY", priceStr: "₹999.00", image: "/images/25-26_club-jerseys/MC25-26_HPV.jpeg" }
     ];
 
-    const mapped = items.map((item: any) => {
-      // Find a matching product in the real database
-      const realProduct = products.find(p =>
-        p.name.toUpperCase() === item.name.toUpperCase() ||
-        p.name.toUpperCase().includes(item.name.toUpperCase()) ||
-        item.name.toUpperCase().includes(p.name.toUpperCase())
-      );
+    const extractIdFromLink = (link?: string) => {
+      if (!link) return null;
+      const match = link.match(/\/product\/([^\/\?#]+)/);
+      return match ? match[1] : null;
+    };
+
+    const mapped = items.map((item: any, idx: number) => {
+      const linkedId = extractIdFromLink(item.link);
+
+      // Find a matching product in the real database if available
+      const realProduct = products.find(p => {
+        if (linkedId && (p.id === linkedId || (p as any).slug === linkedId)) return true;
+        if (item.id && p.id === item.id) return true;
+        if (item.realId && p.id === item.realId) return true;
+
+        const pName = (p.name || '').trim().toUpperCase();
+        const iName = (item.name || '').trim().toUpperCase();
+        if (!pName || !iName) return false;
+        if (pName === iName) return true;
+        if (pName.includes(iName) || iName.includes(pName)) return true;
+
+        const cleanP = pName.replace(/[^A-Z0-9]/g, '');
+        const cleanI = iName.replace(/[^A-Z0-9]/g, '');
+        if (cleanP && cleanI && (cleanP.includes(cleanI) || cleanI.includes(cleanP))) return true;
+
+        return false;
+      });
 
       return {
         ...item,
-        realId: realProduct ? realProduct.id : item.id,
+        id: item.id || `bs-${idx}`,
+        realId: realProduct ? realProduct.id : (item.realId || item.id || `bs-${idx}`),
         realProduct: realProduct || null
       };
     });
 
-    if (products.length > 0) {
-      return mapped.filter((item: any) => item.realProduct !== null);
-    }
     return mapped;
   }, [homepageSettings, products]);
 

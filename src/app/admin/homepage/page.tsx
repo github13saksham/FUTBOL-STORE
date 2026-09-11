@@ -14,6 +14,7 @@ export default function HomepageManagerPage() {
   const [uploading, setUploading] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'hero' | 'featured' | 'seo' | 'clubs' | 'national' | 'banner' | 'styling' | 'collectionPromo'>('hero');
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
+  const [storeProducts, setStoreProducts] = useState<any[]>([]);
 
   const defaultNationalTeams = [
     {
@@ -218,6 +219,13 @@ export default function HomepageManagerPage() {
 
   useEffect(() => {
     fetchSettings();
+    // Load store products for quick selection
+    const dbService = new FirebaseDatabaseService();
+    dbService.getProducts().then(prods => {
+      setStoreProducts(prods || []);
+    }).catch(err => {
+      console.error("Error loading products:", err);
+    });
   }, []);
 
   useEffect(() => {
@@ -420,8 +428,54 @@ export default function HomepageManagerPage() {
 
   const handleBestSellerChange = (index: number, field: string, value: string) => {
     setSettings(prev => {
-      const newBS = [...prev.bestSellersItems];
+      const newBS = [...(prev.bestSellersItems || [])];
       newBS[index] = { ...newBS[index], [field]: value };
+      return { ...prev, bestSellersItems: newBS };
+    });
+  };
+
+  const handleAddBestSeller = () => {
+    setSettings(prev => ({
+      ...prev,
+      bestSellersItems: [
+        ...(prev.bestSellersItems || []),
+        {
+          id: `bs-${Date.now()}`,
+          name: '',
+          category: 'PLAYER VERSION',
+          club: '',
+          priceStr: '₹999.00',
+          image: '',
+          link: ''
+        }
+      ]
+    }));
+  };
+
+  const handleRemoveBestSeller = (index: number) => {
+    if (!confirm("Are you sure you want to remove this Best Seller jersey?")) return;
+    setSettings(prev => {
+      const newBS = [...(prev.bestSellersItems || [])];
+      newBS.splice(index, 1);
+      return { ...prev, bestSellersItems: newBS };
+    });
+  };
+
+  const handleSelectProductForBestSeller = (index: number, productId: string) => {
+    if (!productId) return;
+    const selected = storeProducts.find(p => p.id === productId);
+    if (!selected) return;
+    setSettings(prev => {
+      const newBS = [...(prev.bestSellersItems || [])];
+      newBS[index] = {
+        ...newBS[index],
+        name: selected.name || '',
+        category: selected.version ? `${selected.version.toUpperCase()} VERSION` : (selected.category || 'PLAYER VERSION'),
+        club: selected.club || selected.team || selected.nation || '',
+        priceStr: selected.price ? `₹${selected.price}` : (selected.priceStr || '₹999.00'),
+        image: selected.image || (selected.images && selected.images[0]) || '',
+        link: `/product/${selected.id}`
+      };
       return { ...prev, bestSellersItems: newBS };
     });
   };
@@ -993,54 +1047,131 @@ export default function HomepageManagerPage() {
           {activeTab === 'featured' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
-                <div>
-                  <h2 className="text-base font-bold text-black border-b border-gray-100 pb-3 mb-2">Best Sellers (5 Cards)</h2>
-                  <p className="text-sm text-gray-500 mb-6">Edit the 5 jerseys shown in the Best Sellers horizontal scrolling section on the homepage.</p>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 pb-4">
+                  <div>
+                    <h2 className="text-base font-bold text-black mb-1">
+                      Best Sellers ({(settings.bestSellersItems || []).length} Jerseys)
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                      Manage the jerseys displayed in the Best Sellers horizontal scrolling carousel on the homepage.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddBestSeller}
+                    className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors font-bold text-xs shadow"
+                  >
+                    <Plus className="w-4 h-4" /> Add Jersey
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 gap-6">
-                  {settings.bestSellersItems.map((item, index) => (
-                    <div key={index} className="border border-gray-200 rounded-xl p-5 bg-gray-50 space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold bg-black text-white px-2 py-1 rounded">Card {index + 1}</span>
+                  {(settings.bestSellersItems || []).map((item, index) => (
+                    <div key={item.id || index} className="border border-gray-200 rounded-xl p-5 bg-gray-50 space-y-4 relative">
+                      <div className="flex justify-between items-center pb-2 border-b border-gray-200/60">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold bg-black text-white px-2.5 py-1 rounded">
+                            Jersey #{index + 1}
+                          </span>
+                          {item.name && (
+                            <span className="text-xs font-semibold text-gray-700 truncate max-w-[200px] sm:max-w-md">
+                              {item.name}
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveBestSeller(index)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium"
+                          title="Remove Jersey"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          <span className="hidden sm:inline">Delete</span>
+                        </button>
                       </div>
+
+                      {/* Quick Select from Store Catalog */}
+                      {storeProducts.length > 0 && (
+                        <div className="bg-white p-3 rounded-lg border border-blue-100 shadow-sm">
+                          <label className="block text-xs font-bold text-blue-900 mb-1">
+                            ⚡ Quick Fill from Store Catalog:
+                          </label>
+                          <select
+                            onChange={(e) => {
+                              handleSelectProductForBestSeller(index, e.target.value);
+                              e.target.value = '';
+                            }}
+                            defaultValue=""
+                            className="w-full border border-blue-200 bg-blue-50/50 rounded-md p-2 text-xs font-medium text-gray-800 outline-none focus:ring-1 focus:ring-blue-400"
+                          >
+                            <option value="" disabled>-- Select a product to auto-fill details --</option>
+                            {storeProducts.map((prod) => (
+                              <option key={prod.id} value={prod.id}>
+                                {prod.name} ({prod.club || prod.team || prod.nation || 'Jersey'}) - ₹{prod.price || prod.priceStr || '999'}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-bold text-gray-700 mb-1">Product Name</label>
-                          <input type="text" value={item.name} onChange={(e) => handleBestSellerChange(index, 'name', e.target.value)} className="w-full border-gray-300 rounded-md p-2 text-sm" />
+                          <input type="text" value={item.name} onChange={(e) => handleBestSellerChange(index, 'name', e.target.value)} className="w-full border-gray-300 rounded-md p-2 text-sm bg-white" placeholder="e.g. Real Madrid 2026/27 Home Player Version" />
                         </div>
                         <div>
                           <label className="block text-xs font-bold text-gray-700 mb-1">Category (e.g. PLAYER VERSION)</label>
-                          <input type="text" value={item.category} onChange={(e) => handleBestSellerChange(index, 'category', e.target.value)} className="w-full border-gray-300 rounded-md p-2 text-sm" />
+                          <input type="text" value={item.category} onChange={(e) => handleBestSellerChange(index, 'category', e.target.value)} className="w-full border-gray-300 rounded-md p-2 text-sm bg-white" placeholder="PLAYER VERSION or FAN VERSION" />
                         </div>
                         <div>
                           <label className="block text-xs font-bold text-gray-700 mb-1">Club/Nation Name</label>
-                          <input type="text" value={item.club} onChange={(e) => handleBestSellerChange(index, 'club', e.target.value)} className="w-full border-gray-300 rounded-md p-2 text-sm" />
+                          <input type="text" value={item.club} onChange={(e) => handleBestSellerChange(index, 'club', e.target.value)} className="w-full border-gray-300 rounded-md p-2 text-sm bg-white" placeholder="e.g. Real Madrid" />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-gray-700 mb-1">Price String (e.g. ₹999.00)</label>
-                          <input type="text" value={item.priceStr} onChange={(e) => handleBestSellerChange(index, 'priceStr', e.target.value)} className="w-full border-gray-300 rounded-md p-2 text-sm" />
+                          <label className="block text-xs font-bold text-gray-700 mb-1">Price String</label>
+                          <input type="text" value={item.priceStr} onChange={(e) => handleBestSellerChange(index, 'priceStr', e.target.value)} className="w-full border-gray-300 rounded-md p-2 text-sm bg-white" placeholder="e.g. ₹999.00" />
                         </div>
-                        <div>
+                        <div className="md:col-span-2">
                           <label className="block text-xs font-bold text-gray-700 mb-1">Product Link (Optional)</label>
-                          <input type="text" value={item.link || ''} onChange={(e) => handleBestSellerChange(index, 'link', e.target.value)} placeholder="/product/some-id or /national-teams?team=..." className="w-full border-gray-300 rounded-md p-2 text-sm" />
+                          <input type="text" value={item.link || ''} onChange={(e) => handleBestSellerChange(index, 'link', e.target.value)} placeholder="/product/some-id or https://..." className="w-full border-gray-300 rounded-md p-2 text-sm bg-white" />
                         </div>
                         <div className="md:col-span-2">
                           <label className="block text-xs font-bold text-gray-700 mb-1">Image URL</label>
                           <div className="flex gap-2">
-                            <input type="text" value={item.image} onChange={(e) => handleBestSellerChange(index, 'image', e.target.value)} className="flex-1 border-gray-300 rounded-md p-2 text-sm" />
-                            <label className="cursor-pointer flex items-center justify-center bg-gray-200 px-3 rounded-md text-xs font-bold hover:bg-gray-300 transition-colors">
+                            <input type="text" value={item.image} onChange={(e) => handleBestSellerChange(index, 'image', e.target.value)} className="flex-1 border-gray-300 rounded-md p-2 text-sm bg-white" placeholder="https://... or /images/..." />
+                            <label className="cursor-pointer flex items-center justify-center bg-gray-200 px-4 rounded-md text-xs font-bold hover:bg-gray-300 transition-colors">
                               {uploading === `bs-${index}` ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Upload'}
                               <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, (url) => handleBestSellerChange(index, 'image', url), `bs-${index}`)} />
                             </label>
                           </div>
-                          {item.image && <img src={item.image} alt={item.name} className="mt-2 h-32 object-contain bg-white rounded-md border border-gray-200" />}
+                          {item.image && (
+                            <div className="mt-2 flex items-center gap-3">
+                              <img src={item.image} alt={item.name} className="h-24 w-24 object-contain bg-white rounded-md border border-gray-200 p-1" />
+                              <span className="text-xs text-gray-400">Image preview</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
                   ))}
+
+                  {(settings.bestSellersItems || []).length === 0 && (
+                    <div className="text-center py-8 text-gray-500 border border-dashed rounded-xl">
+                      No Best Seller jerseys added yet. Click &quot;Add Jersey&quot; above to add one.
+                    </div>
+                  )}
                 </div>
-                <SaveButton />
+
+                <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                  <button
+                    type="button"
+                    onClick={handleAddBestSeller}
+                    className="flex items-center gap-2 border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-100 transition-colors font-bold text-xs"
+                  >
+                    <Plus className="w-4 h-4" /> Add Another Jersey
+                  </button>
+                  <SaveButton />
+                </div>
               </div>
             </div>
           )}

@@ -41,6 +41,9 @@ export async function fetchProductsRest() {
     if (!data.documents) return [];
     return data.documents.map((doc: any) => {
       const p = parseFirestoreDocument(doc);
+      if (doc.name && !p.id) {
+        p.id = doc.name.split('/').pop();
+      }
       if (p.rating === 5) {
         delete p.rating;
       }
