@@ -350,6 +350,11 @@ export default function CheckoutPage() {
         items: cart,
         totalAmount: finalAmount,
         subTotal: subTotal,
+        merchandiseRevenue: subTotal - (
+          appliedCoupon && ['free_shipping', 'qty_free_shipping'].includes(appliedCoupon.discountType)
+            ? 0
+            : discountAmount
+        ),
         shippingCharges: shippingCharge || 0,
         discountAmount: discountAmount,
         couponApplied: appliedCoupon ? appliedCoupon.code : null,

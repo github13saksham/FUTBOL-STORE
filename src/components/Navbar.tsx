@@ -11,10 +11,16 @@ import {
 } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { useAuth } from "@/context/AuthContext";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "@/backend/firebase/config";
+import dynamic from "next/dynamic";
+const DiwaliFirecrackers = dynamic(() => import("@/components/DiwaliFirecrackers"), { ssr: false });
+import { AnimatedDiya, HangingLantern } from "@/components/DiwaliDecorations";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [navbarSolid, setNavbarSolid] = useState(false);
+  const [festivalEnabled, setFestivalEnabled] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -45,6 +51,20 @@ export default function Navbar() {
   } = useStore();
 
   const { user } = useAuth();
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      doc(db, "settings", "homepage"),
+      (snapshot) => setFestivalEnabled(snapshot.exists() && snapshot.data()?.festival?.enabled !== false),
+      (error) => console.error("Error listening to festival settings:", error)
+    );
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle("diwali-theme", festivalEnabled && !pathname?.startsWith("/admin"));
+    return () => document.body.classList.remove("diwali-theme");
+  }, [festivalEnabled, pathname]);
 
   // Monitor scroll for navbar blurring / solid background
   useEffect(() => {
@@ -84,8 +104,11 @@ export default function Navbar() {
 
   return (
     <>
+      {festivalEnabled && <DiwaliFirecrackers delay={500} loop={true} />}
       {/* 1. Transparent Luxury Navbar (Desktop) & Clean Header (Mobile) */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 bg-white ${
+      <nav className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 ${
+        festivalEnabled ? "bg-[#fff8ed]" : "bg-white"
+      } ${
         navbarSolid ? "shadow-sm" : ""
       }`}>
         <div className="py-2 md:py-2 px-4 md:px-12 flex justify-between items-center w-full relative min-h-[100px] md:min-h-[120px]">
@@ -206,10 +229,49 @@ export default function Navbar() {
           </div>
         </div>
 
+        {festivalEnabled && (
+          <div aria-hidden="true" className="pointer-events-none absolute left-0 right-0 top-full -translate-y-1 h-9 overflow-visible">
+            <svg className="h-full w-full" viewBox="0 0 1440 32" preserveAspectRatio="none">
+              <path d="M0 0 Q720 54 1440 0" fill="none" stroke="#166534" strokeWidth="2" />
+              {Array.from({ length: 25 }, (_, index) => {
+                const x = index * 60;
+                const y = Math.sin((Math.PI * index) / 24) * 25;
+                return (
+                  <g key={index}>
+                    <path d={`M${x} ${y} l-5 -7 l-2 5 l6 5 M${x} ${y} l5 -7 l2 5 l-6 5`} fill="#15803d" />
+                    <circle cx={x} cy={y} r="3" fill="#f97316" />
+                    <circle cx={x} cy={y} r="1" fill="#fef3c7" />
+                  </g>
+                );
+              })}
+            </svg>
+            <div className="absolute left-2 top-0">
+              <AnimatedDiya size={34} />
+            </div>
+            <div className="absolute left-[15%] top-0 hidden md:block">
+              <HangingLantern size={24} />
+            </div>
+            <div className="absolute left-[35%] top-0 hidden lg:block">
+              <AnimatedDiya size={26} />
+            </div>
+            <div className="absolute right-[35%] top-0 hidden lg:block">
+              <AnimatedDiya size={26} />
+            </div>
+            <div className="absolute right-[15%] top-0 hidden md:block">
+              <HangingLantern size={24} />
+            </div>
+            <div className="absolute right-2 top-0">
+              <AnimatedDiya size={34} />
+            </div>
+          </div>
+        )}
+
       </nav>
 
       {/* 2. Fixed Bottom Navigation Bar (Mobile Only) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-black border-t border-neutral-900 flex justify-around items-center py-2 px-4 pb-safe shadow-[0_-2px_10px_rgba(0,0,0,0.5)]">
+      <div className={`md:hidden fixed bottom-0 left-0 right-0 z-40 ${
+        festivalEnabled ? "bg-[#7f1d1d] border-amber-400/40" : "bg-black border-neutral-900"
+      } border-t flex justify-around items-center py-2 px-4 pb-safe shadow-[0_-2px_10px_rgba(0,0,0,0.5)]`}>
         <Link href="/" className="flex flex-col items-center gap-1 text-white/80 hover:text-white">
           <svg className="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
           <span className="text-[10px] font-medium">Home</span>

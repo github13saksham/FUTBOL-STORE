@@ -6,9 +6,12 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useStore } from "@/context/StoreContext";
+import { AnimatedDiya, HangingLantern, DiwaliFestiveRibbon } from "@/components/DiwaliDecorations";
 
 export default function AboutUsPage() {
   const router = useRouter();
+  const { festivalEnabled } = useStore();
   const focuses = [
     {
       icon: ShieldCheck,
@@ -43,23 +46,40 @@ export default function AboutUsPage() {
   ];
 
   return (
-    <div className="min-h-screen text-luxury-dark bg-[#FFEEE2] selection:bg-luxury-taupe selection:text-luxury-ivory">
+    <div className={`min-h-screen text-luxury-dark selection:bg-luxury-taupe selection:text-luxury-ivory ${festivalEnabled ? 'bg-gradient-to-r from-[#7f1d1d] via-[#b45309] to-[#7f1d1d]' : 'bg-[#FFEEE2]'}`}>
       
       {/* 1. Immersive Editorial Header */}
-      <section className="relative w-full pt-60 pb-3  md:pb-24 px-6 md:px-12 max-w-7xl mx-auto overflow-hidden">
+      <section className="relative w-full pt-48 md:pt-56 pb-3 md:pb-16 px-6 md:px-12 max-w-7xl mx-auto overflow-hidden">
         {/* Glow beams */}
         <div className="absolute right-[5%] top-[10%] w-[350px] h-[350px] bg-luxury-taupe/10 rounded-full blur-[80px] pointer-events-none" />
         <div className="absolute left-[5%] bottom-[10%] w-[300px] h-[300px] bg-luxury-sage/10 rounded-full blur-[70px] pointer-events-none" />
 
-        <div className="text-center max-w-4xl mx-auto space-y-8 relative z-10">
-          <motion.span 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-4xl font-sans md:text-[43px] uppercase tracking-widest md:tracking-[0.35em] text-black font-bold block"
-          >
-            OUR JOURNEY
-          </motion.span>
+        {festivalEnabled && (
+          <div className="flex justify-center items-center gap-6 mb-6">
+            <HangingLantern size={32} />
+            <AnimatedDiya size={48} />
+            <HangingLantern size={32} />
+          </div>
+        )}
+
+        <div className="text-center max-w-4xl mx-auto space-y-6 relative z-10">
+          <div className="flex items-center justify-center gap-3">
+            <motion.span 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className={`text-4xl font-sans md:text-[43px] uppercase tracking-widest md:tracking-[0.35em] font-bold block ${festivalEnabled ? 'text-white' : 'text-black'}`}
+            >
+              OUR JOURNEY
+            </motion.span>
+          </div>
+
+          {festivalEnabled && (
+            <DiwaliFestiveRibbon
+              title="Warning: Your cart might get a little too festive."
+              subtitle="Unmissable Diwali deals on your favourite jerseys."
+            />
+          )}
           
           
 
@@ -67,7 +87,7 @@ export default function AboutUsPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
-            className="text-base md:text-xl text-luxury-dark/80 leading-relaxed font-sans font-light max-w-4xl mx-auto text-justify"
+            className={`text-base md:text-xl leading-relaxed font-sans font-light max-w-4xl mx-auto text-justify ${festivalEnabled ? 'text-amber-50/90' : 'text-luxury-dark/80'}`}
           >
          
           </motion.p>
@@ -82,10 +102,10 @@ export default function AboutUsPage() {
           <div className="lg:col-span-6  space-y-6">
             
             
-            <p className="text-sm md:text-base leading-relaxed text-luxury-charcoal/80 mb-6 font-sans">
+            <p className={`text-sm md:text-base leading-relaxed mb-6 font-sans ${festivalEnabled ? 'text-amber-50/90' : 'text-luxury-charcoal/80'}`}>
               Founded in September 2024 by Krish, THE FÚTBOL STORE started with a simple passion for Football and the dream of creating a place where fans could proudly wear the colors of the teams they love. For us, Football is more than just a game — it’s emotion, memories, loyalty, and unforgettable moments that connect millions of fans around the world.
             </p>
-            <p className="text-sm md:text-base leading-relaxed text-luxury-charcoal/80 font-sans">
+            <p className={`text-sm md:text-base leading-relaxed font-sans ${festivalEnabled ? 'text-amber-50/90' : 'text-luxury-charcoal/80'}`}>
               From iconic club kits to the latest international collections, we aim to provide premium-quality Football jerseys that help supporters feel closer to the game they live for. Whether you support or your national team, every jersey represents passion and identity. From iconic home kits to the latest 2026 collections, our goal is to deliver high-quality jerseys that let fans represent their favorite teams with pride and style. Whether you support iconic clubs, rising giants, your favorite players, or your national team, we aim to make every jersey feel special for every Football lover.
             </p>
             <div className="pt-4">
@@ -157,17 +177,17 @@ export default function AboutUsPage() {
       </section>
 
       {/* 4. The Manifesto Banner */}
-      <section className="py-16 md:py-32 px-6 md:px-12 bg-[#FFEEE2] relative overflow-hidden border-b border-luxury-taupe/15">
+      <section className={`py-16 md:py-32 px-6 md:px-12 relative overflow-hidden border-b ${festivalEnabled ? 'bg-gradient-to-r from-[#7f1d1d] via-[#b45309] to-[#7f1d1d] border-amber-200/20' : 'bg-[#FFEEE2] border-luxury-taupe/15'}`}>
         <div className="max-w-4xl mx-auto text-center space-y-8 relative z-10">
-          <span className="text-xs uppercase tracking-[0.3em] text-luxury-taupe font-bold block">The Manifesto</span>
+          <span className={`text-xs uppercase tracking-[0.3em] font-bold block ${festivalEnabled ? 'text-amber-200' : 'text-luxury-taupe'}`}>The Manifesto</span>
           
-          <h2 className="text-2xl md:text-4xl font-serif font-light text-luxury-dark leading-snug">
-            "Football is more than just a game — it’s <span className="italic font-medium text-luxury-taupe">emotion</span>, culture, loyalty, and <span className="italic font-medium text-luxury-taupe">passion</span>. Our mission is to help fans wear that passion every day."
+          <h2 className={`text-2xl md:text-4xl font-serif font-light leading-snug ${festivalEnabled ? 'text-white' : 'text-luxury-dark'}`}>
+            "Football is more than just a game — it’s <span className={`italic font-medium ${festivalEnabled ? 'text-amber-200' : 'text-luxury-taupe'}`}>emotion</span>, culture, loyalty, and <span className={`italic font-medium ${festivalEnabled ? 'text-amber-200' : 'text-luxury-taupe'}`}>passion</span>. Our mission is to help fans wear that passion every day."
           </h2>
 
-          <div className="h-[1px] bg-luxury-taupe/20 w-32 mx-auto my-6" />
+          <div className={`h-[1px] w-32 mx-auto my-6 ${festivalEnabled ? 'bg-amber-200/40' : 'bg-luxury-taupe/20'}`} />
 
-          <p className="text-xs uppercase tracking-[0.25em] text-luxury-taupe font-bold">
+          <p className={`text-xs uppercase tracking-[0.25em] font-bold ${festivalEnabled ? 'text-amber-100' : 'text-luxury-taupe'}`}>
             Thank you for being part of THE FÚTBOL STORE family. 
           </p>
         </div>

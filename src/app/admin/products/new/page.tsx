@@ -26,6 +26,7 @@ function SingleProductForm() {
     category: 'Player Version', // Re-mapped to Version
     rating: 5,
     price: 0,
+    costPrice: '',
     priceStr: '₹0',
     comparePrice: 0,
     image: '',
@@ -54,6 +55,7 @@ function SingleProductForm() {
       if (product) {
         setFormData({
           ...product,
+          costPrice: product.costPrice ?? '',
           inventory: product.inventory || { S: 0, M: 0, L: 0, XL: 0, '2XL': 0 },
           rating: (product as any).rating || 5,
           lowStockThreshold: (product as any).lowStockThreshold || 5,
@@ -86,6 +88,8 @@ function SingleProductForm() {
         price: priceNum,
         priceStr: `₹${priceNum.toLocaleString('en-IN')}`
       }));
+    } else if (name === 'costPrice') {
+      setFormData((prev: any) => ({ ...prev, costPrice: value === '' ? '' : Number(value) }));
     } else if (name === 'comparePrice' || name === 'lowStockThreshold' || name === 'rating') {
       setFormData((prev: any) => ({ ...prev, [name]: Number(value) }));
     } else {
@@ -138,8 +142,10 @@ function SingleProductForm() {
     const totalStock = Object.values(formData.inventory).reduce((sum: number, val: any) => sum + (Number(val) || 0), 0);
     const inStock = totalStock > 0;
 
+    const { costPrice, ...productData } = formData;
     const dataToSave = {
-      ...formData,
+      ...productData,
+      ...(costPrice === '' || costPrice === undefined ? {} : { costPrice: Number(costPrice) }),
       inStock
     };
 
@@ -305,6 +311,19 @@ function SingleProductForm() {
                     required
                     value={formData.price || ''} 
                     onChange={handleChange}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Unit Cost (₹)</label>
+                  <input
+                    type="number"
+                    name="costPrice"
+                    min="0"
+                    step="0.01"
+                    value={formData.costPrice ?? ''}
+                    onChange={handleChange}
+                    placeholder="Used to calculate profit"
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-black outline-none focus:bg-white focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
                   />
                 </div>

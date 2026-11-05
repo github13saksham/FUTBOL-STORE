@@ -8,12 +8,14 @@ import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 import { useStore } from "@/context/StoreContext";
+import { AnimatedDiya, HangingLantern, DiwaliFestiveRibbon, FestiveDarkBackgroundDecor } from "@/components/DiwaliDecorations";
+import { getProductDisplayPrice } from "@/utils/priceUtils";
 
 export default function NationalTeamsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { products, wishlist, toggleWishlist, setQuickAddProduct } = useStore();
+  const { products, wishlist, toggleWishlist, setQuickAddProduct, festivalEnabled } = useStore();
   const [versionFilter, setVersionFilter] = useState<string>("player");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
@@ -51,19 +53,43 @@ export default function NationalTeamsPage() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col text-luxury-dark bg-[#FFEEE2] pt-40 selection:bg-luxury-taupe selection:text-luxury-ivory">
+    <div className={`min-h-screen flex flex-col text-luxury-dark pt-40 selection:bg-luxury-taupe selection:text-luxury-ivory ${festivalEnabled ? 'bg-gradient-to-r from-[#7f1d1d] via-[#b45309] to-[#7f1d1d]' : 'bg-[#FFEEE2]'}`}>
       
       {/* 1. Page Header Section */}
-      <section className="w-full max-w-7xl mx-auto px-6 md:px-12 mb-8 relative z-10 flex justify-start">
+      <section className="w-full max-w-7xl mx-auto px-6 md:px-12 mb-8 relative z-10 flex flex-col justify-start">
         <div className="absolute right-[5%] top-[-20%] w-[350px] h-[350px] bg-luxury-cream/15 rounded-full blur-[80px] pointer-events-none" />
-        <div className="w-full  space-y-4 flex flex-col items-start text-left">
-          <span className="text-[12px]  uppercase tracking-[0.3em] text-luxury-dark font-bold block">
-            ACTIVE RELEASE
-          </span>
-          <h1 className="text-5xl md:text-8xl font-serif font-light text-luxury-dark tracking-tight leading-none">
-            National <span className="italic font-medium text-luxury-dark">Teams</span>
+        
+        {festivalEnabled && (
+          <div className="absolute right-6 top-0 hidden md:flex items-center gap-6 pointer-events-none">
+            <HangingLantern size={28} />
+            <AnimatedDiya size={46} />
+            <HangingLantern size={28} />
+          </div>
+        )}
+
+        <div className="w-full space-y-4 flex flex-col items-start text-left">
+          <div className="flex items-center gap-3">
+            <span className={`text-[12px] uppercase tracking-[0.3em] font-bold block ${festivalEnabled ? 'text-amber-100' : 'text-luxury-dark'}`}>
+              ACTIVE RELEASE
+            </span>
+            {festivalEnabled && (
+              <span className="inline-flex items-center gap-1.5 diwali-badge-glow text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-sm">
+                <span>🪔</span>
+                <span>Diwali Edition</span>
+              </span>
+            )}
+          </div>
+          <h1 className={`text-5xl md:text-8xl font-serif font-light tracking-tight leading-none ${festivalEnabled ? 'text-white' : 'text-luxury-dark'}`}>
+            National <span className={`italic font-medium ${festivalEnabled ? 'text-amber-100' : 'text-luxury-dark'}`}>Teams</span>
           </h1>
         </div>
+
+        {festivalEnabled && (
+          <DiwaliFestiveRibbon 
+            title="Warning: Your cart might get a little too festive." 
+            subtitle="Unmissable Diwali deals on your favourite jerseys."
+          />
+        )}
       </section>
 
     
@@ -71,13 +97,13 @@ export default function NationalTeamsPage() {
       <section className="w-full max-w-7xl mx-auto px-6 md:px-12 flex justify-end md:justify-start">
         <div className="w-full relative flex justify-end md:justify-start pb-6 border-b border-luxury-taupe/15">
           <div className="relative flex items-center gap-3">
-            <span className="text-[10px] md:text-xs uppercase tracking-widest font-semibold text-luxury-dark">
+            <span className={`text-[10px] md:text-xs uppercase tracking-widest font-semibold ${festivalEnabled ? 'text-amber-100' : 'text-luxury-dark'}`}>
               Jersey Type:
             </span>
             <button
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="inline-flex justify-between items-center w-40 md:w-64 rounded-full border border-luxury-taupe/30 bg-white/40 px-4 py-2 md:px-6 md:py-3 text-[10px] md:text-xs uppercase tracking-widest font-semibold text-luxury-dark shadow-sm hover:bg-white focus:outline-none transition-colors duration-300"
+              className="inline-flex justify-between items-center w-40 md:w-64 rounded-full border border-luxury-taupe/30 bg-white/90 px-4 py-2 md:px-6 md:py-3 text-[10px] md:text-xs uppercase tracking-widest font-semibold text-luxury-dark shadow-sm hover:bg-white focus:outline-none transition-colors duration-300"
             >
               {versionFilter === "player" ? "Player Version" : "Fan Version"}
               <ChevronDown className={`-mr-1 ml-2 h-4 w-4 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
@@ -130,8 +156,9 @@ export default function NationalTeamsPage() {
       </section>
 
       {/* 4. Products Grid */}
-      <div className="w-full flex-grow bg-[#121212] pt-16 pb-24">
-        <section className="max-w-7xl mx-auto px-6 md:px-12">
+      <div className="w-full flex-grow bg-[#121212] pt-16 pb-24 relative overflow-hidden festive-dark-ambient">
+        {festivalEnabled && <FestiveDarkBackgroundDecor />}
+        <section className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           {filteredProducts.length === 0 ? (
             <div className="text-center py-24 space-y-4">
               <ShieldAlert className="w-12 h-12 text-white/40 mx-auto" />
@@ -170,6 +197,12 @@ export default function NationalTeamsPage() {
 
                   {/* Tags Container */}
                   <div className="absolute top-3 left-3 flex flex-col gap-1 z-20 pointer-events-none">
+                    {festivalEnabled && (
+                      <div className="diwali-badge-glow text-white text-[8px] md:text-[9px] uppercase tracking-widest font-black px-2 py-1 rounded shadow flex items-center gap-1 w-max">
+                        <span>🪔</span>
+                        <span>{product.diwaliOffer?.badgeText || 'DIWALI SALE'}</span>
+                      </div>
+                    )}
                     {product.visibility?.newArrival && (
                       <div className="bg-white text-black text-[8px] md:text-[9px] uppercase tracking-widest font-bold px-2 py-1 rounded shadow-sm w-max">
                         New Arrival
@@ -227,29 +260,30 @@ export default function NationalTeamsPage() {
 
                   <div className="flex justify-between items-end pb-1 border-b border-white/20 pt-1 md:pt-0 gap-1">
                     <div className="flex flex-col min-w-0">
-                      <div className="h-5 md:h-6 flex items-center">
-                        {(() => {
-                          const compPrice = product.comparePrice || 0;
-                          const currentPrice = product.price || 0;
-                          if (compPrice > currentPrice) {
-                            const percentOff = Math.round(((compPrice - currentPrice) / compPrice) * 100);
-                            return (
-                              <div className="flex items-center gap-1 md:gap-1.5 whitespace-nowrap shrink-0">
-                                <span className="font-sans text-[10px] md:text-sm text-white/50 line-through">
-                                  ₹{compPrice}
-                                </span>
-                                <span className="font-sans text-[8px] md:text-xs text-luxury-taupe font-bold tracking-wider">
-                                  {percentOff}% OFF
-                                </span>
-                              </div>
-                            );
-                          }
-                          return null;
-                        })()}
-                      </div>
-                      <span className="font-serif text-base md:text-lg text-white font-medium leading-none mt-1 whitespace-nowrap">
-                        {product.priceStr}
-                      </span>
+                      {(() => {
+                        const pricing = getProductDisplayPrice(product, festivalEnabled);
+                        return (
+                          <>
+                            <div className="h-5 md:h-6 flex items-center">
+                              {pricing.effectiveComparePrice && pricing.effectiveComparePrice > pricing.effectivePrice ? (
+                                <div className="flex items-center gap-1 md:gap-1.5 whitespace-nowrap shrink-0">
+                                  <span className="font-sans text-[10px] md:text-sm text-white/50 line-through">
+                                    ₹{pricing.effectiveComparePrice}
+                                  </span>
+                                  <span className={`font-sans text-[8px] md:text-xs font-bold tracking-wider ${
+                                    pricing.isDiwaliOffer ? 'text-amber-400 font-black' : 'text-luxury-taupe'
+                                  }`}>
+                                    {pricing.percentOff}% OFF
+                                  </span>
+                                </div>
+                              ) : null}
+                            </div>
+                            <span className="font-serif text-base md:text-lg text-white font-medium leading-none mt-1 whitespace-nowrap">
+                              {pricing.priceStr}
+                            </span>
+                          </>
+                        );
+                      })()}
                     </div>
                     <Link
                       href={`/product/${product.id}`}

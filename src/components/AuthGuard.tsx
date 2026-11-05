@@ -32,29 +32,48 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   }, [user, loading, pathname, router, mounted, isProtectedRoute]);
 
   // Show the logo loading screen globally while the app is mounting or auth is loading
-  // This provides a professional splash screen effect.
+  // This provides a professional splash screen effect with upscale branding and sparkling line indicator.
   if (!mounted || loading) {
     return (
       <LazyMotion features={domMax}>
-        <div className="min-h-screen bg-white flex items-center justify-center z-50 fixed inset-0">
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center z-50 fixed inset-0 px-6">
           <m.div
-            initial={{ opacity: 1, scale: 1 }}
-            animate={{ opacity: [1, 0.3, 1], scale: [1, 0.95, 1] }}
+            initial={{ opacity: 0.9, scale: 0.97 }}
+            animate={{ 
+              opacity: [0.9, 1, 0.9],
+              scale: [0.97, 1.02, 0.97],
+            }}
             transition={{
-              duration: 0.8,
+              duration: 2.4,
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="relative w-20 h-20 md:w-28 md:h-28"
+            className="relative w-56 h-36 sm:w-72 sm:h-44 md:w-80 md:h-48 drop-shadow-sm flex items-center justify-center"
           >
             <Image
               src="/logo.png"
-              alt="Loading..."
+              alt="The Futbol Store"
               fill
               style={{ objectFit: 'contain' }}
               priority
+              quality={100}
             />
           </m.div>
+
+          {/* Diwali Cracker Burning Fuse Indicator */}
+          <div className="mt-8 flex flex-col items-center gap-3 w-64 sm:w-80">
+            <div className="w-full cracker-fuse-track">
+              <div className="cracker-fuse-burning">
+                <span className="cracker-spark-flame" />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase tracking-[0.35em] text-neutral-600 font-bold">
+                Igniting Store
+              </span>
+              <span className="text-xs">💥</span>
+            </div>
+          </div>
         </div>
       </LazyMotion>
     );

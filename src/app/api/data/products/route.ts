@@ -23,6 +23,7 @@ export async function GET() {
     const sanitized = products.map((p: any) => {
       const sp = { ...p };
       delete sp.rating;
+      delete sp.costPrice;
       return sp;
     });
 

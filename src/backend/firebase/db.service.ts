@@ -9,7 +9,7 @@ export class FirebaseDatabaseService implements IDatabaseService {
    * For now, this returns mock data if the database is empty or not yet seeded.
    * Ideally, this will pull from the `products` collection.
    */
-  async getProducts(): Promise<Product[]> {
+  async getProducts(onError?: (error: Error) => void): Promise<Product[]> {
     try {
       const q = query(collection(db, "products"));
       const querySnapshot = await getDocs(q);
@@ -28,6 +28,7 @@ export class FirebaseDatabaseService implements IDatabaseService {
       });
     } catch (error) {
       console.error("Error fetching products from Firestore:", error);
+      onError?.(error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -322,7 +323,7 @@ export class FirebaseDatabaseService implements IDatabaseService {
     }
   }
 
-  listenToAllOrders(callback: (orders: any[]) => void): () => void {
+  listenToAllOrders(callback: (orders: any[]) => void, onError?: (error: Error) => void): () => void {
     const q = query(collection(db, "orders"));
     return onSnapshot(q, (querySnapshot) => {
       const orders: any[] = [];
@@ -332,6 +333,7 @@ export class FirebaseDatabaseService implements IDatabaseService {
       callback(orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
     }, (error) => {
       console.error("Error listening to orders:", error);
+      onError?.(error);
     });
   }
 

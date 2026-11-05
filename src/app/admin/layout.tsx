@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, ArrowLeft, Menu, X, ShoppingBag, LayoutTemplate, LogOut, Ticket, Database, Star, Truck } from 'lucide-react';
+import { LayoutDashboard, Package, ArrowLeft, Menu, X, ShoppingBag, LayoutTemplate, LogOut, Ticket, Database, Star, Truck, Sparkles, BarChart3 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FirebaseDatabaseService } from '@/backend/firebase/db.service';
 
@@ -26,11 +26,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navItems = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+    { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingBag, badge: newOrderCount > 0 ? newOrderCount : undefined },
     { name: 'Products', href: '/admin/products', icon: Package, alert: true }, // Mock alert for low stock
     { name: 'Shipment Details', href: '/admin/shipments', icon: Truck },
     { name: 'Coupons', href: '/admin/coupons', icon: Ticket },
     { name: 'Reviews', href: '/admin/reviews', icon: Star },
+    { name: 'Diwali Offer Pricing', href: '/admin/diwali-offers', icon: Sparkles },
     { name: 'Homepage Manager', href: '/admin/homepage', icon: LayoutTemplate },
     { name: 'Database', href: '/admin/database', icon: Database },
   ];

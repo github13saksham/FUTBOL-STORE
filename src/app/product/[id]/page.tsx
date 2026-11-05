@@ -13,6 +13,8 @@ import {
 import { useStore } from "@/context/StoreContext";
 import { Product, BEST_SELLERS, CLUB_PRODUCTS } from "@/data/mockData";
 import { FirebaseDatabaseService } from "@/backend/firebase/db.service";
+import { getProductDisplayPrice } from "@/utils/priceUtils";
+import { AnimatedDiya, FestiveDarkBackgroundDecor } from "@/components/DiwaliDecorations";
 
 const dbService = new FirebaseDatabaseService();
 
@@ -28,7 +30,8 @@ export default function ProductPage() {
     wishlist,
     toggleWishlist,
     addToCart,
-    setSizeGuideOpen
+    setSizeGuideOpen,
+    festivalEnabled
   } = useStore();
 
   // Find product
@@ -187,7 +190,14 @@ export default function ProductPage() {
     // Add to cart with custom options
     const printName = showPersonalisation && customName.trim() ? customName.toUpperCase() : undefined;
     const printNumber = showPersonalisation && customNumber.trim() ? customNumber : undefined;
-    addToCart(product, selectedSize, printName, printNumber, quantity);
+    
+    // Resolve dynamic Diwali pricing if enabled
+    const pricing = getProductDisplayPrice(product, festivalEnabled);
+    const cartProduct = pricing.isDiwaliOffer
+      ? { ...product, price: pricing.effectivePrice, priceStr: pricing.priceStr }
+      : product;
+
+    addToCart(cartProduct, selectedSize, printName, printNumber, quantity);
   };
 
   const handlePincodeCheck = (e: React.FormEvent) => {
@@ -209,9 +219,11 @@ export default function ProductPage() {
   };
 
   return (
-    <div className="min-h-screen text-luxury-ivory bg-[#0B0B0C] pt-32 pb-24 selection:bg-white selection:text-black">
+    <div className="min-h-screen text-luxury-ivory bg-[#0B0B0C] pt-32 pb-24 selection:bg-white selection:text-black relative overflow-hidden festive-dark-ambient">
+      {festivalEnabled && <FestiveDarkBackgroundDecor />}
+      
       {/* 1. Breadcrumbs / Return Link */}
-      <nav className="max-w-6xl mx-auto px-6 md:px-12 mb-8 flex justify-between items-center text-[10px] uppercase tracking-widest font-semibold text-white/90">
+      <nav className="max-w-6xl mx-auto px-6 md:px-12 mb-8 flex justify-between items-center text-[10px] uppercase tracking-widest font-semibold text-white/90 relative z-10">
         <button
           onClick={() => router.back()}
           className="flex items-center gap-2 hover:text-white transition-colors duration-300"
@@ -226,7 +238,7 @@ export default function ProductPage() {
       </nav>
 
       {/* 2. Main Visual Layout Container */}
-      <main className="max-w-6xl mx-auto px-6 space-y-12">
+      <main className="max-w-6xl mx-auto px-6 space-y-12 relative z-10">
         <div className="grid md:grid-cols-12 gap-10 items-start">
           
           {/* A. Product Image Card Showcase (Left on Desktop, Top on Mobile) */}
@@ -262,11 +274,25 @@ export default function ProductPage() {
           <div className="md:col-span-5 space-y-6">
             
             {/* Stock Urgency Alert Indicator */}
-            {product.inStock === false && (
-              <div className="inline-block bg-red-900/80 border border-red-500/50 text-red-100 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded mb-2">
-                Out of Stock
-              </div>
-            )}
+            {(() => {
+              const pricing = getProductDisplayPrice(product, festivalEnabled);
+              return (
+                <>
+                  {pricing.isDiwaliOffer && (
+                    <div className="inline-flex items-center gap-2 diwali-badge-glow text-white text-[11px] font-black uppercase tracking-widest px-3.5 py-1.5 rounded-lg mb-2 w-max shadow-md border border-amber-300/30">
+                      <span>🪔</span>
+                      <span>{pricing.badgeText || "Diwali Special Offer"}</span>
+                      <span>✨</span>
+                    </div>
+                  )}
+                  {product.inStock === false && (
+                    <div className="inline-block bg-red-900/80 border border-red-500/50 text-red-100 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded mb-2">
+                      Out of Stock
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
             {/* Title & Price */}
             <div className="space-y-1 text-left">
@@ -300,26 +326,29 @@ export default function ProductPage() {
 
               <div className="flex items-end gap-3 mt-3">
                 {(() => {
-                  const compPrice = product.comparePrice || 0;
-                  const currentPrice = product.price || 0;
-                  if (compPrice > currentPrice) {
-                    const percentOff = Math.round(((compPrice - currentPrice) / compPrice) * 100);
-                    return (
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-base font-sans text-white/50 line-through">
-                          ₹{compPrice}
-                        </span>
-                        <span className="text-sm font-sans text-luxury-taupe font-bold tracking-wider px-2 py-0.5 rounded bg-luxury-taupe/10 border border-luxury-taupe/20">
-                          {percentOff}% OFF
-                        </span>
-                      </div>
-                    );
-                  }
-                  return null;
+                  const pricing = getProductDisplayPrice(product, festivalEnabled);
+                  return (
+                    <>
+                      {pricing.effectiveComparePrice && pricing.effectiveComparePrice > pricing.effectivePrice ? (
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-base font-sans text-white/50 line-through">
+                            ₹{pricing.effectiveComparePrice}
+                          </span>
+                          <span className={`text-sm font-sans font-bold tracking-wider px-2 py-0.5 rounded ${
+                            pricing.isDiwaliOffer 
+                              ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40 font-black' 
+                              : 'text-luxury-taupe bg-luxury-taupe/10 border border-luxury-taupe/20'
+                          }`}>
+                            {pricing.percentOff}% OFF
+                          </span>
+                        </div>
+                      ) : null}
+                      <span className="text-2xl font-serif font-semibold text-white block">
+                        ₹{pricing.effectivePrice.toFixed(0)}
+                      </span>
+                    </>
+                  );
                 })()}
-                <span className="text-xl font-serif font-semibold text-white block">
-                  ₹{product.price.toFixed(0)}
-                </span>
               </div>
             </div>
 

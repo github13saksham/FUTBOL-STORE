@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FirebaseDatabaseService } from '@/backend/firebase/db.service';
-import { Save, Loader2, Upload, LayoutGrid, LayoutTemplate, Link as LinkIcon, Image as ImageIcon, Search, Video, Monitor, Smartphone, Tablet, Flag, Shield, Plus, Trash2, Palette, ChevronRight } from 'lucide-react';
+import { Save, Loader2, Upload, LayoutGrid, LayoutTemplate, Link as LinkIcon, Image as ImageIcon, Search, Video, Monitor, Smartphone, Tablet, Flag, Shield, Plus, Trash2, Palette, ChevronRight, Sparkles } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/backend/firebase/config';
 import { motion } from 'framer-motion';
@@ -149,6 +149,9 @@ export default function HomepageManagerPage() {
   ];
 
   const [settings, setSettings] = useState({
+    festival: {
+      enabled: true,
+    },
     banner: {
       enabled: true,
       text: 'Get Flat ₹100 OFF on all orders above ₹999.'
@@ -266,6 +269,8 @@ export default function HomepageManagerPage() {
         }
         if (!data.bestSellersItems) data.bestSellersItems = defaultBestSellers;
         if (!data.banner) data.banner = { enabled: true, text: 'Get Flat ₹100 OFF on all orders above ₹999.' };
+        if (!data.festival) data.festival = { enabled: true };
+        else data.festival.enabled = data.festival.enabled !== false;
         if (!data.styling) data.styling = { textSize: 100, sectionPadding: 100 };
         if (!data.collectionPromo) {
           data.collectionPromo = {
@@ -320,6 +325,22 @@ export default function HomepageManagerPage() {
     } catch (error) {
       console.error("Error saving homepage settings:", error);
       alert('Failed to save settings.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleFestivalToggle = async () => {
+    if (saving) return;
+
+    const enabled = !settings.festival.enabled;
+    setSaving(true);
+    try {
+      await setDoc(doc(db, 'settings', 'homepage'), { festival: { enabled } }, { merge: true });
+      setSettings(prev => ({ ...prev, festival: { enabled } }));
+    } catch (error) {
+      console.error("Error updating festival mode:", error);
+      alert("Failed to update festival mode.");
     } finally {
       setSaving(false);
     }
@@ -488,6 +509,7 @@ export default function HomepageManagerPage() {
     );
   }
 
+
   // Common Save Button for reuse in tabs
   const SaveButton = () => (
     <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end">
@@ -518,6 +540,38 @@ export default function HomepageManagerPage() {
           {saving ? 'Saving...' : 'Publish Changes'}
         </button>
       </div>
+
+      <section className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 via-orange-50 to-red-50 p-5 shadow-sm">
+        <div className="flex items-start gap-3">
+          <div className="rounded-lg bg-amber-100 p-2 text-amber-800">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="font-bold text-gray-900">Diwali festive mode</h2>
+            <p className="mt-1 max-w-2xl text-sm text-gray-600">
+              {settings.festival.enabled
+                ? 'The Diwali desktop/mobile hero, festive navbar decor, and seasonal styling are live.'
+                : 'Enable the temporary Diwali hero, navbar decor, and festive styling across the storefront.'}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={settings.festival.enabled}
+          aria-label="Diwali festive mode"
+          onClick={handleFestivalToggle}
+          disabled={saving}
+          className={`inline-flex shrink-0 items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-bold transition-colors disabled:cursor-wait disabled:opacity-60 ${
+            settings.festival.enabled ? 'bg-emerald-700 text-white hover:bg-emerald-800' : 'bg-gray-900 text-white hover:bg-black'
+          }`}
+        >
+          <span>{saving ? 'Updating...' : settings.festival.enabled ? 'On' : 'Off'}</span>
+          <span className={`relative h-5 w-9 rounded-full transition-colors ${settings.festival.enabled ? 'bg-emerald-500' : 'bg-gray-500'}`}>
+            <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${settings.festival.enabled ? 'translate-x-4' : 'translate-x-0.5'}`} />
+          </span>
+        </button>
+      </section>
 
       <div className="flex flex-col lg:flex-row gap-8">
 
@@ -1400,4 +1454,3 @@ export default function HomepageManagerPage() {
     </div>
   );
 }
-

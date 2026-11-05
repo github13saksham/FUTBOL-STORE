@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { Product, Club } from "@/data/mockData";
 import { dbService } from "@/backend";
 import { useAuth } from "./AuthContext";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "@/backend/firebase/config";
 
 export interface CartItem {
   id: string;
@@ -42,6 +44,7 @@ interface StoreContextType {
   toggleWishlist: (id: string) => void;
   getCartTotal: () => number;
   clearCart: () => void;
+  festivalEnabled: boolean;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -50,11 +53,21 @@ export default function StoreProvider({ children, initialProducts = [], initialC
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [clubs, setClubs] = useState<Club[]>(initialClubs);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [festivalEnabled, setFestivalEnabled] = useState(false);
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const { user, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      doc(db, "settings", "homepage"),
+      (snapshot) => setFestivalEnabled(snapshot.exists() && snapshot.data()?.festival?.enabled !== false),
+      (error) => console.error("Error listening to festival settings:", error)
+    );
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -306,6 +319,7 @@ export default function StoreProvider({ children, initialProducts = [], initialC
         toggleWishlist,
         getCartTotal,
         clearCart,
+        festivalEnabled,
       }}
     >
       {children}

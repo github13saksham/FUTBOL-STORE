@@ -3,6 +3,7 @@ export interface Product {
   name: string;
   club: string;
   price: number;
+  costPrice?: number;
   comparePrice?: number;
   priceStr: string;
   image: string;
@@ -18,6 +19,12 @@ export interface Product {
     featured: boolean;
     bestSeller: boolean;
     newArrival: boolean;
+  };
+  diwaliOffer?: {
+    enabled?: boolean;
+    discountPrice?: number;
+    comparePrice?: number;
+    badgeText?: string;
   };
 }
 

@@ -15,6 +15,8 @@ import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import { useStore } from "@/context/StoreContext";
 import { FAQS } from "@/data/mockData";
 import { useRouter } from "next/navigation";
+import { getProductDisplayPrice } from "@/utils/priceUtils";
+import { AnimatedDiya, HangingLantern } from "@/components/DiwaliDecorations";
 
 export default function HomepageClient({ initialSettings, isPreview = false }: { initialSettings: any, isPreview?: boolean }) {
   const bestSellersRef = useRef<HTMLDivElement>(null);
@@ -36,6 +38,7 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
   } = useStore();
 
   const [homepageSettings, setHomepageSettings] = useState<any>(initialSettings);
+  const festivalEnabled = Boolean(homepageSettings) && homepageSettings?.festival?.enabled !== false;
 
   useEffect(() => {
     // Check if we are in preview mode
@@ -195,8 +198,12 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
       >
 
         {/* Promo Banner */}
-        {(homepageSettings?.banner?.enabled ?? true) && (
-          <div className="w-full bg-black text-white overflow-hidden z-40 border-b border-white/10 mt-[100px] md:mt-[120px]">
+        {homepageSettings?.banner?.enabled !== false && (
+          <div className={`w-full text-white overflow-hidden z-40 border-b border-white/10 mt-[100px] md:mt-[120px] ${
+            festivalEnabled
+              ? 'bg-gradient-to-r from-[#7f1d1d] via-[#b45309] to-[#166534]'
+              : 'bg-black'
+          }`}>
 
             <div className="flex whitespace-nowrap py-2.5 md:py-3 w-full">
               <div className="animate-marquee flex w-max">
@@ -212,29 +219,77 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
           </div>
         )}
 
+        {festivalEnabled && (
+          <section
+            aria-label="Diwali festival hero"
+            className={`relative w-full overflow-hidden ${
+              homepageSettings?.banner?.enabled === false ? 'mt-[100px] md:mt-[120px]' : ''
+            } ${isPreview ? 'h-[720px] md:h-[900px]' : 'min-h-[100svh]'}`}
+          >
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              className="hidden md:block absolute inset-0 w-full h-full object-cover"
+            >
+              <source src="/diwali/diwali-desktop.mp4" type="video/mp4" />
+            </video>
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              className="block md:hidden absolute inset-0 w-full h-full object-cover"
+            >
+              <source src="/diwali/diwali-mobile.mp4" type="video/mp4" />
+            </video>
+          </section>
+        )}
+
         {/* 2. Cinematic Hero Section */}
-        <section className={`relative w-full flex flex-col justify-center items-start overflow-hidden py-[calc(var(--pad-scale,1)*6rem)] md:py-[calc(var(--pad-scale,1)*8rem)] px-6 md:px-12 lg:px-24 ${isPreview ? 'h-[720px] md:h-[900px]' : 'min-h-[100svh]'}`}>
+        <section className={`${festivalEnabled ? 'hidden' : ''} relative w-full flex flex-col justify-center items-start overflow-hidden ${
+          homepageSettings?.banner?.enabled === false ? 'mt-[100px] md:mt-[120px]' : ''
+        } py-[calc(var(--pad-scale,1)*6rem)] md:py-[calc(var(--pad-scale,1)*8rem)] px-6 md:px-12 lg:px-24 ${isPreview ? 'h-[720px] md:h-[900px]' : 'min-h-[100svh]'}`}>
 
           {!homepageSettings ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-black z-50">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black z-50 px-6">
               <m.div
-                initial={{ opacity: 1, scale: 1 }}
-                animate={{ opacity: [1, 0.6, 1], scale: [1, 0.95, 1] }}
+                initial={{ opacity: 0.9, scale: 0.98 }}
+                animate={{ opacity: [0.9, 1, 0.9], scale: [0.98, 1.02, 0.98] }}
                 transition={{
-                  duration: 1.5,
+                  duration: 2.2,
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
-                className="relative w-36 h-36 md:w-48 md:h-48"
+                className="relative w-64 h-40 sm:w-80 sm:h-48 md:w-96 md:h-56"
               >
                 <Image
-                  src="/FUTBOL STORE IT'S ALL ABOUT THE QUALITY (1).svg"
-                  alt="Loading..."
+                  src="/logo.png"
+                  alt="The Futbol Store"
                   fill
                   style={{ objectFit: 'contain' }}
                   priority
+                  quality={100}
                 />
               </m.div>
+
+              {/* Diwali Cracker Burning Fuse Indicator */}
+              <div className="mt-8 flex flex-col items-center gap-3 w-64 sm:w-80">
+                <div className="w-full cracker-fuse-track">
+                  <div className="cracker-fuse-burning">
+                    <span className="cracker-spark-flame" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] uppercase tracking-[0.35em] text-white/70 font-bold">
+                    Igniting Store
+                  </span>
+                  <span className="text-xs">💥</span>
+                </div>
+              </div>
             </div>
           ) : (
             <>
@@ -588,6 +643,12 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
 
                     {/* Tags Container */}
                     <div className="absolute top-3 left-3 md:top-4 md:left-4 flex flex-col gap-1 z-20 pointer-events-none">
+                      {festivalEnabled && (
+                        <div className="diwali-badge-glow text-white text-[8px] md:text-[9px] uppercase tracking-widest font-black px-2 py-1 rounded shadow flex items-center gap-1 w-max">
+                          <span>🪔</span>
+                          <span>{product.realProduct?.diwaliOffer?.badgeText || 'DIWALI SALE'}</span>
+                        </div>
+                      )}
                       {(product.realProduct?.visibility?.newArrival || product.visibility?.newArrival) && (
                         <div className="bg-white text-black text-[8px] md:text-[9px] uppercase tracking-widest font-bold px-2 py-1 rounded shadow-sm w-max">
                           New Arrival
@@ -648,29 +709,54 @@ export default function HomepageClient({ initialSettings, isPreview = false }: {
 
                     <div className="flex justify-between items-end pb-1 border-b border-white/20 pt-1 md:pt-0 gap-1">
                       <div className="flex flex-col min-w-0">
-                        <div className="h-5 md:h-6 flex items-center">
-                          {(() => {
-                            const compPrice = product.realProduct?.comparePrice || product.comparePrice || 0;
-                            const currentPrice = product.realProduct?.price || product.price || 0;
-                            if (compPrice > currentPrice) {
-                              const percentOff = Math.round(((compPrice - currentPrice) / compPrice) * 100);
-                              return (
-                                <div className="flex items-center gap-1 md:gap-1.5 whitespace-nowrap shrink-0">
-                                  <span className="font-sans text-[10px] md:text-sm text-white/50 line-through">
-                                    ₹{compPrice}
-                                  </span>
-                                  <span className="font-sans text-[8px] md:text-xs text-luxury-taupe font-bold tracking-wider">
-                                    {percentOff}% OFF
-                                  </span>
+                        {(() => {
+                          if (product.realProduct) {
+                            const pricing = getProductDisplayPrice(product.realProduct, festivalEnabled);
+                            return (
+                              <>
+                                <div className="h-5 md:h-6 flex items-center">
+                                  {pricing.effectiveComparePrice && pricing.effectiveComparePrice > pricing.effectivePrice ? (
+                                    <div className="flex items-center gap-1 md:gap-1.5 whitespace-nowrap shrink-0">
+                                      <span className="font-sans text-[10px] md:text-sm text-white/50 line-through">
+                                        ₹{pricing.effectiveComparePrice}
+                                      </span>
+                                      <span className={`font-sans text-[8px] md:text-xs font-bold tracking-wider ${
+                                        pricing.isDiwaliOffer ? 'text-amber-400 font-black' : 'text-luxury-taupe'
+                                      }`}>
+                                        {pricing.percentOff}% OFF
+                                      </span>
+                                    </div>
+                                  ) : null}
                                 </div>
-                              );
-                            }
-                            return null;
-                          })()}
-                        </div>
-                        <span className="font-serif text-sm md:text-lg text-white font-medium leading-none mt-1 whitespace-nowrap">
-                          {product.realProduct?.priceStr || product.priceStr}
-                        </span>
+                                <span className="font-serif text-sm md:text-lg text-white font-medium leading-none mt-1 whitespace-nowrap">
+                                  {pricing.priceStr}
+                                </span>
+                              </>
+                            );
+                          }
+
+                          const compPrice = product.comparePrice || 0;
+                          const currentPrice = product.price || 0;
+                          return (
+                            <>
+                              <div className="h-5 md:h-6 flex items-center">
+                                {compPrice > currentPrice && (
+                                  <div className="flex items-center gap-1 md:gap-1.5 whitespace-nowrap shrink-0">
+                                    <span className="font-sans text-[10px] md:text-sm text-white/50 line-through">
+                                      ₹{compPrice}
+                                    </span>
+                                    <span className="font-sans text-[8px] md:text-xs text-luxury-taupe font-bold tracking-wider">
+                                      {Math.round(((compPrice - currentPrice) / compPrice) * 100)}% OFF
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              <span className="font-serif text-sm md:text-lg text-white font-medium leading-none mt-1 whitespace-nowrap">
+                                {product.priceStr}
+                              </span>
+                            </>
+                          );
+                        })()}
                       </div>
                       <Link
                         href={product.link || `/product/${product.realId}`}
